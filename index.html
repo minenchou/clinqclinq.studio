@@ -8,15 +8,14 @@
   <meta property="og:title" content="clinqclinq.studio">
   <meta property="og:description" content="Playful work on elements, physics, and the beauty inside everything.">
   <meta property="og:url" content="https://clinqclinq.studio/">
-  <!-- Favicon (light / dark) -->
-  <link rel="icon" id="favLight" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABmJLR0QA/wD/AP+gvaeTAAADkUlEQVR4nO3aSYhdRRTG8Z9T0HRHE0FUTCsRF0qCQuKwEVFBUJyWDqCiKEIcVm5EUReCIKJR4kIXIkiLJgpZiBvBaSUo0YBRaQkIDiFoMIMkprX7uah+2v289726t6rfa7T+UJsLdc75TtWtulXnUigUCoVCoVAo/C85KrO9U7AB52ECY3PPZ7AHu7ADX809+0+wBo/jC8yiE9H2YhLX4Zjhh5yH9dgmjGSM6Lr2He7DsqFGn8DJeEX8aMe2b3HVEHW04nL8JK/w+W0WmyzR2XA3psUJOYwv8QHewyfYHdm3gw+xaiiqInnQ4Cn/DR4R1oZja+ycipvxtsHJ/BwrFkVNQ27TX/wOXKv5lroaL+KPPrYfSg8/jQvxu+rgpvGw+tGOZT121vjYnGg7ieWYqgiqg324MqOvcbxT4eeGjD4a81RFQB0cwMWL4O84YQc4iJ/FT/8LsBH34JxcwUwIK3mv+Blck8tJIuPY6t/xbZb+WtqkevSfSTWciTFhi61bPN8SZlRr4/sqjH4vrAujZpD45CTcUmNwY2LgOYgVn5SE1ysM7ffP0XZUNBXfOglV3/qv5VCQQFvxjZNweo2B27NJac44Pq6Jq0nbKmJ3uKym89qMgpryZk1MbdrTg5zdVNNxVKv/hLz3Dodx4nwHR/c4rFropnEoh5oWbJD33vJ4rJv/oDcBS43F2HkWDGZvAn6r6LBskQKJ4VNh6ubikHDy/JveBOyu6bgmYxBNmMKWjPZeEO4fajlN9eJxR8YgmpJrG9wi8pD0Y0XnyVxqWrIc70v7Boj+GpysMHBAGIlR0jYJjcRT/y1wfwYRqTRNQmPxXSe/Vhj7wegPRMQnoZX4Ls/WGH0uIfCcDEpCkng4Q9gzew3P4voUwxkZwxsWxjeD52W4EoMnVWf3IC7J4aCHtpei63Av7sLZOQM6Qaj2VCVhv7yFzBV4t8LPSK/FCUWLqtvhjvBF9ZjEdw0XqU/0SAsjXW7V/0i6EzdqfrA6Ey/jzz62R14a6/KAwefyKTwhrA91i9Bqoda4Tf+aYAfbLZHiaJc7xZfHjwjT+iOhPL4dv0T27Qhb3MrhyGrGpUJ9oOnnaGybFYovqevKorISL0n/N6i3fY0rhqgjmfOF6+Z+i1hM2yXs40t61PtxFh7FZ+JnxR68iquN+De53D9KrhJ+qjhXuNE9ae75EQt/lOzu+4VCoVAoFAqFQmE0/AWN0p2mpEqHIwAAAABJRU5ErkJggg==" sizes="64x64" type="image/png" media="(prefers-color-scheme: light)">
-  <link rel="icon" id="favDark" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAABmJLR0QA/wD/AP+gvaeTAAAD6UlEQVR4nO2aTahVVRiG31Updn9MC8nIHxQHRWJwNZ1EqBAklaITf0ClMAJNR02iqAaBIGI/qGCDEMJIb4GDaJjoVPFncFUUKVATkfCqcbWj5z4N9r5wPKy1z9p7r3224HomF8656/ve99v7rLX3+pYUiUQikUgkEok8lpiQwYApkuZLelnSdEm96VdNSdclXZJ0RtJZY0wzZO7aAGYBXwCngVH8+Ac4ALwDPFm3h0IAA8BhoOlp2sVfwBZgfN2evACeBX7IcbV9uQi8Wbe/TIDFwN+BjbcyCnxDF+8G70kQ2CRpr6RxHv9+T8mEd0PSA0n9kmZKmuqZ7qiklcaYm776KgXYRudb/jzwKcnc8JQjzvPAGuBXoNEh3imgv9tebaLXdzB/BngbyLWkAtOAPcD9jNgfV+XLV+QC4J5DXAP4xHW1c+QYAIYcOXaH8lJEWA9wwSFsGFgaMFcf8Jslz/JQOYqI2u4wfxtYWEG+cSQrwB3ghu/tD7wKbAY+AOaEEjMduGsx3wSWBUlSkvSuGbTo203Jn6XSK2FjZyD9pQB6gSMOjQC/AD7LtTP4sCXoZaAnsJei+rLMlysCsNYRcHMFfvJq8zVfvAjAT5ZAt4DezqOro4D5YkXA/qz/Y4XefDQVNZ+vCMALjgAbuuDTpakPOFbC/BiDdFodgDccg1/pkl+bpoMBzI+xo1Oy1Y6Btcz+JM8jIfcd7gITW3M80ZbTNtE1jDEj1dnMZL7C7ltOkDS39YP2AjxqVLHyPHQx2wvwr2XAeOpbAo9LImC8EUlDrR+0F+CaY+CsgCK8McZckHQoYMjvjDH3nd8CUx2Tx8aAInJBuGXwED4vScBVy+ADXfCapakH+KOE+UF8nwZJGhbt3Ab6KvbZSVfRIvibTxO5ngU+qtCfr7a8RchnviXJTUuwK9T8QtSiz6cI+c23JNnlCPp1YD+F8ChCcfNpgheBEUvgUeDdgF4KQ/KG+HObvibwLWW3xNIEXzmqewdYFMBDe76im6JzgQ+B94HZIQU9TdLtsXGLgI1MoB/43ZKnvm3xVNgA9t1hSDo6n1Pmt5bkeC2j0PU1RloEriP7lXQIWAHkerECZgDfAw8yYtfbGhsD2NqhCJB0kb4EFuFujk4j6TUeJrsnCHCSLjRH87TH35O0T37t8YakP5WcC2pIek7SjPSvD0ckrTLGDPvq6wrA6yT9gaoYBXZScl6pFGASsI/yZ4PaOQcsqdufN8A8ku3mrEnMh0sk6/ije9WzAGYCnwEn8L8rrgP7gbeo+Zhc6IOSkyUtkPSSkoOSz6Rf/aeHD0qeN8aE3OqKRCKRSCQSiUQi+fgf51QAhrPUDMkAAAAASUVORK5CYII=" sizes="64x64" type="image/png" media="(prefers-color-scheme: dark)">
-  <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHBhdGggZD0iTTE4LjQ2IDkuNjZBOC45NyA4Ljk3IDAgMSAwIDE4LjQ2IDIyLjM0IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMi42OCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PHJlY3QgeD0iMjAuNjQiIHk9IjExLjY3IiB3aWR0aD0iOC42NiIgaGVpZ2h0PSI4LjY2IiByeD0iMi4xNyIgdHJhbnNmb3JtPSJyb3RhdGUoNDUgMjQuOTcgMTYpIiBmaWxsPSIjMDAwIi8+PC9zdmc+" type="image/svg+xml" data-fav="svg">
+  <!-- Favicon: real files in the repo root (Safari, iOS and Google need real files, not data: URIs) -->
+  <link rel="icon" href="/favicon.ico?v=4" sizes="48x48">
+  <link rel="icon" href="/favicon.svg?v=4" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=4">
 
   <!-- Custom icons: path, '' = built-in, or { light, dark } -->
   <script>
     window.SITE_ICONS = {
-      tab:    '',  // Favicon
       nav:    '',  // Nav logo (16px)
       emblem: '',  // Header emblem
       work1:  '',  // Work item 1 (22px)
@@ -38,33 +37,6 @@
         t.onload = function () { ok(src); };
         t.src = src;
       }
-      /* Built-in favicon */
-      var BUILTIN_TAB = {
-        light: { png: document.getElementById('favLight').href, svg: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHBhdGggZD0iTTE4LjQ2IDkuNjZBOC45NyA4Ljk3IDAgMSAwIDE4LjQ2IDIyLjM0IiBmaWxsPSJub25lIiBzdHJva2U9IiMwMDAiIHN0cm9rZS13aWR0aD0iMi42OCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PHJlY3QgeD0iMjAuNjQiIHk9IjExLjY3IiB3aWR0aD0iOC42NiIgaGVpZ2h0PSI4LjY2IiByeD0iMi4xNyIgdHJhbnNmb3JtPSJyb3RhdGUoNDUgMjQuOTcgMTYpIiBmaWxsPSIjMDAwIi8+PC9zdmc+' },
-        dark:  { png: document.getElementById('favDark').href,  svg: 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMiAzMiI+PHBhdGggZD0iTTE4LjQ2IDkuNjZBOC45NyA4Ljk3IDAgMSAwIDE4LjQ2IDIyLjM0IiBmaWxsPSJub25lIiBzdHJva2U9IiNmZmYiIHN0cm9rZS13aWR0aD0iMi42OCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+PHJlY3QgeD0iMjAuNjQiIHk9IjExLjY3IiB3aWR0aD0iOC42NiIgaGVpZ2h0PSI4LjY2IiByeD0iMi4xNyIgdHJhbnNmb3JtPSJyb3RhdGUoNDUgMjQuOTcgMTYpIiBmaWxsPSIjZmZmIi8+PC9zdmc+' }
-      };
-      function replaceTabIcons(list) {
-        document.querySelectorAll('link[rel~="icon"]').forEach(function (l) { l.parentNode.removeChild(l); });
-        list.forEach(function (o) {
-          var l = document.createElement('link');
-          l.rel = 'icon'; l.href = o.href;
-          if (o.type) l.type = o.type;
-          if (o.sizes) l.sizes = o.sizes;
-          document.head.appendChild(l);
-        });
-      }
-      function setTab() {
-        var custom = pick(I.tab);
-        if (custom) {
-          tryLoad(custom, function (src) { replaceTabIcons([{ href: src }]); });
-          return;
-        }
-        var b = dark.matches ? BUILTIN_TAB.dark : BUILTIN_TAB.light;
-        replaceTabIcons([
-          { href: b.png, type: 'image/png', sizes: '64x64' },
-          { href: b.svg, type: 'image/svg+xml' }
-        ]);
-      }
       function setSlots() {
         document.querySelectorAll('[data-icon]').forEach(function (host) {
           tryLoad(pick(I[host.getAttribute('data-icon')]), function (src) {
@@ -79,10 +51,9 @@
           });
         });
       }
-      setTab();
       if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setSlots);
       else setSlots();
-      if (dark.addEventListener) dark.addEventListener('change', function () { setTab(); setSlots(); });
+      if (dark.addEventListener) dark.addEventListener('change', setSlots);
     })();
   </script>
 
