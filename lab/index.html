@@ -23,11 +23,11 @@
 
     (function () {
       var I = window.SITE_ICONS || {};
-      var dark = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : { matches: false };
       function pick(spec) {
         if (!spec) return '';
         if (typeof spec === 'string') return spec;
-        return (dark.matches && spec.dark) || spec.light || spec.dark || '';
+        var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        return (dark && spec.dark) || spec.light || spec.dark || '';
       }
       function tryLoad(src, ok) {
         if (!src) return;
@@ -51,7 +51,7 @@
       }
       if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setSlots);
       else setSlots();
-      if (dark.addEventListener) dark.addEventListener('change', setSlots);
+      window.__setIcons = setSlots;
     })();
   </script>
 
@@ -69,6 +69,9 @@
       try { p = localStorage.getItem('palette') || 'soda'; } catch (e) {}
       var ok = window.PALETTES.some(function (x) { return x.id === p; });
       document.documentElement.setAttribute('data-palette', ok ? p : 'soda');
+      var t = 'light';
+      try { t = localStorage.getItem('theme') === 'dark' ? 'dark' : 'light'; } catch (e) {}
+      document.documentElement.setAttribute('data-theme', t);
     })();
   </script>
   <base target="_blank">
@@ -81,14 +84,14 @@
             --ink: #1f3a44; --body: #3b545e; --muted: #6a8088; --faint: #9aabb0; --line: #efe0e2;
             --accent: #22838a; --soft: #e2f3f1;
             --pink: #d9667f; --pink-soft: #fce5ea;
-            --lemon: #a8820c; --lemon-soft: #fbf0bf; }
-    @media (prefers-color-scheme: dark) {
-      :root { --bg: #13222a; --blush: #2a2330;
-              --ink: #f4ede7; --body: #cdd8da; --muted: #98aab0; --faint: #6f8489; --line: #253840;
-              --accent: #7fd3cf; --soft: #1a3238;
-              --pink: #f2a3b5; --pink-soft: #3a2632;
-              --lemon: #f3d873; --lemon-soft: #3b3522; }
-    }
+            --lemon: #a8820c; --lemon-soft: #fbf0bf;
+            color-scheme: light; }
+    :root[data-theme="dark"] { --bg: #13222a; --blush: #2a2330;
+            --ink: #f4ede7; --body: #cdd8da; --muted: #98aab0; --faint: #6f8489; --line: #253840;
+            --accent: #7fd3cf; --soft: #1a3238;
+            --pink: #f2a3b5; --pink-soft: #3a2632;
+            --lemon: #f3d873; --lemon-soft: #3b3522;
+            color-scheme: dark; }
 
     :root[data-palette="flame-cs"] { --bg: #faf9f7; --blush: #f6eff6;
             --ink: #1c2233; --body: #3b4254; --muted: #61687b; --faint: #848b9c; --line: #e6e3e6;
@@ -115,33 +118,31 @@
             --accent: #3a7ca5; --soft: #eaf1f6;
             --pink: #3a7ca5; --pink-soft: #eaf1f6;
             --lemon: #3a7ca5; --lemon-soft: #eaf1f6; }
-    @media (prefers-color-scheme: dark) {
-      :root[data-palette="flame-cs"] { --bg: #13151d; --blush: #1f1a26;
-              --ink: #f2eff0; --body: #cfd2da; --muted: #9aa0ad; --faint: #7a808d; --line: #262a36;
-              --accent: #a3aaff; --soft: #1d2040;
-              --pink: #ff8198; --pink-soft: #3a1f27;
-              --lemon: #ffc94d; --lemon-soft: #3a311b; }
-      :root[data-palette="ice"] { --bg: #0f1823; --blush: #1a1b2e;
-              --ink: #eef4fa; --body: #c9d5e1; --muted: #93a3b4; --faint: #76869a; --line: #213040;
-              --accent: #8cc4f5; --soft: #152a40;
-              --pink: #c4a6f5; --pink-soft: #2a2140;
-              --lemon: #e8cf86; --lemon-soft: #332d1c; }
-      :root[data-palette="clink"] { --bg: #1c1415; --blush: #2a1a1d;
-              --ink: #f6ece4; --body: #dccfc6; --muted: #a8978e; --faint: #86766e; --line: #33262a;
-              --accent: #f08a9b; --soft: #3a2127;
-              --pink: #f5a066; --pink-soft: #3b2618;
-              --lemon: #c9da6a; --lemon-soft: #2e3219; }
-      :root[data-palette="specimen"] { --bg: #181a17; --blush: #1f1d1a;
-              --ink: #efece4; --body: #cfccc2; --muted: #9d9a90; --faint: #7c7a71; --line: #2c2d28;
-              --accent: #7fcca4; --soft: #1a2d23;
-              --pink: #e88aa0; --pink-soft: #36222a;
-              --lemon: #9fa9f0; --lemon-soft: #23263d; }
-      :root[data-palette="classic"] { --bg: #0d1217; --blush: #0d1217;
-              --ink: #e8eef3; --body: #c3cfd9; --muted: #92a3b2; --faint: #6d7e8c; --line: #1f2a33;
-              --accent: #8cc4e6; --soft: #16212a;
-              --pink: #8cc4e6; --pink-soft: #16212a;
-              --lemon: #8cc4e6; --lemon-soft: #1a2b38; }
-    }
+    :root[data-theme="dark"][data-palette="flame-cs"] { --bg: #13151d; --blush: #1f1a26;
+            --ink: #f2eff0; --body: #cfd2da; --muted: #9aa0ad; --faint: #7a808d; --line: #262a36;
+            --accent: #a3aaff; --soft: #1d2040;
+            --pink: #ff8198; --pink-soft: #3a1f27;
+            --lemon: #ffc94d; --lemon-soft: #3a311b; }
+    :root[data-theme="dark"][data-palette="ice"] { --bg: #0f1823; --blush: #1a1b2e;
+            --ink: #eef4fa; --body: #c9d5e1; --muted: #93a3b4; --faint: #76869a; --line: #213040;
+            --accent: #8cc4f5; --soft: #152a40;
+            --pink: #c4a6f5; --pink-soft: #2a2140;
+            --lemon: #e8cf86; --lemon-soft: #332d1c; }
+    :root[data-theme="dark"][data-palette="clink"] { --bg: #1c1415; --blush: #2a1a1d;
+            --ink: #f6ece4; --body: #dccfc6; --muted: #a8978e; --faint: #86766e; --line: #33262a;
+            --accent: #f08a9b; --soft: #3a2127;
+            --pink: #f5a066; --pink-soft: #3b2618;
+            --lemon: #c9da6a; --lemon-soft: #2e3219; }
+    :root[data-theme="dark"][data-palette="specimen"] { --bg: #181a17; --blush: #1f1d1a;
+            --ink: #efece4; --body: #cfccc2; --muted: #9d9a90; --faint: #7c7a71; --line: #2c2d28;
+            --accent: #7fcca4; --soft: #1a2d23;
+            --pink: #e88aa0; --pink-soft: #36222a;
+            --lemon: #9fa9f0; --lemon-soft: #23263d; }
+    :root[data-theme="dark"][data-palette="classic"] { --bg: #0d1217; --blush: #0d1217;
+            --ink: #e8eef3; --body: #c3cfd9; --muted: #92a3b2; --faint: #6d7e8c; --line: #1f2a33;
+            --accent: #8cc4e6; --soft: #16212a;
+            --pink: #8cc4e6; --pink-soft: #16212a;
+            --lemon: #8cc4e6; --lemon-soft: #1a2b38; }
 
     :root { --serif: "Source Serif 4", "Noto Serif TC", "Songti TC", Georgia, serif; }
 
@@ -179,6 +180,13 @@
     .palette-toggle .p2 { fill: var(--pink); }
     .palette-toggle .p3 { fill: var(--lemon); }
     .palette-toggle svg { transition: transform .35s ease; }
+
+    .theme-toggle { right: 20px; top: 124px; }
+    .theme-toggle svg { width: 18px; height: 18px; display: block; fill: none; stroke: currentColor;
+                        stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; transition: transform .35s ease; }
+    .theme-toggle .sun { display: none; }
+    :root[data-theme="dark"] .theme-toggle .sun { display: block; }
+    :root[data-theme="dark"] .theme-toggle .moon { display: none; }
 
     .menu-toggle { right: 20px; }
     .menu-toggle .bars { position: relative; width: 16px; height: 12px; }
@@ -223,6 +231,13 @@
     .nav-home:hover .hico img, .nav-home:hover .hico svg { transform: rotate(-8deg); }
     .nav-home:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
 
+    .top-home { position: fixed; top: 20px; left: 20px; z-index: 30; height: 40px; margin: 0; padding: 0 14px 0 12px;
+                gap: 10px; border-radius: 20px;
+                background: color-mix(in srgb, var(--bg) 92%, transparent);
+                -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+    .top-home .hico { width: 18px; height: 18px; }
+    .top-home .hico img, .top-home .hico svg { width: 18px; height: 18px; }
+
     .sidenav { display: none; position: fixed; top: 84px; z-index: 20; }
     .sidenav .tl a { color: var(--faint); }
     .sidenav .tl a:not(.active):not(.passed) .dot { border-color: color-mix(in srgb, var(--accent) 30%, var(--line)); }
@@ -247,20 +262,22 @@
 
     @media (max-width: 1023px) {
       .palette-toggle { top: 72px; }
-      .lang-toggle { top: 124px; opacity: 0; visibility: hidden; transform: translateY(-6px);
+      .theme-toggle { top: 124px; }
+      .lang-toggle { top: 176px; }
+      .theme-toggle, .lang-toggle { opacity: 0; visibility: hidden; transform: translateY(-6px);
                      transition: opacity .18s ease, transform .18s ease, visibility 0s linear .18s, border-color .15s, color .15s; }
-      body.menu-open .lang-toggle { opacity: 1; visibility: visible; transform: none;
+      body.menu-open .theme-toggle, body.menu-open .lang-toggle { opacity: 1; visibility: visible; transform: none;
                                     transition: opacity .18s ease, transform .18s ease, visibility 0s, border-color .15s, color .15s; }
-      .menu-panel { top: 180px; left: auto; right: 34.5px; width: auto; padding: 0;
+      .menu-panel { top: 232px; left: auto; right: 34.5px; width: auto; padding: 0;
                     background: none; border: 0; border-radius: 0; box-shadow: none; transform-origin: top right; }
       .menu-panel .tl { --dotbg: var(--bg); }
       .menu-panel .tl::before, .menu-panel .tl::after { left: auto; right: 5px; }
-      .menu-panel .tl a, .menu-panel .nav-home { flex-direction: row-reverse; justify-content: flex-start; text-align: right; }
+      .menu-panel .tl a { flex-direction: row-reverse; justify-content: flex-start; text-align: right; }
     }
 
     @media (min-width: 1024px) {
       .sidenav { display: block; left: 32px; }
-      .menu-toggle, .menu-panel, .menu-scrim { display: none; }
+      .menu-toggle, .menu-panel, .menu-scrim, .top-home { display: none; }
       .wrap { margin-left: 208px; margin-right: auto; }
     }
     @media (min-width: 1360px) {
@@ -326,10 +343,12 @@
     @media (max-width: 640px) {
       .wrap { padding: 64px 16px 48px; }
       .fab { top: 14px; }
-      .lang-toggle, .menu-toggle, .palette-toggle { right: 14px; }
+      .lang-toggle, .menu-toggle, .palette-toggle, .theme-toggle { right: 14px; }
+      .top-home { top: 14px; left: 14px; }
       .palette-toggle { top: 62px; }
-      .lang-toggle { top: 110px; }
-      .menu-panel { top: 164px; right: 28.5px; }
+      .theme-toggle { top: 110px; }
+      .lang-toggle { top: 158px; }
+      .menu-panel { top: 212px; right: 28.5px; }
       section { scroll-margin-top: 68px; }
       header { grid-template-columns: 1fr; gap: 24px; }
       .emblem { width: auto; place-items: start; order: -1; padding-top: 0; }
@@ -345,9 +364,13 @@
   </style>
 </head>
 <body>
+  <a class="nav-home top-home" href="../" target="_self"><span class="hico" data-icon="nav" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="c" d="M18.46 9.66A8.97 8.97 0 1 0 18.46 22.34" stroke-width="2.68" stroke-linecap="round"/><rect class="d" x="20.64" y="11.67" width="8.66" height="8.66" rx="2.17" transform="rotate(45 24.97 16)"/></svg></span><span>clinqclinq</span></a>
   <button class="fab lang-toggle" id="langToggle" type="button" aria-label="切換為中文" title="切換為中文">中</button>
   <button class="fab palette-toggle" id="paletteToggle" type="button" aria-label="Change palette" title="Change palette">
     <svg viewBox="0 0 18 18" aria-hidden="true"><circle class="p1" cx="9" cy="4.6" r="3.4"/><circle class="p2" cx="4.6" cy="12.2" r="3.4"/><circle class="p3" cx="13.4" cy="12.2" r="3.4"/></svg>
+  </button>
+  <button class="fab theme-toggle" id="themeToggle" type="button" aria-label="Switch to dark mode" title="Switch to dark mode">
+    <svg viewBox="0 0 18 18" aria-hidden="true"><path class="moon" d="M14.6 11.2A6.2 6.2 0 0 1 6.8 3.4a6.2 6.2 0 1 0 7.8 7.8z"/><g class="sun"><circle cx="9" cy="9" r="3.1"/><path d="M9 1.6v1.6M9 14.8v1.6M1.6 9h1.6M14.8 9h1.6M3.77 3.77l1.13 1.13M13.1 13.1l1.13 1.13M3.77 14.23l1.13-1.13M13.1 4.9l1.13-1.13"/></g></svg>
   </button>
 
   <button class="fab menu-toggle" id="menuToggle" type="button" aria-label="Sections" aria-expanded="false" aria-controls="menuPanel">
@@ -355,7 +378,6 @@
   </button>
   <div class="menu-scrim" id="menuScrim"></div>
   <nav class="menu-panel" id="menuPanel" aria-label="Sections">
-    <a class="nav-home" href="../" target="_self"><span class="hico" data-icon="nav" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="c" d="M18.46 9.66A8.97 8.97 0 1 0 18.46 22.34" stroke-width="2.68" stroke-linecap="round"/><rect class="d" x="20.64" y="11.67" width="8.66" height="8.66" rx="2.17" transform="rotate(45 24.97 16)"/></svg></span><span>clinqclinq</span></a>
     <ul class="tl">
       <li><a href="../#work" target="_self"><span class="dot"></span><span data-i18n="nav_work">Work</span></a></li>
       <li><a href="./" target="_self" aria-current="page"><span class="dot"></span><span data-i18n="nav_lab">Lab</span></a></li>
@@ -459,6 +481,30 @@
     })();
 
     (function () {
+      var btn = document.getElementById('themeToggle');
+      var turns = 0;
+      function label() {
+        var dark = document.documentElement.getAttribute('data-theme') === 'dark';
+        var zh = document.documentElement.lang === 'zh-Hant';
+        var t = dark ? (zh ? '切換為淺色模式' : 'Switch to light mode') : (zh ? '切換為深色模式' : 'Switch to dark mode');
+        btn.setAttribute('aria-label', t);
+        btn.title = t;
+        btn.setAttribute('aria-pressed', dark ? 'true' : 'false');
+      }
+      window.__updateThemeLabel = label;
+      btn.addEventListener('click', function () {
+        var next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', next);
+        try { localStorage.setItem('theme', next); } catch (e) {}
+        turns += 1;
+        btn.querySelector('svg').style.transform = 'rotate(' + turns * 360 + 'deg)';
+        if (window.__setIcons) window.__setIcons();
+        label();
+      });
+      label();
+    })();
+
+    (function () {
       var ZH = {
         lede: 'clinqclinq 是一間以元素、物理與萬物之美為題的小工作室，做一些好玩的東西。介於藝術與一堂課之間。',
         nav_work: '作品',
@@ -503,6 +549,7 @@
         btn.title = label;
         menuBtn.setAttribute('aria-label', zh ? '選單' : 'Sections');
         if (window.__updatePaletteLabel) window.__updatePaletteLabel();
+        if (window.__updateThemeLabel) window.__updateThemeLabel();
         try { localStorage.setItem('lang', lang); } catch (e) {}
         if (window.__renderWorks) window.__renderWorks();
         if (window.__updateNav) window.__updateNav();
@@ -518,7 +565,6 @@
         apply(document.documentElement.lang === 'zh-Hant' ? 'en' : 'zh');
       });
     })();
-
 
     (function () {
       var lists = document.querySelectorAll('.tl');
