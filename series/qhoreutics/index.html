@@ -4,6 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#000000">
+<script>
+  (function () {
+    var t = 'dark';
+    try { var s = localStorage.getItem('theme'); if (s === 'light' || s === 'dark') t = s; } catch (e) {}
+    document.documentElement.setAttribute('data-theme', t);
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.content = t === 'light' ? '#eceae5' : '#000000';
+  })();
+</script>
 <title>Qhoreutics — Quantum Sensory Experiment</title>
 <meta name="description" content="A quantum sensory experiment. A field of Bloch spheres dances on its own; take hold of one and steer its state with the cursor.">
 <meta property="og:title" content="Qhoreutics · clinqclinq">
@@ -134,12 +143,54 @@
     letter-spacing:.05em;color:#a3b1bd;opacity:0;transition:opacity .8s ease}
   #hint.on{opacity:.9}
 
+  #theme{position:fixed;right:calc(var(--edge) + var(--sr));bottom:calc(88px + var(--sb));z-index:25;
+    width:38px;height:38px;padding:0;border-radius:50%;
+    border:1px solid rgba(190,210,230,.5);background:rgba(10,14,20,.25);
+    -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+    color:#dfe8ef;cursor:pointer;display:grid;place-items:center;
+    transition:border-color .15s,color .15s,background-color .2s,transform .15s}
+  #theme:hover,#theme:focus-visible{border-color:rgba(232,180,142,.85);color:#f0c4a0;outline:none}
+  #theme:active{transform:scale(.94)}
+  #theme svg{width:18px;height:18px;display:block;fill:none;stroke:currentColor;stroke-width:1.5;
+    stroke-linecap:round;stroke-linejoin:round;transition:transform .35s ease}
+  #theme .moon{display:none}
+  :root[data-theme="light"] #theme .moon{display:block}
+  :root[data-theme="light"] #theme .sun{display:none}
+
+  :root[data-theme="light"]{--ink:#25303b;--dim:#6c7783;--line:rgba(60,80,100,.18);--panel:rgba(250,249,246,.86)}
+  :root[data-theme="light"],:root[data-theme="light"] body{background:#eceae5}
+  :root[data-theme="light"] .lockup .t{color:#1e2833}
+  :root[data-theme="light"] .lockup .s{color:#55606c}
+  :root[data-theme="light"] #boot{background:#eceae5}
+  :root[data-theme="light"] #boot .g{color:#6a7581}
+  :root[data-theme="light"] #boot .g:hover{color:#1e2833;text-shadow:0 0 14px rgba(255,255,255,.9)}
+  :root[data-theme="light"] #readout{color:#1f2a35}
+  :root[data-theme="light"] #readout .sub{color:#5f6b77}
+  :root[data-theme="light"] #legend{color:#5f6a75}
+  :root[data-theme="light"] #legend b{color:#2f3a45}
+  :root[data-theme="light"] #legend .steer.active b,:root[data-theme="light"] #legend .steer.active span{color:#c25a1c}
+  :root[data-theme="light"] #sound,:root[data-theme="light"] #steer,:root[data-theme="light"] #theme{
+    border-color:rgba(40,55,70,.38);background:rgba(255,255,255,.45);color:#26313c}
+  :root[data-theme="light"] #sound.on:hover,:root[data-theme="light"] #sound.on:focus-visible,
+  :root[data-theme="light"] #steer.on:hover,:root[data-theme="light"] #steer.on:focus-visible{background:rgba(255,255,255,.85)}
+  :root[data-theme="light"] #theme:hover,:root[data-theme="light"] #theme:focus-visible{
+    border-color:rgba(205,95,30,.8);color:#c25a1c;background:rgba(255,255,255,.85)}
+  :root[data-theme="light"] #steer.active{border-color:rgba(205,95,30,.8);color:#c25a1c;
+    background:rgba(240,150,90,.14);box-shadow:0 0 16px rgba(220,110,40,.25)}
+  :root[data-theme="light"] #steer.invite:not(.active){animation-name:invite-light}
+  @keyframes invite-light{0%,100%{box-shadow:0 0 0 rgba(220,110,40,0)}
+    50%{box-shadow:0 0 14px rgba(220,110,40,.35);border-color:rgba(205,95,30,.7)}}
+  :root[data-theme="light"] #hint{color:#4c5762}
+  :root[data-theme="light"] .cq-bar{background:rgba(244,243,239,.62);color:#2b3641;border-bottom-color:rgba(60,80,100,.14)}
+  :root[data-theme="light"] .cq-bar a:focus-visible{outline-color:#c25a1c}
+
   @media (max-width:520px){
     :root{--edge:18px}
     #readout{top:calc(62px + var(--st));font-size:clamp(14px,4.1vw,18px)}
     #readout .sub{margin-top:6px}
     #title{bottom:calc(30px + var(--sb))}
     #sound,#steer{bottom:calc(30px + var(--sb))}
+    #theme{bottom:calc(80px + var(--sb))}
     #hint{bottom:calc(108px + var(--sb))}
   }
   @media (max-height:460px) and (orientation:landscape){
@@ -147,6 +198,7 @@
     #title{bottom:calc(18px + var(--sb))}
     #title .s{margin-top:8px}
     #sound,#steer{bottom:calc(18px + var(--sb))}
+    #theme{bottom:calc(68px + var(--sb))}
     #hint{bottom:calc(84px + var(--sb))}
   }
 </style>
@@ -161,6 +213,9 @@
   <div class="s">Quantum Sensory Experiment</div>
 </div>
 <div id="readout"></div>
+<button id="theme" type="button" aria-label="Switch to light mode" title="Switch to light mode">
+  <svg viewBox="0 0 18 18" aria-hidden="true"><path class="moon" d="M14.6 11.2A6.2 6.2 0 0 1 6.8 3.4a6.2 6.2 0 1 0 7.8 7.8z"/><g class="sun"><circle cx="9" cy="9" r="3.1"/><path d="M9 1.6v1.6M9 14.8v1.6M1.6 9h1.6M14.8 9h1.6M3.77 3.77l1.13 1.13M13.1 13.1l1.13 1.13M3.77 14.23l1.13-1.13M13.1 4.9l1.13-1.13"/></g></svg>
+</button>
 <button id="sound" class="muted" type="button" aria-label="Turn sound on" title="Sound off">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"
        stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -304,6 +359,44 @@ function shortestAngle(a, b) {
   return d;
 }
 
+const THEMES = {
+  dark: {
+    clear: 0x000000, meta: '#000000',
+    ambient: [0x223044, 0.55], hemi: [0x334a63, 0x0a0d12, 0.35],
+    additive: true,
+    trailHot: new THREE.Color(1.0, 0.74, 0.46), trailEdge: new THREE.Color(1.0, 0.30, 0.11), trailAlpha: 0.78,
+    marker: new THREE.Color(2.2, 0.95, 0.48),
+    vector: new THREE.Color(0.5, 0.08, 0.04), vectorOpacity: 0.18,
+    haloOpacity: 0.78,
+    glow: [[0.00, 'rgba(255,246,230,1)'], [0.12, 'rgba(255,170,95,0.95)'], [0.35, 'rgba(255,80,30,0.42)'],
+           [0.65, 'rgba(255,45,15,0.10)'], [1.00, 'rgba(255,30,10,0)']],
+    wire: 0x9fc4dc, wireOpacity: 0.30,
+    axes: { X: new THREE.Color(3.2, 0.22, 0.38), Y: new THREE.Color(0.13, 2.9, 0.0), Z: new THREE.Color(0.0, 1.35, 3.6) },
+    axisToneMapped: true,
+    ketLabel: '#dbe7f2',
+    rim: 0, sphereAlpha: 0.22, focusSphereDim: 0.22,
+  },
+  light: {
+    clear: 0xeceae5, meta: '#eceae5',
+    ambient: [0x8a96a4, 0.9], hemi: [0xdfe7f0, 0x6b6560, 0.6],
+    additive: false,
+    trailHot: new THREE.Color(0.78, 0.26, 0.05), trailEdge: new THREE.Color(0.95, 0.52, 0.22), trailAlpha: 0.85,
+    marker: new THREE.Color(0.86, 0.30, 0.06),
+    vector: new THREE.Color(0.55, 0.18, 0.06), vectorOpacity: 0.32,
+    haloOpacity: 0.78,
+    glow: [[0.00, 'rgba(232,110,40,0.85)'], [0.12, 'rgba(238,125,55,0.6)'], [0.35, 'rgba(240,120,60,0.22)'],
+           [0.65, 'rgba(240,110,60,0.06)'], [1.00, 'rgba(240,110,60,0)']],
+    wire: 0x2f4a60, wireOpacity: 0.45,
+    axes: { X: new THREE.Color('#c8213f'), Y: new THREE.Color('#1e8a3a'), Z: new THREE.Color('#1f5fc8') },
+    axisToneMapped: false,
+    ketLabel: '#2a3642',
+    rim: 1, sphereAlpha: 0.26, focusSphereDim: 0.14,
+  },
+};
+let theme = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+const THEMED = { trails: [], markers: [], vectors: [], halos: [], axes: [], labels: [] };
+const RIM = { value: 0 };
+
 const app = document.getElementById('app');
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
@@ -321,8 +414,9 @@ camera.position.set(...CFG.camera.pos);
 const keyLight = new THREE.DirectionalLight(new THREE.Color(0.86, 0.92, 1.0), 1.65);
 keyLight.position.set(-3.2, 4.4, 3.0);
 scene.add(keyLight);
-scene.add(new THREE.AmbientLight(0x223044, 0.55));
-scene.add(new THREE.HemisphereLight(0x334a63, 0x0a0d12, 0.35));
+const ambLight = new THREE.AmbientLight(0x223044, 0.55);
+const hemiLight = new THREE.HemisphereLight(0x334a63, 0x0a0d12, 0.35);
+scene.add(ambLight, hemiLight);
 
 const root = new THREE.Group();
 scene.add(root);
@@ -530,7 +624,8 @@ const TRAIL_MAX = 260;
 const TRAIL_HALF_WIDTH = 0.021;
 const trailMaterial = new THREE.ShaderMaterial({
   transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
-  uniforms: { uDim: { value: 1 } },
+  uniforms: { uDim: { value: 1 }, uAlpha: { value: 0.78 },
+              uHot: { value: new THREE.Color(1.0, 0.74, 0.46) }, uEdge: { value: new THREE.Color(1.0, 0.30, 0.11) } },
   vertexShader: `
     attribute float aAge;
     attribute float aSide;
@@ -543,15 +638,16 @@ const trailMaterial = new THREE.ShaderMaterial({
     }`,
   fragmentShader: `
     uniform float uDim;
+    uniform float uAlpha;
+    uniform vec3 uHot;
+    uniform vec3 uEdge;
     varying float vA;
     varying float vS;
     void main(){
       float core = exp(-vS * vS * 3.2);
       float a = pow(vA, 1.3) * core;
-      vec3 hot  = vec3(1.0, 0.74, 0.46);
-      vec3 edge = vec3(1.0, 0.30, 0.11);
-      vec3 col = mix(edge, hot, smoothstep(0.35, 1.0, core) * vA);
-      gl_FragColor = vec4(col, a * 0.78 * uDim);
+      vec3 col = mix(uEdge, uHot, smoothstep(0.35, 1.0, core) * vA);
+      gl_FragColor = vec4(col, a * uAlpha * uDim);
     }`,
 });
 
@@ -628,29 +724,26 @@ const sphereGeo   = new THREE.SphereGeometry(1, 40, 28);
 const markerGeo   = new THREE.SphereGeometry(0.045, 20, 14);
 const vectorGeo   = new THREE.CylinderGeometry(1, 1, 1, 8);
 const markerMat   = new THREE.MeshBasicMaterial({
-  color: new THREE.Color(2.2, 0.95, 0.48), toneMapped: false });
+  color: new THREE.Color(2.2, 0.95, 0.48), toneMapped: false, transparent: true });
 const vectorMat   = new THREE.MeshBasicMaterial({
   color: new THREE.Color(0.5, 0.08, 0.04), transparent: true, opacity: 0.18,
   blending: THREE.AdditiveBlending, depthWrite: false });
 
-function makeGlowTexture() {
+function makeGlowTexture(stops) {
   const c = document.createElement('canvas');
   c.width = c.height = 128;
   const g = c.getContext('2d');
   const grd = g.createRadialGradient(64, 64, 0, 64, 64, 64);
-  grd.addColorStop(0.00, 'rgba(255,246,230,1)');
-  grd.addColorStop(0.12, 'rgba(255,170,95,0.95)');
-  grd.addColorStop(0.35, 'rgba(255,80,30,0.42)');
-  grd.addColorStop(0.65, 'rgba(255,45,15,0.10)');
-  grd.addColorStop(1.00, 'rgba(255,30,10,0)');
+  for (const [o, c] of stops) grd.addColorStop(o, c);
   g.fillStyle = grd;
   g.fillRect(0, 0, 128, 128);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
 }
+const GLOW = { dark: makeGlowTexture(THEMES.dark.glow), light: makeGlowTexture(THEMES.light.glow) };
 const haloMat = new THREE.SpriteMaterial({
-  map: makeGlowTexture(), color: 0xffffff, transparent: true, opacity: 0.78,
+  map: GLOW.dark, color: 0xffffff, transparent: true, opacity: 0.78,
   blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false });
 
 const _v = new THREE.Vector3(), _v2 = new THREE.Vector3(), _q = new THREE.Quaternion();
@@ -664,6 +757,8 @@ class Qubit {
       ? { marker: markerMat.clone(), halo: haloMat.clone(), vector: vectorMat.clone(),
           trail: trailMaterial.clone() }
       : { marker: markerMat, halo: haloMat, vector: vectorMat, trail: trailMaterial };
+    for (const [k, list] of [['marker', 'markers'], ['halo', 'halos'], ['vector', 'vectors'], ['trail', 'trails']])
+      if (!THEMED[list].includes(this.mats[k])) THEMED[list].push(this.mats[k]);
     this.dim = 1;
 
     this.special = special;
@@ -684,6 +779,15 @@ class Qubit {
       emissive: new THREE.Color(0xffffff), emissiveIntensity: this.emissionStrength,
       depthWrite: false, side: THREE.FrontSide,
     });
+    this.sphereMat.onBeforeCompile = sh => {
+      sh.uniforms.uRim = RIM;
+      sh.fragmentShader = 'uniform float uRim;\n' + sh.fragmentShader.replace('#include <opaque_fragment>', `
+        float qRim = uRim * pow(1.0 - clamp(abs(dot(normal, normalize(vViewPosition))), 0.0, 1.0), 2.2);
+        outgoingLight = mix(outgoingLight, outgoingLight * 0.55 + vec3(0.06, 0.08, 0.11), qRim);
+        diffuseColor.a = mix(diffuseColor.a, min(1.0, diffuseColor.a * 3.2), qRim);
+        #include <opaque_fragment>`);
+    };
+    this.sphereMat.customProgramCacheKey = () => 'qh-rim';
     this.sphereMesh = new THREE.Mesh(sphereGeo, this.sphereMat);
     this.sphereMesh.renderOrder = 2;
     this.sphereMesh.userData.qubit = this;
@@ -1111,7 +1215,17 @@ const audio = {
   },
 };
 
-function makeLabel(text, color = '#cfe0ee', px = 96) {
+function makeLabel(text, colors, px = 96) {
+  const maps = { dark: labelTexture(text, colors.dark, px), light: labelTexture(text, colors.light, px) };
+  const spr = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: maps[theme], transparent: true, depthTest: false, depthWrite: false }));
+  spr.material.userData.maps = maps;
+  THEMED.labels.push(spr.material);
+  spr.renderOrder = 40;
+  spr.scale.set(0.44, 0.22, 1);
+  return spr;
+}
+function labelTexture(text, color, px) {
   const c = document.createElement('canvas');
   c.width = 256; c.height = 128;
   const g = c.getContext('2d');
@@ -1121,11 +1235,7 @@ function makeLabel(text, color = '#cfe0ee', px = 96) {
   g.fillText(text, 128, 64);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
-  const spr = new THREE.Sprite(new THREE.SpriteMaterial({
-    map: tex, transparent: true, depthTest: false, depthWrite: false }));
-  spr.renderOrder = 40;
-  spr.scale.set(0.44, 0.22, 1);
-  return spr;
+  return tex;
 }
 
 function ringGeometry(radius, segments, axis) {
@@ -1160,24 +1270,26 @@ function addWireframeRings(group) {
 function addAxes(group) {
   const g = new THREE.Group();
   const axes = [
-    { dir: new THREE.Vector3(1, 0, 0), col: new THREE.Color(3.2, 0.22, 0.38), lab: 'X' },
-    { dir: AX_Y.clone(),               col: new THREE.Color(0.13, 2.9, 0.0),  lab: 'Y' },
-    { dir: new THREE.Vector3(0, 1, 0), col: new THREE.Color(0.0, 1.35, 3.6),  lab: 'Z' },
+    { dir: new THREE.Vector3(1, 0, 0), lab: 'X' },
+    { dir: AX_Y.clone(),               lab: 'Y' },
+    { dir: new THREE.Vector3(0, 1, 0), lab: 'Z' },
   ];
   for (const a of axes) {
-    const m = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 2.3, 6),
-      new THREE.MeshBasicMaterial({ color: a.col, transparent: true, opacity: 0.9,
-        blending: THREE.AdditiveBlending, depthWrite: false }));
+    const axMat = new THREE.MeshBasicMaterial({ color: THEMES.dark.axes[a.lab].clone(), transparent: true, opacity: 0.9,
+        blending: THREE.AdditiveBlending, depthWrite: false });
+    THEMED.axes.push({ m: axMat, lab: a.lab });
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(0.006, 0.006, 2.3, 6), axMat);
     m.quaternion.setFromUnitVectors(UP, a.dir);
     m.renderOrder = 8;
     g.add(m);
-    const lab = makeLabel(a.lab, '#' + new THREE.Color().copy(a.col).getHexString(), 84);
+    const lab = makeLabel(a.lab, { dark: '#' + THEMES.dark.axes[a.lab].getHexString(),
+                                   light: '#' + THEMES.light.axes[a.lab].getHexString() }, 84);
     lab.position.copy(a.dir).multiplyScalar(1.30);
     lab.scale.set(0.30, 0.15, 1);
     g.add(lab);
   }
   for (const s of [['|0⟩', new THREE.Vector3(0, 1.16, 0)], ['|1⟩', new THREE.Vector3(0, -1.16, 0)]]) {
-    const lab = makeLabel(s[0], '#dbe7f2', 72);
+    const lab = makeLabel(s[0], { dark: THEMES.dark.ketLabel, light: THEMES.light.ketLabel }, 72);
     lab.position.copy(s[1]).add(new THREE.Vector3(0.20, 0, 0));
     lab.scale.set(0.34, 0.17, 1);
     g.add(lab);
@@ -1387,9 +1499,34 @@ for (const g of ctlQubit.decor) g.traverse(o => {
     decorMats.push({ m: o.material, base: o.material.opacity });
 });
 
-const BASE = {
-  marker: markerMat.color.clone(), halo: haloMat.opacity, vector: vectorMat.opacity,
-};
+function applyTheme(name) {
+  theme = name;
+  const T = THEMES[name];
+  const blend = T.additive ? THREE.AdditiveBlending : THREE.NormalBlending;
+  renderer.setClearColor(T.clear, 1);
+  ambLight.color.setHex(T.ambient[0]); ambLight.intensity = T.ambient[1];
+  hemiLight.color.setHex(T.hemi[0]); hemiLight.groundColor.setHex(T.hemi[1]); hemiLight.intensity = T.hemi[2];
+  for (const m of THEMED.trails) {
+    m.blending = blend;
+    m.uniforms.uHot.value.copy(T.trailHot);
+    m.uniforms.uEdge.value.copy(T.trailEdge);
+    m.uniforms.uAlpha.value = T.trailAlpha;
+  }
+  for (const m of THEMED.markers) { m.color.copy(T.marker); m.opacity = 1; }
+  for (const m of THEMED.vectors) { m.color.copy(T.vector); m.opacity = T.vectorOpacity; m.blending = blend; }
+  for (const m of THEMED.halos)   { m.map = GLOW[name]; m.opacity = T.haloOpacity; m.blending = blend; }
+  wireMat.color.setHex(T.wire); wireMat.blending = blend; wireMat.userData.baseOpacity = T.wireOpacity;
+  for (const a of THEMED.axes) {
+    a.m.color.copy(T.axes[a.lab]); a.m.blending = blend;
+    a.m.toneMapped = T.axisToneMapped; a.m.needsUpdate = true;
+  }
+  for (const m of THEMED.labels) m.map = m.userData.maps[name];
+  RIM.value = T.rim;
+  CFG.sphereAlpha = T.sphereAlpha;
+  CFG.focusSphereDim = T.focusSphereDim;
+  for (const q of qubits) if (!q.special) q.sphereAlpha = CFG.sphereAlpha;
+}
+applyTheme(theme);
 function tickFocus(dt) {
   focus.value = approach(focus.value, focus.target, CFG.focusSpeed, dt);
   if (Math.abs(focus.value - focus.target) < 1e-3) focus.value = focus.target;
@@ -1397,15 +1534,17 @@ function tickFocus(dt) {
 
   const sd = lerp(1, CFG.focusSphereDim, f), st = lerp(1, CFG.focusStateDim, f);
   for (const q of qubits) q.dim = sd;
-  markerMat.color.copy(BASE.marker).multiplyScalar(st);
-  haloMat.opacity = BASE.halo * st;
-  vectorMat.opacity = BASE.vector * st;
+  const T = THEMES[theme];
+  if (T.additive) { markerMat.color.copy(T.marker).multiplyScalar(st); markerMat.opacity = 1; }
+  else            { markerMat.color.copy(T.marker); markerMat.opacity = st; }
+  haloMat.opacity = T.haloOpacity * st;
+  vectorMat.opacity = T.vectorOpacity * st;
   trailMaterial.uniforms.uDim.value = st;
 
   ctlQubit.sphereAlpha = lerp(CFG.sphereAlpha, CFG.sphereAlphaSpecial * 1.25, f);
   ctlQubit.emissionStrength = lerp(CFG.emissionStrength, CFG.emissionSpecial, f);
   for (const g of ctlQubit.decor) g.visible = f > 0.002;
-  for (const d of decorMats) d.m.opacity = d.base * f;
+  for (const d of decorMats) d.m.opacity = (d.m.userData.baseOpacity ?? d.base) * f;
 
 }
 
@@ -1491,6 +1630,35 @@ function hideHint() { clearTimeout(hintTimer); elHint.classList.remove('on'); }
 const boot = document.getElementById('boot');
 if (touchUI()) boot.querySelector('.g').textContent = 'Tap to begin';
 const elSound = document.getElementById('sound');
+const elTheme = document.getElementById('theme');
+let themeTurns = 0;
+function themeLabel() {
+  const t = theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode';
+  elTheme.setAttribute('aria-label', t);
+  elTheme.title = t;
+  elTheme.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+}
+function setTheme(next, spin) {
+  document.documentElement.setAttribute('data-theme', next);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.content = THEMES[next].meta;
+  applyTheme(next);
+  if (spin) { themeTurns += 1; elTheme.querySelector('svg').style.transform = `rotate(${themeTurns * 360}deg)`; }
+  themeLabel();
+}
+elTheme.addEventListener('pointerdown', e => e.stopPropagation());
+elTheme.addEventListener('keydown', e => e.stopPropagation());
+elTheme.addEventListener('click', e => {
+  e.stopPropagation();
+  const next = theme === 'dark' ? 'light' : 'dark';
+  try { localStorage.setItem('theme', next); } catch (_) {}
+  setTheme(next, true);
+  elTheme.blur();
+});
+addEventListener('storage', e => {
+  if (e.key === 'theme' && (e.newValue === 'light' || e.newValue === 'dark') && e.newValue !== theme) setTheme(e.newValue, false);
+});
+themeLabel();
 const elSteerBtn = document.getElementById('steer');
 elSteerBtn.addEventListener('pointerdown', e => e.stopPropagation());
 elSteerBtn.addEventListener('click', e => {
