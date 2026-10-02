@@ -5,7 +5,7 @@ window.TOPICS = {
 };
 
 window.WORKS = [
-  { section: 'lab', slug: 'cesium-mot-simulator', topic: 'cool', featured: true,
+  { section: 'lab', slug: 'mot-simulator', topic: 'cool', featured: true,
     en: 'Cesium MOT Simulator', zh: '銫原子 MOT 模擬器',
     en_d: 'Observe how magnetic and optical fields cool and trap a cloud of cesium atoms.',
     zh_d: '觀察磁場與光場如何冷卻並捕抓一團銫原子雲。' },
