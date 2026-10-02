@@ -28,6 +28,7 @@ a{color:var(--acc)}
 .btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line2);background:var(--raise);border-radius:7px;padding:5px 12px;cursor:pointer;font-size:13px;white-space:nowrap;transition:border-color .15s,color .15s}
 .btn:hover{border-color:#3d4c61}
 .btn svg{width:12px;height:12px;fill:currentColor}
+#focus{gap:0}
 .btn.on{color:var(--gold);border-color:rgba(255,210,131,.4)}
 .ghost{border:0;background:none;color:var(--muted);cursor:pointer;font-size:13px;padding:5px 4px;white-space:nowrap}
 .ghost:hover{color:var(--text)}
@@ -63,6 +64,7 @@ input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;bac
 .row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;font-size:13px;color:var(--muted)}
 .row .unit{font-size:12px;color:var(--dim);margin-left:6px}
 .hint{font-size:12px;color:var(--dim);margin:0 0 10px;line-height:1.7}
+.touch-only{display:none}
 kbd{font-family:inherit;font-size:11px;border:1px solid var(--line2);border-radius:4px;padding:0 5px;color:var(--muted);margin-right:4px}
 body[data-mode=cloud] [data-mode=incoming],body[data-mode=incoming] [data-mode=cloud]{display:none}
 select{width:100%;background:var(--raise);border:1px solid var(--line2);border-radius:7px;padding:6px 8px;font-size:13px;cursor:pointer;margin-bottom:12px}
@@ -75,6 +77,7 @@ select{width:100%;background:var(--raise);border:1px solid var(--line2);border-r
 .hud .tip{font-size:12px;color:var(--dim);margin-top:2px}
 .viewbar{position:absolute;top:12px;right:12px;display:flex;gap:6px;align-items:center}
 .viewbar .seg,.viewbar .btn{background:rgba(10,14,20,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.viewbar .seg button,.viewbar .btn{font-size:13px;line-height:20px}.viewbar .seg button{padding:2px 10px}.viewbar .btn{height:30px;padding:0 11px}
 .speedkey{position:absolute;left:18px;bottom:14px;width:230px;font-size:12px;color:var(--muted);pointer-events:none}
 .sk-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 .sk-head small{font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -119,47 +122,52 @@ dialog::backdrop{background:rgba(3,5,9,.62);-webkit-backdrop-filter:blur(3px);ba
 .eqm math{font-family:"STIX Two Math","Cambria Math","Latin Modern Math",math;font-size:17px;color:var(--acc);margin:4px 0}
 .eqn{flex:none;color:var(--muted);font-size:14px;font-variant-numeric:tabular-nums;min-width:3.6em;text-align:right}
 @media(max-width:1240px){.app{grid-template-columns:256px minmax(0,1fr);grid-template-areas:"left center" "right right";height:auto}.left,.center{height:calc(100dvh - var(--hh) - var(--cqbar))}.right{border-left:0;border-top:1px solid var(--line);display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:32px;padding:4px 24px 28px;overflow:visible}.right section{border-bottom:0}}
-@media(max-width:780px){.top{height:auto;flex-direction:column;align-items:stretch;padding:10px 14px;gap:8px}.brand span{display:none}.tr{display:flex;align-items:center;gap:8px;min-width:0}.tr .pace{gap:6px}.tr .seg.sm button{padding:2px 7px}#pause{margin-left:auto}.top .btn{padding:5px 9px}.top .btn span{display:none}.app{grid-template-columns:1fr;grid-template-areas:"center" "left" "right";height:auto}.left,.center{height:auto}.left{border-right:0;border-top:1px solid var(--line)}#stage{flex:none;height:56vh;min-height:320px}.strip{grid-template-columns:1fr;height:auto;padding:12px 14px;gap:14px}.metrics{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px 10px;align-items:start}.m span{white-space:nowrap}.m strong{font-size:20px}#plot{flex:none;height:120px}.right{grid-template-columns:1fr;gap:0;padding:4px 16px 28px}.hud{top:52px;left:14px}.hud .t{font-size:22px}.hud .tip{display:none}.viewbar{top:10px;right:10px;left:10px;justify-content:space-between}.speedkey{left:14px;width:190px}.eqm math{font-size:15px}.eqn{font-size:12.5px;min-width:3em}.dlg{padding:18px 18px 22px}}
+@media(max-width:780px){.top{height:auto;display:grid;grid-template-columns:auto 1fr;align-items:baseline;column-gap:10px;row-gap:8px;padding:10px 14px}.brand{margin:0}.brand span{display:none}#aboutBtn{order:0;justify-self:end;padding:2px 4px}.tr{grid-column:1/-1;display:flex;align-items:center;gap:8px;min-width:0}.tr-play,.spacer,.pl,#paceSeg button[data-v=".0002"]{display:none}.top .seg button{font-size:12px;padding:3px 8px}.tr .pace{gap:4px;margin-left:auto;font-size:11px}.tr .seg.sm button{padding:2px 6px}.xl{display:none}
+.app{display:flex;flex-direction:column;height:auto;background:var(--panel)}.left,.center,.strip{display:contents}.left,.center{height:auto}
+.s-init{order:1;padding:10px 14px 2px}.metrics{order:2;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px 10px;align-items:start;padding:4px 14px 10px}#stage{order:3;flex:none;height:56vh;min-height:320px}.s-field{order:4;padding:12px 14px 2px;border-bottom:0}.plotbox{order:5;padding:2px 14px 14px;border-bottom:1px solid var(--line)}.s-disp{order:6;padding:14px 14px 8px}.s-keys{order:9;padding:14px 16px 28px;border-top:1px solid var(--line)}.right{order:8;padding-bottom:16px}.kb-only{display:none}.touch-only{display:inline}p.touch-only{display:block}
+.s-init,.s-field{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:16px;border-bottom:0}.s-init h2,.s-field h2,.s-init .hint,.s-field .togs{grid-column:1/-1}.s-init h2,.s-field h2{margin-bottom:6px}.s-init .ctl,.s-field .ctl{margin-bottom:8px;min-width:0}.s-init .ctl label,.s-field .ctl label{font-size:12px;gap:4px}.s-init .hint{margin:0 0 6px}
+.m span{white-space:nowrap}.m strong{font-size:20px}#plot{flex:none;height:120px}.right{grid-template-columns:1fr;gap:0;padding:4px 16px 28px}.hud{top:52px;left:14px}.hud .t{font-size:22px}.hud .tip{display:none}.viewbar{top:10px;right:10px;left:10px}#focus{margin-right:auto}#pause span,#reset span{display:none}.speedkey{left:14px;width:190px}.eqm math{font-size:15px}.eqn{font-size:12.5px;min-width:3em}.dlg{padding:18px 18px 22px}}
+@media(max-width:360px){.top .seg button{padding:3px 6px;font-size:11.5px}.tr .seg.sm button{padding:2px 5px}.tr{gap:6px}}
 </style>
 <body data-mode="cloud">
 <div class="cq-bar" role="navigation" aria-label="clinqclinq"><style>.cq-bar{position:relative;z-index:40;box-sizing:border-box;height:40px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 18px;font:500 14px/1 "Source Serif 4","Noto Serif TC","Iowan Old Style",Georgia,serif;letter-spacing:.02em;color:#cfd9e3;border-bottom:1px solid rgba(150,175,200,.18)}.cq-bar a{color:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:8px;opacity:.78;transition:opacity .15s;white-space:nowrap}.cq-bar a:hover{opacity:1}.cq-bar .cq-home{opacity:.55}.cq-bar .cq-arr{display:inline-block;transition:transform .15s}.cq-bar .cq-back:hover .cq-arr{transform:translateX(-3px)}.cq-bar svg{width:15px;height:15px;display:block}.cq-bar a:focus-visible{outline:1.5px solid #ffd283;outline-offset:3px;border-radius:3px}@media (max-width:520px){.cq-bar{padding:0 14px;font-size:13px}}</style><a class="cq-back" href="../"><span class="cq-arr" aria-hidden="true">←</span>Interactive physics</a><a class="cq-home" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M18.46 9.66A8.97 8.97 0 1 0 18.46 22.34" fill="none" stroke="currentColor" stroke-width="2.68" stroke-linecap="round"/><rect x="20.64" y="11.67" width="8.66" height="8.66" rx="2.17" fill="currentColor" transform="rotate(45 24.97 16)"/></svg>clinqclinq.studio</a></div>
 <header class="top">
 <div class="brand"><h1>Cesium MOT <em>Simulator</em></h1><span>¹³³Cs · D₂ 852 nm</span></div>
+<button class="ghost" id="aboutBtn">模型說明</button>
 <div class="tr"><div class="seg" id="modeSeg"><button data-v="cloud" class="on">原子雲冷卻</button><button data-v="incoming">外部原子注入</button></div>
 <div class="spacer"></div>
-<button class="ghost" id="aboutBtn">模型說明</button></div>
-<div class="tr"><div class="pace"><span>模擬速度</span><div class="seg sm" id="paceSeg"><button data-v=".0002">.2</button><button data-v=".0005">.5</button><button data-v=".001" class="on">1</button><button data-v=".005">5</button><button data-v=".01">10</button></div><span>ms／秒</span></div>
-<button class="btn" id="pause"></button>
+<div class="pace"><span class="pl">模擬速度</span><div class="seg sm" id="paceSeg"><button data-v=".0002">.2</button><button data-v=".0005">.5</button><button data-v=".001" class="on">1</button><button data-v=".005">5</button><button data-v=".01">10</button></div><span>ms／秒</span></div></div>
+<div class="tr tr-play"><button class="btn" id="pause"></button>
 <button class="btn" id="reset" aria-label="重新開始"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" style="fill:none"><path d="M2.4 6.2a3.6 3.6 0 1 0 1.2-2.8"/><path d="M2.2 1.6v2.5h2.5"/></svg><span>重新開始</span></button></div>
 </header>
 <div class="app">
 <aside class="panel left">
-<section><h2>光場與磁場</h2>
+<section class="s-field"><h2>光場與磁場</h2>
 <div class="ctl"><label for="delta">失諧 δ/Γ<output id="deltaOut"></output></label><input id="delta" type="range" min="-3" max="-.25" step=".05" value="-.5"></div>
 <div class="ctl"><label for="sat">每束光強 s₀<output id="satOut"></output></label><input id="sat" type="range" min="0" max=".15" step=".005" value=".08"></div>
 <div class="ctl"><label for="grad">軸向磁場梯度<output id="gradOut"></output></label><input id="grad" type="range" min="0" max="20" step=".5" value="10"></div>
 <div class="ctl"><label for="waist">光束 1/e² 半徑<output id="waistOut"></output></label><input id="waist" type="range" min="2" max="10" step=".5" value="5"></div>
 <div class="togs"><label class="tog"><input id="noise" type="checkbox" checked><span>光子反沖擴散</span></label><label class="tog"><input id="gravity" type="checkbox"><span>重力 −z</span></label></div>
 </section>
-<section><h2>初始條件</h2>
+<section class="s-init"><h2>初始條件</h2>
 <div class="ctl"><label for="atomNumber">總原子數<output id="atomNumberOut"></output></label><input id="atomNumber" type="range" min="10" max="1000" step="10" value="240"></div>
 <div class="ctl" data-mode="cloud"><label for="initial">原子雲初始溫度<output id="initialOut"></output></label><input id="initial" type="range" min="1" max="20" step="1" value="5"></div>
 <div class="ctl" data-mode="incoming"><label for="speed">外部注入速度<output id="speedOut"></output></label><input id="speed" type="range" min=".5" max="25" step=".5" value="3"></div>
-<p class="hint">放開滑桿後以新條件重新開始</p>
 </section>
-<section><h2>顯示</h2>
+<section class="s-disp"><h2>顯示</h2>
 <div class="row"><span>箭頭</span><div class="seg sm" id="vecSeg"><button data-v="B" class="on">磁場</button><button data-v="A">加速度</button><button data-v="none">無</button></div></div>
 <div class="row"><span>速率上限</span><span><div class="seg sm" id="speedSeg"><button data-v=".3">.3</button><button data-v="1">1</button><button data-v="3" class="on">3</button><button data-v="10">10</button></div></span></div>
 <div class="togs"><label class="tog"><input id="showField" type="checkbox" checked><span>3D 色彩切面</span></label><label class="tog"><input id="showCoils" type="checkbox"><span>線圈示意</span></label></div>
 </section>
-<section><h2>快捷鍵</h2>
-<p class="hint"><kbd>Space</kbd>暫停或繼續<br><kbd>R</kbd>重新開始<br><kbd>F</kbd>放大中心或回到全景</p>
+<section class="s-keys"><h2><span class="kb-only">快捷鍵</span><span class="touch-only">手勢操作</span></h2>
+<p class="hint kb-only"><kbd>Space</kbd>暫停或繼續<br><kbd>R</kbd>重新開始<br><kbd>F</kbd>放大中心或回到全景</p>
+<p class="hint touch-only"><kbd>單指拖曳</kbd>旋轉視角<br><kbd>雙指開合</kbd>縮放畫面<br><kbd>點擊粒子</kbd>追蹤粒子<br><kbd>點擊切面圖</kbd>讀取探針數值</p>
 </section>
 </aside>
 <main class="center">
 <div id="stage"><canvas id="scene" aria-label="可拖曳旋轉的三維原子位置與軌跡"></canvas>
 <div class="hud"><div class="t" id="time">0.0 ms</div><div id="track"></div><div class="tip">拖曳旋轉 · 滾輪或雙指縮放 · 點選粒子追蹤</div></div>
-<div class="viewbar"><div class="seg sm" id="viewSeg"><button data-v="persp" class="on">立體視角</button><button data-v="face">正視切面</button></div><button class="btn" id="focus">放大中心</button></div>
+<div class="viewbar"><div class="seg sm" id="viewSeg"><button data-v="persp" class="on">立體</button><button data-v="face">正視</button></div><button class="btn" id="focus">放大</button></div>
 <div class="speedkey"><div class="sk-head"><span>粒子速率 |v|（m/s）</span><small id="distLabel"></small></div><canvas id="dist" aria-label="粒子速率分佈與 Maxwell–Boltzmann 曲線"></canvas><div class="bar speedbar"></div><div class="sticks" id="speedTicks"></div></div>
 </div>
 <div class="strip">
@@ -169,7 +177,7 @@ dialog::backdrop{background:rgba(3,5,9,.62);-webkit-backdrop-filter:blur(3px);ba
 <div class="m"><span>RMS 半徑</span><strong id="radius">—</strong></div>
 <div class="m"><span>逃逸原子</span><strong id="escaped">—</strong></div>
 </div>
-<div class="plotbox"><div class="plothead"><span>等效溫度歷程 · 對數軸</span><span><i></i>低飽和參考 <span id="reference"></span><i class="td"></i>T<sub>D</sub> <span id="dopplerLimit"></span></span></div><canvas id="plot" aria-label="溫度隨模擬時間變化"></canvas></div>
+<div class="plotbox"><div class="plothead"><span>等效溫度 · 對數軸</span><span><i></i>低飽和參考 <span id="reference"></span><i class="td"></i>T<sub>D</sub> <span id="dopplerLimit"></span></span></div><canvas id="plot" aria-label="溫度隨模擬時間變化"></canvas></div>
 </div>
 </main>
 <aside class="panel right">
@@ -209,7 +217,7 @@ dialog::backdrop{background:rgba(3,5,9,.62);-webkit-backdrop-filter:blur(3px);ba
 <p>依據 C. J. Foot, <i>Atomic Physics</i> (2005) Ch.9。</p>
 <p>銫常數取自 D. A. Steck,  <a href="https://steck.us/alkalidata/" target="_blank" rel="noreferrer">Alkali D Line Data</a>。</p>
 <h4>延伸閱讀</h4>
-<p>以下文章提出更完整的 MOT 數值模型，本模擬器目前未採用其方法，列出供讀者參考。</p>
+<p>以下文章提出更完整的 MOT 數值模型。</p>
 <ul>
 <li>R. K. Hanley et al., J. Mod. Opt. 65, 667 (2018). <a href="https://doi.org/10.1080/09500340.2017.1401679" target="_blank" rel="noreferrer">doi</a></li>
 <li>X. Chen et al., AtomECS, arXiv:2105.06447 (2021). <a href="https://arxiv.org/abs/2105.06447" target="_blank" rel="noreferrer">arXiv</a></li>
@@ -253,12 +261,12 @@ function labels(){const v=id=>+$(id).value;$('deltaOut').textContent=minus(v('de
 function setPaused(p){paused=p;$('pause').innerHTML=(p?IC.play:IC.pause)+'<span>'+(p?'繼續':'暫停')+'</span>';$('pause').setAttribute('aria-label',p?'繼續':'暫停');$('pause').classList.toggle('on',p)}
 function reset(){random=rng(42);t=0;sample=0;budget=0;trail=[];history=[];selected=0;atoms=[];const v=Math.sqrt(C.kB*(+$('initial').value/1000)/C.m),n=+$('atomNumber').value;for(let i=0;i<n;i++){if(S.mode==='cloud')atoms.push(atom([0,1,2].map(()=>.0015*normal(random)),[0,1,2].map(()=>v*normal(random))));else atoms.push(atom([-.008-.001*random(),.00035*normal(random),.00035*normal(random)],[+$('speed').value+.08*normal(random),.05*normal(random),.05*normal(random)]));}setPaused(false);labels();measure()}
 function tempText(T){return T<1e-3?fmt(T*1e6,true)+' μK':fmt(T*1e3,true)+' mK'}
-function measure(){const s=stats(atoms);lastStats=s;history.push([t,s.T]);if(history.length>1800)history.shift();$('time').textContent=(t*1000).toFixed(S.pace<.005?2:1)+' ms';$('count').innerHTML=s.n+'<small> / '+atoms.length+'</small>';$('temp').innerHTML=s.n>1?tempText(s.T).replace(' ','<small> ')+'</small>':'—';$('dopplerRatio').innerHTML=s.n>1?fmt(s.T/dopplerLimit,true)+' T<sub>D</sub>':'';$('radius').innerHTML=s.n?fmt(s.rms*1000,true)+'<small> mm</small>':'—';$('escaped').textContent=atoms.length-s.n;const a=atoms[selected];$('track').textContent=!a?'':a.escaped?'追蹤粒子已逃逸':'追蹤粒子  |v| '+fmt(Math.hypot(...a.v))+' m/s · r '+fmt(Math.hypot(...a.p)*1000)+' mm'+(a.captured?' · 已捕獲':'')}
+function measure(){const s=stats(atoms);lastStats=s;history.push([t,s.T]);if(history.length>1800)history.shift();$('time').textContent=(t*1000).toFixed(S.pace<.005?2:1)+' ms';$('count').innerHTML=s.n+'<small> / '+atoms.length+'</small>';$('temp').innerHTML=s.n>1?tempText(s.T).replace(' ','<small> ')+'</small>':'—';$('dopplerRatio').innerHTML=s.n>1?fmt(s.T/dopplerLimit,true)+' T<sub>D</sub>':'';$('radius').innerHTML=s.n?fmt(s.rms*1000,true)+'<small> mm</small>':'—';$('escaped').textContent=atoms.length-s.n;const a=atoms[selected];$('track').textContent=!a?'':a.escaped?'追蹤粒子已逃逸':'追蹤粒子  |v| '+fmt(Math.hypot(...a.v))+' m/s · r '+fmt(Math.hypot(...a.p)*1000)+' mm'+(a.captured?'':'')}
 function bindSeg(id,fn){const el=$(id);el.addEventListener('click',e=>{const b=e.target.closest('button[data-v]');if(!b)return;el.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));fn(b.dataset.v)})}
 function setSeg(id,v){$(id).querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.v===v))}
 function aim(y,p){cam.ty=cam.yaw+(((y-cam.yaw)%TAU+3*Math.PI)%TAU-Math.PI);cam.tp=p}
 function setView(v){S.view=v;setSeg('viewSeg',v)}
-function updateFocus(){const z=cam.ts<.003;$('focus').textContent=z?'回到全景':'放大中心';$('focus').classList.toggle('on',z)}
+function updateFocus(){const z=cam.ts<.003;$('focus').textContent=z?'全景':'放大';$('focus').classList.toggle('on',z)}
 function faceView(){const p=S.plane;if(p==='xz')aim(0,0);else if(p==='xy')aim(0,Math.PI/2);else aim(-Math.PI/2,0);cam.ts=S.span/1000*1.2;setView('face');updateFocus()}
 function perspView(){aim(.65,.42);setView('persp')}
 function toggleFocus(){cam.ts=cam.ts>.003?.0008:HOME[S.mode];updateFocus()}
@@ -276,7 +284,7 @@ const top=Math.max(1e-9,...hist,...curve)*1.08,y=d=>H-1-d/top*(H-3),bw=W/NB;
 for(let i=0;i<NB;i++)if(bins[i]){dc.fillStyle=speedColor(V0*Math.expm1((i+.5)/NB*L));dc.globalAlpha=.55;dc.fillRect(i*bw+.5,y(hist[i]),bw-1,H-1-y(hist[i]))}dc.globalAlpha=1;
 dc.strokeStyle='rgba(152,165,184,.35)';dc.lineWidth=1;dc.beginPath();dc.moveTo(0,H-.5);dc.lineTo(W,H-.5);dc.stroke();
 if(curve.length){dc.strokeStyle='#e4e9f1';dc.lineWidth=1.3;dc.beginPath();curve.forEach((c,i)=>{const X=i/120*W;if(i)dc.lineTo(X,y(c));else dc.moveTo(X,y(c))});dc.stroke()}
-$('distLabel').textContent=(curve.length?'MB · '+tempText(T):'')+(over?' · '+over+' 超出':'')}
+$('distLabel').textContent=""}
 function draw(){const[W,H]=resize(scene,ctx);ctx.clearRect(0,0,W,H);drawSpatial(W,H);const s=cam.scale,ext=s*1.2;for(let n=-4;n<=4;n++){const d=n*s/4;line([-s,d,0],[s,d,0],'#1b2533',W,H);line([d,-s,0],[d,s,0],'#1b2533',W,H)}
 ctx.font='italic 15px '+SERIF;for(let j=0;j<3;j++){const a=[0,0,0],b=[0,0,0];a[j]=-ext;b[j]=ext;line(a,b,AX[j],W,H,1.6);const q=projection(b,W,H);ctx.fillStyle='#aebbd0';ctx.fillText('xyz'[j],q[0]+6,q[1]+4)}
 if($('showCoils').checked&&s>.003)for(const z of [-.005,.005]){ctx.beginPath();for(let n=0;n<=80;n++){const a=n*Math.PI/40,q=projection([.007*Math.cos(a),.007*Math.sin(a),z],W,H);if(n===0)ctx.moveTo(q[0],q[1]);else ctx.lineTo(q[0],q[1])}ctx.strokeStyle='#7a5c45';ctx.lineWidth=2;ctx.stroke()}
@@ -337,6 +345,7 @@ bindSeg('speedSeg',v=>{S.speedMax=+v;speedLegend()});
 bindSeg('viewSeg',v=>v==='face'?faceView():perspView());
 $('focus').onclick=toggleFocus;
 $('pause').onclick=()=>setPaused(!paused);
+{const mq=matchMedia('(max-width:780px)'),vb=document.querySelector('.viewbar'),tp=document.querySelector('.tr-play'),place=()=>(mq.matches?vb:tp).append($('pause'),$('reset'));mq.addEventListener?mq.addEventListener('change',place):mq.addListener(place);place()}
 $('reset').onclick=reset;
 for(const id of ['delta','sat','grad','waist'])$(id).addEventListener('input',labels);
 $('atomNumber').addEventListener('input',reset);
