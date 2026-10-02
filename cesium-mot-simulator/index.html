@@ -1,0 +1,365 @@
+<!doctype html><html lang="zh-Hant"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%23101925%22/%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%229%22%20fill%3D%22none%22%20stroke%3D%22%239de8dc%22/%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%223%22%20fill%3D%22%23ffd283%22/%3E%3C/svg%3E"><title>Cesium MOT Simulator</title>
+<meta name="description" content="Observe how magnetic and optical fields cool and trap a cloud of cesium atoms.">
+<meta property="og:title" content="Cesium MOT Simulator · clinqclinq">
+<meta property="og:description" content="Observe how magnetic and optical fields cool and trap a cloud of cesium atoms.">
+<meta property="og:image" content="https://clinqclinq.studio/lab/cesium-mot-simulator/thumb.webp">
+
+<style>
+:root{--cqbar:40px;color-scheme:dark;--serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua","Songti TC","Noto Serif TC","Source Han Serif TC","PMingLiU",serif;--bg:#0a0e14;--panel:#0e131b;--raise:#141b26;--line:#1d2632;--line2:#2b3746;--text:#e4e9f1;--muted:#98a5b8;--dim:#66748a;--acc:#9de8dc;--accbg:rgba(157,232,220,.1);--gold:#ffd283;--hh:52px;font-family:var(--serif);background:var(--bg);color:var(--text)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,select,input{font:inherit;color:inherit}
+a{color:var(--acc)}
+:focus-visible{outline:1.5px solid var(--gold);outline-offset:2px}
+.top{height:var(--hh);display:flex;align-items:center;gap:14px;padding:0 18px;border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:baseline;gap:12px;margin-right:10px}
+.brand h1{font-size:19px;font-weight:600;margin:0;letter-spacing:.01em;white-space:nowrap}
+.brand h1 em{font-weight:400;color:var(--acc)}
+.brand span{color:var(--dim);font-size:13px;white-space:nowrap}
+.spacer{flex:1}
+.pace{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dim)}
+.seg{display:inline-flex;border:1px solid var(--line2);border-radius:7px;padding:2px;gap:2px;background:var(--bg)}
+.seg button{border:0;background:none;color:var(--muted);padding:4px 11px;border-radius:5px;cursor:pointer;font-size:13px;white-space:nowrap;transition:background .15s,color .15s}
+.seg button:hover{color:var(--text)}
+.seg button.on{background:var(--accbg);color:var(--acc)}
+.seg.sm button{padding:2px 8px;font-size:12.5px}
+.btn{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line2);background:var(--raise);border-radius:7px;padding:5px 12px;cursor:pointer;font-size:13px;white-space:nowrap;transition:border-color .15s,color .15s}
+.btn:hover{border-color:#3d4c61}
+.btn svg{width:12px;height:12px;fill:currentColor}
+.btn.on{color:var(--gold);border-color:rgba(255,210,131,.4)}
+.ghost{border:0;background:none;color:var(--muted);cursor:pointer;font-size:13px;padding:5px 4px;white-space:nowrap}
+.ghost:hover{color:var(--text)}
+.app{display:grid;grid-template-columns:268px minmax(0,1fr) 336px;grid-template-areas:"left center right";height:calc(100dvh - var(--hh) - var(--cqbar))}
+.panel{overflow-y:auto;background:var(--panel);scrollbar-width:thin;scrollbar-color:var(--line2) transparent}
+.left{grid-area:left;border-right:1px solid var(--line);padding:4px 18px 24px}
+.right{grid-area:right;border-left:1px solid var(--line);padding:4px 16px 24px}
+.center{grid-area:center;display:flex;flex-direction:column;min-width:0;min-height:0}
+section{padding:14px 0 8px;border-bottom:1px solid var(--line)}
+section:last-child{border-bottom:0}
+h2{font-size:12px;font-weight:600;letter-spacing:.12em;color:var(--dim);margin:0 0 12px;display:flex;justify-content:space-between;align-items:baseline}
+h2 .note{font-weight:400;letter-spacing:0;font-size:11.5px}
+.ctl{margin-bottom:12px}
+.ctl label{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px;color:var(--muted);margin-bottom:2px}
+.ctl output{color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:18px;margin:0;background:none;cursor:pointer;--p:50%;--a:50%;--b:50%}
+input[type=range]::-webkit-slider-runnable-track{height:2px;border-radius:1px;background:linear-gradient(90deg,var(--acc) var(--p),var(--line2) var(--p))}
+input[type=range].bi::-webkit-slider-runnable-track{background:linear-gradient(90deg,var(--line2) var(--a),var(--acc) var(--a) var(--b),var(--line2) var(--b))}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:13px;height:13px;margin-top:-5.5px;border-radius:50%;background:var(--bg);border:1.5px solid var(--acc);transition:transform .12s}
+input[type=range]:hover::-webkit-slider-thumb,input[type=range]:active::-webkit-slider-thumb{transform:scale(1.2)}
+input[type=range]::-moz-range-track{height:2px;background:var(--line2)}
+input[type=range]::-moz-range-progress{height:2px;background:var(--acc)}
+input[type=range].bi::-moz-range-progress{background:none}
+input[type=range].bi::-moz-range-track{background:linear-gradient(90deg,var(--line2) var(--a),var(--acc) var(--a) var(--b),var(--line2) var(--b))}
+input[type=range]::-moz-range-thumb{width:11px;height:11px;border-radius:50%;background:var(--bg);border:1.5px solid var(--acc)}
+.togs{display:flex;flex-wrap:wrap;gap:8px 16px;margin:2px 0 10px}
+.tog{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--muted);cursor:pointer}
+.tog input{-webkit-appearance:none;appearance:none;width:24px;height:14px;border-radius:7px;background:var(--line2);position:relative;cursor:pointer;margin:0;transition:background .15s;flex:none}
+.tog input::after{content:"";position:absolute;top:2px;left:2px;width:10px;height:10px;border-radius:50%;background:#9aa7b9;transition:transform .15s,background .15s}
+.tog input:checked{background:rgba(157,232,220,.3)}
+.tog input:checked::after{transform:translateX(10px);background:var(--acc)}
+.tog input:checked+span{color:var(--text)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;font-size:13px;color:var(--muted)}
+.row .unit{font-size:12px;color:var(--dim);margin-left:6px}
+.hint{font-size:12px;color:var(--dim);margin:0 0 10px;line-height:1.7}
+kbd{font-family:inherit;font-size:11px;border:1px solid var(--line2);border-radius:4px;padding:0 5px;color:var(--muted);margin-right:4px}
+body[data-mode=cloud] [data-mode=incoming],body[data-mode=incoming] [data-mode=cloud]{display:none}
+select{width:100%;background:var(--raise);border:1px solid var(--line2);border-radius:7px;padding:6px 8px;font-size:13px;cursor:pointer;margin-bottom:12px}
+#stage{position:relative;flex:1;min-height:0;overflow:hidden;background:radial-gradient(ellipse at 50% 45%,#131e30,#070a10 75%)}
+#scene{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab}
+#scene.drag{cursor:grabbing}
+.hud{position:absolute;top:14px;left:18px;pointer-events:none}
+.hud .t{font-size:26px;font-variant-numeric:tabular-nums;line-height:1.2}
+#track{font-size:12.5px;color:var(--muted);min-height:19px}
+.hud .tip{font-size:12px;color:var(--dim);margin-top:2px}
+.viewbar{position:absolute;top:12px;right:12px;display:flex;gap:6px;align-items:center}
+.viewbar .seg,.viewbar .btn{background:rgba(10,14,20,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.speedkey{position:absolute;left:18px;bottom:14px;width:230px;font-size:12px;color:var(--muted);pointer-events:none}
+.sk-head{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.sk-head small{font-size:11px;color:var(--dim);font-variant-numeric:tabular-nums;white-space:nowrap}
+#dist{display:block;width:100%;height:44px;margin-top:4px}
+.sticks{position:relative;height:16px;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.sticks span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}
+.sticks span:first-child{transform:none}.sticks span:last-child{transform:translateX(-100%)}
+.bar{height:6px;border-radius:3px;margin:5px 0 3px}
+.speedbar{background:linear-gradient(90deg,hsl(220 95% 65%),hsl(165 95% 65%),hsl(110 95% 65%),hsl(55 95% 65%),hsl(0 95% 65%))}
+.ticks{display:flex;justify-content:space-between;gap:6px;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.strip{display:grid;grid-template-columns:310px minmax(0,1fr);gap:22px;height:158px;padding:12px 18px;border-top:1px solid var(--line);background:var(--panel)}
+.metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;align-content:center}
+.m span{display:block;font-size:12px;color:var(--dim)}
+.m strong{font-size:21px;font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
+.m strong small{font-size:12px;color:var(--muted);font-weight:400}
+.m em{font-style:normal;font-size:12px;color:var(--acc);margin-left:6px;white-space:nowrap}
+.plotbox{display:flex;flex-direction:column;min-width:0;min-height:0}
+.plothead{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 14px;font-size:12px;color:var(--dim);margin-bottom:4px}
+.plothead i{display:inline-block;width:16px;border-top:1px dashed #8b947e;vertical-align:middle;margin:0 5px 0 12px}
+.plothead i.td{border-top:1px dotted #c98f8f}
+#plot{flex:1;min-height:0;width:100%;display:block}
+#sliceCanvas{width:100%;aspect-ratio:1;display:block;touch-action:none;cursor:crosshair;margin:4px 0 2px}
+.cmax input{width:84px;background:var(--raise);border:1px solid var(--line2);border-radius:6px;padding:3px 7px;font-size:12.5px;text-align:right}
+.chip{border:1px solid var(--line2);background:none;color:var(--muted);border-radius:6px;padding:3px 9px;font-size:12px;cursor:pointer;margin-left:6px}
+.chip.on{color:var(--acc);border-color:rgba(157,232,220,.4);background:var(--accbg)}
+#fieldInfo{font-size:12px;color:var(--dim);line-height:1.7;margin:0 0 6px}
+#fieldInfo:empty{display:none}
+.probe{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;margin:0;font-size:13px}
+.probe dt{color:var(--dim);white-space:nowrap}
+.probe dd{margin:0;font-variant-numeric:tabular-nums;text-align:right}
+.probe dd.hl,.probe dt.hl{color:var(--acc)}
+dialog{width:min(760px,calc(100vw - 32px));max-height:calc(100dvh - 48px);padding:0;border:1px solid var(--line2);border-radius:12px;background:var(--panel);color:var(--text)}
+dialog::backdrop{background:rgba(3,5,9,.62);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.dlg{padding:22px 30px 28px}
+.dlg header{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.dlg h3{font-size:19px;font-weight:600;margin:0}
+.dlg p{color:#bcc7d7;line-height:1.9;font-size:14.5px;margin:10px 0}
+.dlg h4{font-size:13px;font-weight:600;letter-spacing:.06em;color:var(--dim);margin:22px 0 4px}
+.dlg .src{font-size:13px;color:var(--dim);margin-top:18px}
+.eq{display:flex;align-items:center;gap:14px;margin:6px 0}
+.eqm{flex:1;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
+.eqm math{font-family:"STIX Two Math","Cambria Math","Latin Modern Math",math;font-size:17px;color:var(--acc);margin:4px 0}
+.eqn{flex:none;color:var(--muted);font-size:14px;font-variant-numeric:tabular-nums;min-width:3.6em;text-align:right}
+@media(max-width:1240px){.app{grid-template-columns:256px minmax(0,1fr);grid-template-areas:"left center" "right right";height:auto}.left,.center{height:calc(100dvh - var(--hh) - var(--cqbar))}.right{border-left:0;border-top:1px solid var(--line);display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:32px;padding:4px 24px 28px;overflow:visible}.right section{border-bottom:0}}
+@media(max-width:780px){.top{height:auto;flex-wrap:wrap;padding:10px 14px;gap:10px}.brand span,.spacer{display:none}.app{grid-template-columns:1fr;grid-template-areas:"center" "left" "right";height:auto}.left,.center{height:auto}.left{border-right:0;border-top:1px solid var(--line)}#stage{flex:none;height:62vh;min-height:340px}.strip{grid-template-columns:1fr;height:auto}#plot{flex:none;height:120px}.right{grid-template-columns:1fr;gap:0;padding:4px 16px 28px}.hud{top:52px;left:14px}.hud .t{font-size:22px}.hud .tip{display:none}.viewbar{top:10px;right:10px;left:10px;justify-content:space-between}.speedkey{left:14px;width:190px}.eqm math{font-size:15px}.eqn{font-size:12.5px;min-width:3em}.dlg{padding:18px 18px 22px}}
+</style>
+<body data-mode="cloud">
+<div class="cq-bar" role="navigation" aria-label="clinqclinq"><style>.cq-bar{position:relative;z-index:40;box-sizing:border-box;height:40px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 18px;font:500 14px/1 "Source Serif 4","Noto Serif TC","Iowan Old Style",Georgia,serif;letter-spacing:.02em;color:#cfd9e3;border-bottom:1px solid rgba(150,175,200,.18)}.cq-bar a{color:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:8px;opacity:.78;transition:opacity .15s;white-space:nowrap}.cq-bar a:hover{opacity:1}.cq-bar .cq-home{opacity:.55}.cq-bar .cq-arr{display:inline-block;transition:transform .15s}.cq-bar .cq-back:hover .cq-arr{transform:translateX(-3px)}.cq-bar svg{width:15px;height:15px;display:block}.cq-bar a:focus-visible{outline:1.5px solid #ffd283;outline-offset:3px;border-radius:3px}@media (max-width:520px){.cq-bar{padding:0 14px;font-size:13px}}</style><a class="cq-back" href="../"><span class="cq-arr" aria-hidden="true">←</span>Interactive physics</a><a class="cq-home" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M18.46 9.66A8.97 8.97 0 1 0 18.46 22.34" fill="none" stroke="currentColor" stroke-width="2.68" stroke-linecap="round"/><rect x="20.64" y="11.67" width="8.66" height="8.66" rx="2.17" fill="currentColor" transform="rotate(45 24.97 16)"/></svg>clinqclinq.studio</a></div>
+<header class="top">
+<div class="brand"><h1>Cesium MOT <em>Simulator</em></h1><span>¹³³Cs · D₂ 852 nm</span></div>
+<div class="seg" id="modeSeg"><button data-v="cloud" class="on">原子雲冷卻</button><button data-v="incoming">外部原子注入</button></div>
+<div class="spacer"></div>
+<div class="pace"><span>模擬速度</span><div class="seg sm" id="paceSeg"><button data-v=".0002">.2</button><button data-v=".0005">.5</button><button data-v=".001" class="on">1</button><button data-v=".005">5</button><button data-v=".01">10</button></div><span>ms／秒</span></div>
+<button class="btn" id="pause"></button>
+<button class="btn" id="reset"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" style="fill:none"><path d="M2.4 6.2a3.6 3.6 0 1 0 1.2-2.8"/><path d="M2.2 1.6v2.5h2.5"/></svg>重新開始</button>
+<button class="ghost" id="aboutBtn">模型說明</button>
+</header>
+<div class="app">
+<aside class="panel left">
+<section><h2>光場與磁場</h2>
+<div class="ctl"><label for="delta">失諧 δ/Γ<output id="deltaOut"></output></label><input id="delta" type="range" min="-3" max="-.25" step=".05" value="-.5"></div>
+<div class="ctl"><label for="sat">每束光強 s₀<output id="satOut"></output></label><input id="sat" type="range" min="0" max=".15" step=".005" value=".08"></div>
+<div class="ctl"><label for="grad">軸向磁場梯度<output id="gradOut"></output></label><input id="grad" type="range" min="0" max="20" step=".5" value="10"></div>
+<div class="ctl"><label for="waist">光束 1/e² 半徑<output id="waistOut"></output></label><input id="waist" type="range" min="2" max="10" step=".5" value="5"></div>
+<div class="togs"><label class="tog"><input id="noise" type="checkbox" checked><span>光子反沖擴散</span></label><label class="tog"><input id="gravity" type="checkbox"><span>重力 −z</span></label></div>
+</section>
+<section><h2>初始條件</h2>
+<div class="ctl"><label for="atomNumber">總原子數<output id="atomNumberOut"></output></label><input id="atomNumber" type="range" min="10" max="1000" step="10" value="240"></div>
+<div class="ctl" data-mode="cloud"><label for="initial">原子雲初始溫度<output id="initialOut"></output></label><input id="initial" type="range" min="1" max="20" step="1" value="5"></div>
+<div class="ctl" data-mode="incoming"><label for="speed">外部注入速度<output id="speedOut"></output></label><input id="speed" type="range" min=".5" max="25" step=".5" value="3"></div>
+<p class="hint">放開滑桿後以新條件重新開始</p>
+</section>
+<section><h2>顯示</h2>
+<div class="row"><span>箭頭</span><div class="seg sm" id="vecSeg"><button data-v="B" class="on">磁場</button><button data-v="A">加速度</button><button data-v="none">無</button></div></div>
+<div class="row"><span>速率上限</span><span><div class="seg sm" id="speedSeg"><button data-v=".3">.3</button><button data-v="1">1</button><button data-v="3" class="on">3</button><button data-v="10">10</button></div></span></div>
+<div class="togs"><label class="tog"><input id="showField" type="checkbox" checked><span>3D 色彩切面</span></label><label class="tog"><input id="showCoils" type="checkbox"><span>線圈示意</span></label></div>
+</section>
+<section><h2>快捷鍵</h2>
+<p class="hint"><kbd>Space</kbd>暫停或繼續<br><kbd>R</kbd>重新開始<br><kbd>F</kbd>放大中心或回到全景</p>
+</section>
+</aside>
+<main class="center">
+<div id="stage"><canvas id="scene" aria-label="可拖曳旋轉的三維原子位置與軌跡"></canvas>
+<div class="hud"><div class="t" id="time">0.0 ms</div><div id="track"></div><div class="tip">拖曳旋轉 · 滾輪或雙指縮放 · 點選粒子追蹤</div></div>
+<div class="viewbar"><div class="seg sm" id="viewSeg"><button data-v="persp" class="on">立體視角</button><button data-v="face">正視切面</button></div><button class="btn" id="focus">放大中心</button></div>
+<div class="speedkey"><div class="sk-head"><span>粒子速率 |v|（m/s）</span><small id="distLabel"></small></div><canvas id="dist" aria-label="粒子速率分佈與 Maxwell–Boltzmann 曲線"></canvas><div class="bar speedbar"></div><div class="sticks" id="speedTicks"></div></div>
+</div>
+<div class="strip">
+<div class="metrics">
+<div class="m"><span>區域內原子</span><strong id="count">—</strong></div>
+<div class="m"><span>等效溫度</span><strong id="temp">—</strong><em id="dopplerRatio"></em></div>
+<div class="m"><span>RMS 半徑</span><strong id="radius">—</strong></div>
+<div class="m"><span>逃逸原子</span><strong id="escaped">—</strong></div>
+</div>
+<div class="plotbox"><div class="plothead"><span>等效溫度歷程 · 對數軸</span><span><i></i>低飽和參考 <span id="reference"></span><i class="td"></i>T<sub>D</sub> <span id="dopplerLimit"></span></span></div><canvas id="plot" aria-label="溫度隨模擬時間變化"></canvas></div>
+</div>
+</main>
+<aside class="panel right">
+<section><h2>空間場切面</h2>
+<select id="fieldKind" aria-label="顯示量">
+<optgroup label="磁場"><option value="B">磁場大小 |B|（G）</option><option value="Bx">磁場 Bx（G）</option><option value="By">磁場 By（G）</option><option value="Bz">磁場 Bz（G）</option></optgroup>
+<optgroup label="光強"><option value="Isum">六束總光強 ΣI / Isat</option><option value="Ix">單束 x 光強 I / Isat</option><option value="Iy">單束 y 光強 I / Isat</option><option value="Iz">單束 z 光強 I / Isat</option></optgroup>
+<optgroup label="有效 Zeeman 頻移"><option value="Zx">Zeeman 頻移 x（MHz）</option><option value="Zy">Zeeman 頻移 y（MHz）</option><option value="Zz">Zeeman 頻移 z（MHz）</option></optgroup>
+<optgroup label="有效失諧 · v = 0"><option value="detx">+x 光束有效失諧（Γ）</option><option value="dety">+y 光束有效失諧（Γ）</option><option value="detz">+z 光束有效失諧（Γ）</option></optgroup>
+<optgroup label="動力學 · v = 0"><option value="R">總散射率（10⁶ / s）</option><option value="A">平均加速度大小（m/s²）</option><option value="N">反沖速度 RMS（m/s，5 μs）</option></optgroup>
+</select>
+<div class="row"><span>切面</span><div class="seg sm" id="planeSeg"><button data-v="xy">xy</button><button data-v="xz" class="on">xz</button><button data-v="yz">yz</button></div></div>
+<div class="row"><span>半寬</span><span><div class="seg sm" id="spanSeg"><button data-v="10">10</button><button data-v="5" class="on">5</button><button data-v="1">1</button><button data-v=".25">0.25</button></div><span class="unit">mm</span></span></div>
+<div class="ctl"><label for="offset">切面位置<output id="offsetOut"></output></label><input id="offset" class="bi" type="range" min="-5" max="5" step=".025" value="0" title="雙擊歸零"></div>
+<canvas id="sliceCanvas" aria-label="空間場切面，移動游標讀取數值"></canvas>
+<div class="bar" id="fieldBar"></div><div class="ticks"><span id="fieldLow"></span><span id="fieldMiddle"></span><span id="fieldHigh"></span></div>
+<div class="row cmax" style="margin-top:10px"><span>色階上限</span><span><input id="fieldMax" type="number" min="0" step="any" value="5" aria-label="色階上限"><button class="chip on" id="autoColor">自動</button></span></div>
+<p id="fieldInfo"></p>
+</section>
+<section><h2>探針讀數<span class="note">在切面上移動游標</span></h2>
+<dl class="probe">
+<dt>位置</dt><dd id="pPos"></dd>
+<dt class="hl" id="pValName"></dt><dd class="hl" id="pVal"></dd>
+<dt>B</dt><dd id="pB"></dd>
+<dt>|B|</dt><dd id="pBm"></dd>
+<dt>s<sub>x, y, z</sub></dt><dd id="pS"></dd>
+<dt>ΣI / I<sub>sat</sub></dt><dd id="pI"></dd>
+<dt>R<sub>total</sub></dt><dd id="pR"></dd>
+<dt>平均加速度</dt><dd id="pA"></dd>
+<dt>反沖 RMS / 5 μs</dt><dd id="pN"></dd>
+</dl>
+</section>
+</aside>
+</div>
+<dialog id="about"><div class="dlg">
+<header><h3>模型與適用範圍</h3><form method="dialog"><button class="ghost">關閉</button></form></header>
+<p>依據 C. J. Foot, <i>Atomic Physics</i> (2005) Ch.9。</p>
+<p>銫常數取自 D. A. Steck,  <a href="https://steck.us/alkalidata/" target="_blank" rel="noreferrer">Alkali D Line Data</a>。</p>
+<h4>延伸閱讀</h4>
+<p>以下文章提出更完整的 MOT 數值模型，本模擬器目前未採用其方法，列出供讀者參考。</p>
+<ul>
+<li>R. K. Hanley et al., J. Mod. Opt. 65, 667 (2018). <a href="https://doi.org/10.1080/09500340.2017.1401679" target="_blank" rel="noreferrer">doi</a></li>
+<li>X. Chen et al., AtomECS, arXiv:2105.06447 (2021). <a href="https://arxiv.org/abs/2105.06447" target="_blank" rel="noreferrer">arXiv</a></li>
+</ul>
+</div></dialog>
+<script>
+(function(root){
+const C={h:1.054571817e-34,kB:1.380649e-23,m:132.905451961*1.66053906660e-27,lambda:852.34727582e-9,G:2*Math.PI*5.234e6,mu:9.2740100783e-24};C.k=2*Math.PI/C.lambda;C.vr=C.h*C.k/C.m;
+function rng(seed=42){return ()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return ((t^t>>>14)>>>0)/4294967296}}
+function normal(r){return Math.sqrt(-2*Math.log(Math.max(1e-12,r())))*Math.cos(2*Math.PI*r())}
+function rates(p,v,o){let rr=[],r2=p.reduce((a,x)=>a+x*x,0);for(let j=0;j<3;j++){const s=o.s*Math.exp(-2*(r2-p[j]*p[j])/(o.w*o.w));const b=C.mu/C.h*o.grad*.01*(j===2?1:.5);const shift=C.k*v[j]+b*p[j];for(const sign of [1,-1])rr.push(C.G/2*s/(1+s+4*(o.delta-sign*shift/C.G)**2));}return rr}
+function step(a,o,dt,r){if(a.escaped)return;let rr=rates(a.p,a.v,o),sum=rr.reduce((x,y)=>x+y,0);for(let j=0;j<3;j++){let dv=C.vr*(rr[2*j]-rr[2*j+1])*dt;if(o.noise)dv+=C.vr*Math.sqrt((rr[2*j]+rr[2*j+1]+sum/3)*dt)*normal(r);if(o.gravity&&j===2)dv-=9.80665*dt;a.v[j]+=dv;a.p[j]+=a.v[j]*dt;}a.age+=dt;const rad=Math.hypot(...a.p),speed=Math.hypot(...a.v);a.dwell=(rad<.001&&speed<.6)?a.dwell+dt:0;a.captured=a.dwell>=.01;if(rad>.020)a.escaped=true;}
+function atom(p,v){return {p,v,age:0,dwell:0,captured:false,escaped:false}}
+function stats(aa){let a=aa.filter(a=>!a.escaped);if(!a.length)return {n:0,T:0,rms:0};let mean=[0,1,2].map(j=>a.reduce((s,a)=>s+a.v[j],0)/a.length);return {n:a.length,T:C.m/C.kB*a.reduce((s,a)=>s+a.v.reduce((q,v,j)=>q+(v-mean[j])**2,0),0)/(3*a.length),rms:Math.sqrt(a.reduce((s,a)=>s+a.p.reduce((q,v)=>q+v*v,0),0)/a.length)}}
+root.MOT={C,rng,normal,rates,step,atom,stats};if(typeof module!=='undefined')module.exports=root.MOT;
+})(typeof window!=='undefined'?window:globalThis);
+</script>
+<script>
+'use strict';
+const $=id=>document.getElementById(id),{C,rng,normal,rates,step,atom,stats}=MOT;
+const SERIF='"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua","Songti TC","Noto Serif TC","Source Han Serif TC",serif';
+const TAU=Math.PI*2,DT=5e-6,dopplerLimit=C.h*C.G/(2*C.kB),HOME={cloud:.009,incoming:.013},AX=['#4b7ca5','#4a9391','#8471aa'];
+const IC={pause:'<svg viewBox="0 0 12 12"><rect x="2.5" y="2" width="2.4" height="8" rx=".5"/><rect x="7.1" y="2" width="2.4" height="8" rx=".5"/></svg>',play:'<svg viewBox="0 0 12 12"><path d="M3 1.8l7.2 4.2L3 10.2z"/></svg>'};
+const S={mode:'cloud',plane:'xz',span:5,vectors:'B',pace:.001,speedMax:3,auto:true,view:'persp'};
+const cam={yaw:.65,pitch:.42,scale:.009,ty:.65,tp:.42,ts:.009};
+let lastStats={n:0,T:0,rms:0},atoms=[],random=rng(),t=0,paused=false,selected=0,trail=[],history=[],last=0,sample=0,projected=[],budget=0,fieldCache=null,lastKind=null,probeUV=[0,0],sliceBounds=null;
+const dist=$('dist'),dc=dist.getContext('2d'),scene=$('scene'),ctx=scene.getContext('2d'),plot=$('plot'),pc=plot.getContext('2d'),slice=$('sliceCanvas'),sc=slice.getContext('2d');
+const minus=s=>String(s).replace(/-/g,'−');
+const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
+function options(){return {delta:+$('delta').value,s:+$('sat').value,grad:+$('grad').value,w:+$('waist').value/1000,noise:$('noise').checked,gravity:$('gravity').checked}}
+function refT(d){return C.h*C.G/(4*C.kB)*(1+4*d*d)/(-2*d)}
+const SUP={'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+function sci(n){let e=Math.floor(Math.log10(Math.abs(n))),m=n/10**e;if(Math.abs(+m.toFixed(1))>=10){m/=10;e++}return m.toFixed(1)+'×10'+String(e).replace(/./g,c=>SUP[c])}
+function decimals(a,sig=3){return a>0?clamp(sig-1-Math.floor(Math.log10(a)),0,3):0}
+function fmt(n,keep=false){if(!Number.isFinite(n))return '—';if(n===0)return '0';const a=Math.abs(n);if(a<5e-4||a>=1e5)return minus(sci(n));let s=n.toFixed(decimals(a));if(!keep&&s.includes('.'))s=s.replace(/\.?0+$/,'');return minus(s==='-0'?'0':s)}
+function fixedList(v){const m=Math.max(...v.map(Math.abs));if(!(m>0))return v.map(()=>'0');if(m<5e-4)return v.map(fmt);const d=decimals(m);return v.map(x=>{const s=x.toFixed(d);return minus(/^-0\.?0*$/.test(s)?s.slice(1):s)})}
+function vec(v,u){return '('+fixedList(v).join(', ')+')'+(u?' '+u:'')}
+function lenUnit(){return S.span<=1?['μm',1e6]:['mm',1e3]}
+function fill(el){const p=(el.value-el.min)/(el.max-el.min)*100;el.style.setProperty('--p',p+'%');el.style.setProperty('--a',Math.min(p,50)+'%');el.style.setProperty('--b',Math.max(p,50)+'%')}
+function labels(){const v=id=>+$(id).value;$('deltaOut').textContent=minus(v('delta').toFixed(2))+' Γ';$('satOut').textContent=v('sat').toFixed(3);$('gradOut').textContent=v('grad').toFixed(1)+' G/cm';$('waistOut').textContent=v('waist').toFixed(1)+' mm';$('atomNumberOut').textContent=v('atomNumber')+' 顆';$('initialOut').textContent=v('initial')+' mK';$('speedOut').textContent=v('speed').toFixed(1)+' m/s';$('reference').textContent=fmt(refT(v('delta'))*1e6)+' μK';document.querySelectorAll('input[type=range]').forEach(fill)}
+function setPaused(p){paused=p;$('pause').innerHTML=(p?IC.play:IC.pause)+(p?'繼續':'暫停');$('pause').classList.toggle('on',p)}
+function reset(){random=rng(42);t=0;sample=0;budget=0;trail=[];history=[];selected=0;atoms=[];const v=Math.sqrt(C.kB*(+$('initial').value/1000)/C.m),n=+$('atomNumber').value;for(let i=0;i<n;i++){if(S.mode==='cloud')atoms.push(atom([0,1,2].map(()=>.0015*normal(random)),[0,1,2].map(()=>v*normal(random))));else atoms.push(atom([-.008-.001*random(),.00035*normal(random),.00035*normal(random)],[+$('speed').value+.08*normal(random),.05*normal(random),.05*normal(random)]));}setPaused(false);labels();measure()}
+function tempText(T){return T<1e-3?fmt(T*1e6,true)+' μK':fmt(T*1e3,true)+' mK'}
+function measure(){const s=stats(atoms);lastStats=s;history.push([t,s.T]);if(history.length>1800)history.shift();$('time').textContent=(t*1000).toFixed(S.pace<.005?2:1)+' ms';$('count').innerHTML=s.n+'<small> / '+atoms.length+'</small>';$('temp').innerHTML=s.n>1?tempText(s.T).replace(' ','<small> ')+'</small>':'—';$('dopplerRatio').innerHTML=s.n>1?fmt(s.T/dopplerLimit,true)+' T<sub>D</sub>':'';$('radius').innerHTML=s.n?fmt(s.rms*1000,true)+'<small> mm</small>':'—';$('escaped').textContent=atoms.length-s.n;const a=atoms[selected];$('track').textContent=!a?'':a.escaped?'追蹤粒子已逃逸':'追蹤粒子  |v| '+fmt(Math.hypot(...a.v))+' m/s · r '+fmt(Math.hypot(...a.p)*1000)+' mm'+(a.captured?' · 已捕獲':'')}
+function bindSeg(id,fn){const el=$(id);el.addEventListener('click',e=>{const b=e.target.closest('button[data-v]');if(!b)return;el.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));fn(b.dataset.v)})}
+function setSeg(id,v){$(id).querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.v===v))}
+function aim(y,p){cam.ty=cam.yaw+(((y-cam.yaw)%TAU+3*Math.PI)%TAU-Math.PI);cam.tp=p}
+function setView(v){S.view=v;setSeg('viewSeg',v)}
+function updateFocus(){const z=cam.ts<.003;$('focus').textContent=z?'回到全景':'放大中心';$('focus').classList.toggle('on',z)}
+function faceView(){const p=S.plane;if(p==='xz')aim(0,0);else if(p==='xy')aim(0,Math.PI/2);else aim(-Math.PI/2,0);cam.ts=S.span/1000*1.2;setView('face');updateFocus()}
+function perspView(){aim(.65,.42);setView('persp')}
+function toggleFocus(){cam.ts=cam.ts>.003?.0008:HOME[S.mode];updateFocus()}
+function projection(p,W,H){const x=Math.cos(cam.yaw)*p[0]-Math.sin(cam.yaw)*p[1],y=Math.sin(cam.yaw)*p[0]+Math.cos(cam.yaw)*p[1],z=p[2],depth=Math.cos(cam.pitch)*y-Math.sin(cam.pitch)*z,up=Math.sin(cam.pitch)*y+Math.cos(cam.pitch)*z,f=Math.min(W,H)*.43/cam.scale;return [W/2+x*f,H/2-up*f,depth]}
+function line(a,b,color,W,H,width=1){a=projection(a,W,H);b=projection(b,W,H);ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke()}
+function resize(canvas,context){const b=canvas.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);if(canvas.width!==Math.round(b.width*d)||canvas.height!==Math.round(b.height*d)){canvas.width=Math.round(b.width*d);canvas.height=Math.round(b.height*d)}context.setTransform(d,0,0,d,0,0);return [b.width,b.height]}
+const V0=.05;
+function speedX(v){return Math.min(1,Math.log1p(v/V0)/Math.log1p(S.speedMax/V0))}
+function speedColor(v){return `hsl(${220*(1-speedX(v))} 95% 65%)`}
+function speedLegend(){const ticks=[[0,'0']];for(const c of [.03,.1,.3,1,3,10]){const x=speedX(c);if(c<S.speedMax&&x-ticks[ticks.length-1][0]>=.16&&1-x>=.14)ticks.push([x,String(c)])}ticks.push([1,'≥ '+S.speedMax]);$('speedTicks').innerHTML=ticks.map(([x,l])=>`<span style="left:${(x*100).toFixed(2)}%">${l}</span>`).join('')}
+function drawDist(){const[W,H]=resize(dist,dc);dc.clearRect(0,0,W,H);const live=atoms.filter(a=>!a.escaped),n=live.length,T=lastStats.T;if(!n){$('distLabel').textContent='';return}
+const NB=32,bins=new Array(NB).fill(0),L=Math.log1p(S.speedMax/V0);let over=0;for(const a of live){const v=Math.hypot(...a.v);if(v>=S.speedMax){over++;continue}bins[Math.min(NB-1,Math.floor(speedX(v)*NB))]++}
+const hist=bins.map(c=>c/n*NB),curve=[];if(n>1&&T>0){const s2=C.kB*T/C.m;for(let i=0;i<=120;i++){const x=i/120,v=V0*Math.expm1(x*L),f=Math.sqrt(2/Math.PI)*v*v/(s2*Math.sqrt(s2))*Math.exp(-v*v/(2*s2));curve.push(f*V0*L*Math.exp(x*L))}}
+const top=Math.max(1e-9,...hist,...curve)*1.08,y=d=>H-1-d/top*(H-3),bw=W/NB;
+for(let i=0;i<NB;i++)if(bins[i]){dc.fillStyle=speedColor(V0*Math.expm1((i+.5)/NB*L));dc.globalAlpha=.55;dc.fillRect(i*bw+.5,y(hist[i]),bw-1,H-1-y(hist[i]))}dc.globalAlpha=1;
+dc.strokeStyle='rgba(152,165,184,.35)';dc.lineWidth=1;dc.beginPath();dc.moveTo(0,H-.5);dc.lineTo(W,H-.5);dc.stroke();
+if(curve.length){dc.strokeStyle='#e4e9f1';dc.lineWidth=1.3;dc.beginPath();curve.forEach((c,i)=>{const X=i/120*W;if(i)dc.lineTo(X,y(c));else dc.moveTo(X,y(c))});dc.stroke()}
+$('distLabel').textContent=(curve.length?'MB · '+tempText(T):'')+(over?' · '+over+' 超出':'')}
+function draw(){const[W,H]=resize(scene,ctx);ctx.clearRect(0,0,W,H);drawSpatial(W,H);const s=cam.scale,ext=s*1.2;for(let n=-4;n<=4;n++){const d=n*s/4;line([-s,d,0],[s,d,0],'#1b2533',W,H);line([d,-s,0],[d,s,0],'#1b2533',W,H)}
+ctx.font='italic 15px '+SERIF;for(let j=0;j<3;j++){const a=[0,0,0],b=[0,0,0];a[j]=-ext;b[j]=ext;line(a,b,AX[j],W,H,1.6);const q=projection(b,W,H);ctx.fillStyle='#aebbd0';ctx.fillText('xyz'[j],q[0]+6,q[1]+4)}
+if($('showCoils').checked&&s>.003)for(const z of [-.005,.005]){ctx.beginPath();for(let n=0;n<=80;n++){const a=n*Math.PI/40,q=projection([.007*Math.cos(a),.007*Math.sin(a),z],W,H);if(n===0)ctx.moveTo(q[0],q[1]);else ctx.lineTo(q[0],q[1])}ctx.strokeStyle='#7a5c45';ctx.lineWidth=2;ctx.stroke()}
+const pp=projection(coordinate(...probeUV),W,H);ctx.strokeStyle='rgba(255,255,255,.75)';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pp[0]-6,pp[1]);ctx.lineTo(pp[0]+6,pp[1]);ctx.moveTo(pp[0],pp[1]-6);ctx.lineTo(pp[0],pp[1]+6);ctx.stroke();
+if(trail.length>1){ctx.beginPath();trail.forEach((p,i)=>{const q=projection(p,W,H);if(i)ctx.lineTo(q[0],q[1]);else ctx.moveTo(q[0],q[1])});ctx.strokeStyle='#f4ca82';ctx.lineWidth=1.5;ctx.stroke()}
+projected=atoms.map((a,i)=>({a,i,q:projection(a.p,W,H)})).filter(p=>!p.a.escaped).sort((a,b)=>a.q[2]-b.q[2]);for(const {i,q} of projected){ctx.beginPath();ctx.arc(q[0],q[1],i===selected?4.5:2.1,0,TAU);ctx.fillStyle=speedColor(Math.hypot(...atoms[i].v));ctx.fill();if(i===selected){ctx.beginPath();ctx.arc(q[0],q[1],9,0,TAU);ctx.strokeStyle='#ffd283aa';ctx.lineWidth=1.2;ctx.stroke()}}
+const f=Math.min(W,H)*.43/s,e10=10**Math.floor(Math.log10(s/2)),bb=s/2/e10,bar=(bb>=5?5:bb>=2?2:1)*e10;ctx.strokeStyle='#bccbdd';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(W-24-bar*f,H-26);ctx.lineTo(W-24,H-26);ctx.stroke();ctx.fillStyle='#bccbdd';ctx.font='13px '+SERIF;ctx.textAlign='right';ctx.fillText(bar>=1e-3?fmt(bar*1e3)+' mm':fmt(bar*1e6)+' μm',W-24,H-34);ctx.textAlign='left'}
+function tempLabel(e){return e<-3?Math.round(10**(e+6))+' μK':e<0?Math.round(10**(e+3))+' mK':Math.round(10**e)+' K'}
+function drawPlot(){const[W,H]=resize(plot,pc);pc.clearRect(0,0,W,H);const data=history.filter(x=>x[1]>0),max=Math.max(.001,...data.map(x=>x[1])),hi=Math.ceil(Math.log10(max)),lo=Math.min(-5,hi-3),left=56,right=W-6,top=6,bottom=H-18;pc.font='11px '+SERIF;pc.lineWidth=1;for(let e=lo;e<=hi;e++){const y=bottom-(e-lo)/(hi-lo)*(bottom-top);pc.strokeStyle='#1c2531';pc.beginPath();pc.moveTo(left,y);pc.lineTo(right,y);pc.stroke();pc.fillStyle='#66748a';pc.textAlign='right';pc.fillText(tempLabel(e),left-8,y+4)}
+const maxT=Math.max(.01,t),minT=history.length?history[0][0]:0,xx=v=>left+(v-minT)/(maxT-minT||1)*(right-left),yy=v=>bottom-(Math.log10(Math.max(10**lo,v))-lo)/(hi-lo)*(bottom-top);
+pc.setLineDash([4,4]);pc.strokeStyle='#8b947e';pc.beginPath();pc.moveTo(left,yy(refT(options().delta)));pc.lineTo(right,yy(refT(options().delta)));pc.stroke();pc.setLineDash([1.5,3]);pc.strokeStyle='#c98f8f';pc.beginPath();pc.moveTo(left,yy(dopplerLimit));pc.lineTo(right,yy(dopplerLimit));pc.stroke();pc.setLineDash([]);
+pc.strokeStyle='#9de8dc';pc.lineWidth=1.6;pc.beginPath();data.forEach((p,i)=>{if(i)pc.lineTo(xx(p[0]),yy(p[1]));else pc.moveTo(xx(p[0]),yy(p[1]))});pc.stroke();pc.fillStyle='#66748a';pc.textAlign='left';pc.fillText((minT*1000).toFixed(0)+' ms',left,H-4);pc.textAlign='right';pc.fillText((maxT*1000).toFixed(0)+' ms',right,H-4);pc.textAlign='left'}
+const fieldDefs={
+B:['磁場大小 |B|','G',false,''],
+Bx:['磁場 Bx','G',true,'有正負號的磁場 x 分量。'],By:['磁場 By','G',true,'有正負號的磁場 y 分量。'],Bz:['磁場 Bz','G',true,'有正負號的磁場 z 分量。'],
+Isum:['ΣI / Isat','',false,'ΣI / Isat = 2(sx + sy + sz)。僅顯示強度加總，力仍採獨立光束模型。'],
+Ix:['單束 x 光強','',false,'+x 與 −x 各有相同強度 sx = s₀ exp[−2(y² + z²)/w²]。'],
+Iy:['單束 y 光強','',false,'+y 與 −y 各有相同強度 sy = s₀ exp[−2(x² + z²)/w²]。'],
+Iz:['單束 z 光強','',false,'+z 與 −z 各有相同強度 sz = s₀ exp[−2(x² + y²)/w²]。'],
+Zx:['Zeeman 頻移 x','MHz',true,'原受力模型的 βx x / 2π，含偏振約定，並非直接取磁場 Bx 的符號。'],
+Zy:['Zeeman 頻移 y','MHz',true,'原受力模型的 βy y / 2π，含偏振約定，並非直接取磁場 By 的符號。'],
+Zz:['Zeeman 頻移 z','MHz',true,'原受力模型的 βz z / 2π。'],
+detx:['+x 有效失諧','Γ',true,'固定 v = 0，Δeff/Γ = δ/Γ − βx x/Γ。0 表示此模型中的局部共振。'],
+dety:['+y 有效失諧','Γ',true,'固定 v = 0，Δeff/Γ = δ/Γ − βy y/Γ。0 表示此模型中的局部共振。'],
+detz:['+z 有效失諧','Γ',true,'固定 v = 0，Δeff/Γ = δ/Γ − βz z/Γ。0 表示此模型中的局部共振。'],
+R:['總散射率','10⁶ / s',false,'六束光散射率之和，固定 v = 0。移動原子的數值另含都卜勒頻移。'],
+A:['平均加速度','m/s²',false,'|F/m + g|，固定 v = 0，同步使用重力開關，沒有包含隨機反沖。'],
+N:['反沖 RMS','m/s',false,'√⟨|Δv|²⟩ = vr √(2 Rtotal Δt)，Δt = 5 μs，固定 v = 0。關閉反沖時為 0。']};
+function axes(){return S.plane==='xy'?[0,1,2]:S.plane==='yz'?[1,2,0]:[0,2,1]}
+function coordinate(u,v){const ax=axes(),p=[0,0,0];p[ax[0]]=u;p[ax[1]]=v;p[ax[2]]=(+$('offset').value||0)/1000;return p}
+function quantities(p,o){const B=[-.5*p[0],-.5*p[1],p[2]].map(x=>x*o.grad*100),r2=p.reduce((s,x)=>s+x*x,0),I=p.map(x=>o.s*Math.exp(-2*(r2-x*x)/(o.w*o.w))),Z=p.map((x,j)=>C.mu/C.h*o.grad*.01*(j===2?1:.5)*x),rr=rates(p,[0,0,0],o),R=rr.reduce((s,x)=>s+x,0),A=[0,1,2].map(j=>C.vr*(rr[2*j]-rr[2*j+1])-(o.gravity&&j===2?9.80665:0));return {B,I,Z,R,A,N:o.noise?C.vr*Math.sqrt(2*R*5e-6):0}}
+function valueOf(q,k,o){if(k==='B')return Math.hypot(...q.B);if(k[0]==='B')return q.B['xyz'.indexOf(k[1])];if(k==='Isum')return 2*q.I.reduce((s,x)=>s+x,0);if(k[0]==='I')return q.I['xyz'.indexOf(k[1])];if(k[0]==='Z')return q.Z['xyz'.indexOf(k[1])]/(2*Math.PI*1e6);if(k.startsWith('det'))return o.delta-q.Z['xyz'.indexOf(k[3])]/C.G;if(k==='R')return q.R/1e6;if(k==='A')return Math.hypot(...q.A);return q.N}
+function colorAt(t,signed){t=clamp(t,0,1);const stops=signed?[[48,126,224],[213,222,227],[232,100,63]]:[[20,43,84],[33,105,132],[45,168,144],[212,199,112],[255,227,170]];const f=t*(stops.length-1),i=Math.min(stops.length-2,Math.floor(f)),a=f-i;return 'rgb('+stops[i].map((x,j)=>Math.round(x*(1-a)+stops[i+1][j]*a)).join(',')+')'}
+function colorMax(){return Math.max(1e-9,+$('fieldMax').value||1)}
+function cacheField(){const o=options(),k=$('fieldKind').value,key=JSON.stringify([o,k,S.plane,$('offset').value,S.span]);if(!fieldCache||fieldCache.key!==key){const extent=S.span/1000,N=40,st=2*extent/N,cells=[];for(let i=0;i<N;i++)for(let j=0;j<N;j++){const u=-extent+(i+.5)*st,v=-extent+(j+.5)*st;cells.push({u,v,value:valueOf(quantities(coordinate(u,v),o),k,o)})}fieldCache={key,extent,N,step:st,cells,ck:null};if(S.auto||k!==lastKind){const m=Math.max(...cells.map(x=>Math.abs(x.value)),Math.abs(valueOf(quantities(coordinate(0,0),o),k,o)));$('fieldMax').value=m>1e-12?Number((m*1.03).toPrecision(3)):1}lastKind=k}
+const m=colorMax(),ck=m+k;if(fieldCache.ck!==ck){const signed=fieldDefs[k][2];for(const c of fieldCache.cells)c.color=colorAt(signed?.5+.5*c.value/m:c.value/m,signed);fieldCache.ck=ck;updateFieldLegend(k,m)}return fieldCache}
+function updateFieldLegend(k,m){const d=fieldDefs[k];$('fieldBar').style.background=d[2]?'linear-gradient(90deg,rgb(48,126,224),rgb(213,222,227),rgb(232,100,63))':'linear-gradient(90deg,#142b54,#216984,#2da890,#d4c770,#ffe3aa)';$('fieldLow').textContent=d[2]?fmt(-m):'0';$('fieldMiddle').textContent=d[2]?'0':fmt(m/2);$('fieldHigh').textContent=fmt(m)+(d[1]?' '+d[1]:'');$('fieldInfo').textContent=d[3];$('pValName').textContent=d[0]}
+function offsetLabel(){const[u,k]=lenUnit();$('offsetOut').innerHTML='<i>'+'xyz'[axes()[2]]+'</i> = '+fmt(+$('offset').value*k/1e3)+' '+u}
+function setOffsetRange(){const o=$('offset');o.min=-S.span;o.max=S.span;o.step=S.span/200;o.value=clamp(+o.value,-S.span,S.span);fill(o);offsetLabel()}
+function vectorArrow(context,x,y,dx,dy){const n=Math.hypot(dx,dy);if(n<1e-10)return;dx/=n;dy/=n;const len=12;context.beginPath();context.moveTo(x-dx*len*.5,y-dy*len*.5);context.lineTo(x+dx*len*.5,y+dy*len*.5);context.lineTo(x+dx*(len*.5-4)-dy*3,y+dy*(len*.5-4)+dx*3);context.moveTo(x+dx*len*.5,y+dy*len*.5);context.lineTo(x+dx*(len*.5-4)+dy*3,y+dy*(len*.5-4)-dx*3);context.stroke()}
+function drawSpatial(W,H){const c=cacheField(),half=c.step/2;if($('showField').checked){ctx.globalAlpha=.6;for(const cell of c.cells){ctx.beginPath();[[-1,-1],[1,-1],[1,1],[-1,1]].forEach(([a,b],i)=>{const q=projection(coordinate(cell.u+a*half,cell.v+b*half),W,H);if(i)ctx.lineTo(q[0],q[1]);else ctx.moveTo(q[0],q[1])});ctx.closePath();ctx.fillStyle=cell.color;ctx.fill()}ctx.globalAlpha=1}
+if(S.vectors!=='none'){ctx.strokeStyle='rgba(227,235,244,.72)';ctx.lineWidth=1;const o=options(),ax=axes();for(let i=-3;i<=3;i++)for(let j=-3;j<=3;j++){const p=coordinate(i*c.extent/4,j*c.extent/4),v=quantities(p,o)[S.vectors],n=Math.hypot(v[ax[0]],v[ax[1]]);if(n<1e-10)continue;const end=[...p];end[ax[0]]+=v[ax[0]]/n*c.extent*.1;end[ax[1]]+=v[ax[1]]/n*c.extent*.1;const a=projection(p,W,H),b=projection(end,W,H);vectorArrow(ctx,a[0],a[1],b[0]-a[0],b[1]-a[1])}}}
+function drawSlice(c){const[W,H]=resize(slice,sc);sc.clearRect(0,0,W,H);const padL=26,padB=22,padT=4,padR=4,size=Math.min(W-padL-padR,H-padT-padB),left=padL+(W-padL-padR-size)/2,top=padT,cs=size/c.N,ax=axes();sliceBounds={left,top,size,extent:c.extent};
+for(const cell of c.cells){const x=left+(cell.u/c.extent+1)*size/2,y=top+(1-cell.v/c.extent)*size/2;sc.fillStyle=cell.color;sc.fillRect(x-cs/2,y-cs/2,cs+.6,cs+.6)}
+sc.lineWidth=1;sc.strokeStyle='rgba(200,214,231,.3)';sc.beginPath();sc.moveTo(left,top+size/2);sc.lineTo(left+size,top+size/2);sc.moveTo(left+size/2,top);sc.lineTo(left+size/2,top+size);sc.stroke();sc.strokeStyle='rgba(200,214,231,.22)';sc.strokeRect(left+.5,top+.5,size-1,size-1);
+if(S.vectors!=='none'){sc.strokeStyle='rgba(255,255,255,.75)';const o=options();for(let i=-3;i<=3;i++)for(let j=-3;j<=3;j++){const v=quantities(coordinate(i*c.extent/4,j*c.extent/4),o)[S.vectors];vectorArrow(sc,left+size/2+i*size/8,top+size/2-j*size/8,v[ax[0]],-v[ax[1]])}}
+const e=fmt(c.extent*1000);sc.fillStyle='#8390a4';sc.font='11.5px '+SERIF;sc.textAlign='left';sc.fillText('−'+e,left,top+size+15);sc.textAlign='right';sc.fillText('+'+e+' mm',left+size,top+size+15);sc.textAlign='center';sc.font='italic 13px '+SERIF;sc.fillStyle='#aebbd0';sc.fillText('xyz'[ax[0]],left+size/2,top+size+16);sc.fillText('xyz'[ax[1]],left-14,top+size/2+4);sc.font='11.5px '+SERIF;sc.fillStyle='#8390a4';sc.fillText('+',left-14,top+10);sc.fillText('−',left-14,top+size);sc.textAlign='left';
+const px=left+(probeUV[0]/c.extent+1)*size/2,py=top+(1-probeUV[1]/c.extent)*size/2;if(px>=left&&px<=left+size&&py>=top&&py<=top+size){sc.strokeStyle='rgba(255,255,255,.35)';sc.beginPath();sc.moveTo(left,py);sc.lineTo(left+size,py);sc.moveTo(px,top);sc.lineTo(px,top+size);sc.stroke();sc.strokeStyle='#fff';sc.lineWidth=1.4;sc.beginPath();sc.arc(px,py,5,0,TAU);sc.stroke()}}
+function updateProbe(){const o=options(),k=$('fieldKind').value,p=coordinate(...probeUV),q=quantities(p,o),d=fieldDefs[k];const[lu,lk]=lenUnit();$('pPos').textContent=vec(p.map(x=>x*lk),lu);$('pVal').textContent=fmt(valueOf(q,k,o))+(d[1]?' '+d[1]:'');$('pB').textContent=vec(q.B,'G');$('pBm').textContent=fmt(Math.hypot(...q.B))+' G';$('pS').textContent=fixedList(q.I).join(', ');$('pI').textContent=fmt(2*q.I.reduce((s,x)=>s+x,0));$('pR').textContent=fmt(q.R/1e6)+' × 10⁶ / s';$('pA').textContent=vec(q.A,'m/s²');$('pN').textContent=fmt(q.N)+' m/s'}
+function pointProbe(e){if(!sliceBounds)return;const r=slice.getBoundingClientRect(),{left,top,size,extent}=sliceBounds,x=clamp(e.clientX-r.left-left,0,size),y=clamp(e.clientY-r.top-top,0,size);probeUV=[(2*x/size-1)*extent,(1-2*y/size)*extent]}
+slice.addEventListener('pointermove',pointProbe);slice.addEventListener('pointerdown',e=>{slice.setPointerCapture(e.pointerId);pointProbe(e)});
+bindSeg('modeSeg',v=>{S.mode=v;document.body.dataset.mode=v;cam.ts=HOME[v];updateFocus();reset()});
+bindSeg('paceSeg',v=>S.pace=+v);
+bindSeg('planeSeg',v=>{S.plane=v;probeUV=[0,0];offsetLabel();if(S.view==='face')faceView()});
+bindSeg('spanSeg',v=>{S.span=+v;probeUV=probeUV.map(x=>clamp(x,-S.span/1000,S.span/1000));setOffsetRange();if(S.view==='face')faceView()});
+bindSeg('vecSeg',v=>S.vectors=v);
+bindSeg('speedSeg',v=>{S.speedMax=+v;speedLegend()});
+bindSeg('viewSeg',v=>v==='face'?faceView():perspView());
+$('focus').onclick=toggleFocus;
+$('pause').onclick=()=>setPaused(!paused);
+$('reset').onclick=reset;
+for(const id of ['delta','sat','grad','waist'])$(id).addEventListener('input',labels);
+$('atomNumber').addEventListener('input',reset);
+for(const id of ['initial','speed']){$(id).addEventListener('input',labels);$(id).addEventListener('change',reset)}
+$('offset').addEventListener('input',()=>{fill($('offset'));offsetLabel()});
+$('offset').addEventListener('dblclick',()=>{$('offset').value=0;fill($('offset'));offsetLabel()});
+function setAuto(v){S.auto=v;$('autoColor').classList.toggle('on',v);if(v)fieldCache=null}
+$('fieldMax').addEventListener('input',()=>setAuto(false));
+$('autoColor').onclick=()=>setAuto(!S.auto);
+$('aboutBtn').onclick=()=>$('about').showModal();
+$('about').addEventListener('click',e=>{if(e.target===$('about'))$('about').close()});
+let down=null,moved=false,pinch=null,gesture=false;const ptrs=new Map();
+function pinchDist(){const[a,b]=[...ptrs.values()];return Math.hypot(a.x-b.x,a.y-b.y)||1}
+scene.onpointerdown=e=>{scene.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});if(ptrs.size>=2){if(!pinch)pinch={d:pinchDist(),ts:cam.ts};gesture=true;down=null;scene.classList.remove('drag');return}if(gesture)return;down={x:e.clientX,y:e.clientY,sx:e.clientX,sy:e.clientY};moved=false;scene.classList.add('drag')};
+scene.onpointermove=e=>{if(ptrs.has(e.pointerId))ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pinch&&ptrs.size>=2){cam.ts=cam.scale=clamp(pinch.ts*pinch.d/pinchDist(),.00015,.04);updateFocus();return}if(!down)return;const dx=e.clientX-down.x,dy=e.clientY-down.y;down.x=e.clientX;down.y=e.clientY;if(!moved&&Math.hypot(e.clientX-down.sx,e.clientY-down.sy)>3){moved=true;setView('free')}if(moved){cam.yaw+=dx*.007;cam.pitch=clamp(cam.pitch+dy*.007,-Math.PI/2,Math.PI/2);cam.ty=cam.yaw;cam.tp=cam.pitch}};
+function pointerEnd(e){ptrs.delete(e.pointerId);if(ptrs.size<2)pinch=null;if(!ptrs.size){gesture=false;scene.classList.remove('drag')}}
+scene.onpointerup=e=>{if(down&&!moved&&!gesture){const b=scene.getBoundingClientRect();let best=null,dist=18;for(const p of projected){const d=Math.hypot(p.q[0]-(e.clientX-b.left),p.q[1]-(e.clientY-b.top));if(d<dist){dist=d;best=p}}if(best){selected=best.i;trail=[];measure()}}down=null;pointerEnd(e)};
+scene.onpointercancel=e=>{down=null;pointerEnd(e)};
+scene.addEventListener('wheel',e=>{e.preventDefault();cam.ts=clamp(cam.ts*Math.exp(e.deltaY*.0015),.00015,.04);updateFocus()},{passive:false});
+addEventListener('keydown',e=>{if(e.metaKey||e.ctrlKey||e.altKey||$('about').open)return;const tg=e.target,tag=tg.tagName;if(tag==='SELECT'||tag==='BUTTON'||tag==='TEXTAREA'||(tag==='INPUT'&&tg.type!=='range'))return;if(e.code==='Space'){e.preventDefault();setPaused(!paused)}else if(e.key==='r'||e.key==='R')reset();else if(e.key==='f'||e.key==='F')toggleFocus()});
+function frame(now){const el=Math.min(.06,(now-last)/1000||0);last=now;if(!paused){budget+=el*S.pace;const o=options(),n=Math.min(1200,Math.floor(budget/DT));budget-=n*DT;for(let i=0;i<n;i++){for(const a of atoms)step(a,o,DT,random);t+=DT;if(t-sample>=1e-4){sample=t;const s=atoms[selected];if(s&&!s.escaped)trail.push([...s.p]);if(trail.length>150)trail.shift()}}if(n)measure()}else budget=0;
+const k=1-Math.pow(.82,el*60||1);cam.yaw+=(cam.ty-cam.yaw)*k;cam.pitch+=(cam.tp-cam.pitch)*k;cam.scale*=Math.pow(cam.ts/cam.scale,k);
+draw();drawDist();drawSlice(fieldCache);drawPlot();updateProbe();requestAnimationFrame(frame)}
+$('dopplerLimit').textContent=fmt(dopplerLimit*1e6)+' μK';
+setOffsetRange();speedLegend();reset();requestAnimationFrame(frame);
+if(document.modelContext?.registerTool){const lifecycle=new AbortController();window.addEventListener('pagehide',()=>lifecycle.abort(),{once:true});try{Promise.resolve(document.modelContext.registerTool({name:'read_mot_simulation',description:'Read current cesium MOT parameters, time, atom counts, and velocity-variance temperature.',inputSchema:{type:'object',properties:{},additionalProperties:false},annotations:{readOnlyHint:true},execute(){return {mode:S.mode,timeSeconds:t,parameters:options(),...stats(atoms),escaped:atoms.filter(a=>a.escaped).length}}},{signal:lifecycle.signal})).catch(()=>{})}catch{}}
+</script>
+</body></html>
