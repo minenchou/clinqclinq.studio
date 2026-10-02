@@ -17,6 +17,8 @@ a{color:var(--acc)}
 .brand h1 em{font-weight:400;color:var(--acc)}
 .brand span{color:var(--dim);font-size:13px;white-space:nowrap}
 .spacer{flex:1}
+.tr{display:contents}
+#aboutBtn{order:1}
 .pace{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--dim)}
 .seg{display:inline-flex;border:1px solid var(--line2);border-radius:7px;padding:2px;gap:2px;background:var(--bg)}
 .seg button{border:0;background:none;color:var(--muted);padding:4px 11px;border-radius:5px;cursor:pointer;font-size:13px;white-space:nowrap;transition:background .15s,color .15s}
@@ -88,7 +90,7 @@ select{width:100%;background:var(--raise);border:1px solid var(--line2);border-r
 .m span{display:block;font-size:12px;color:var(--dim)}
 .m strong{font-size:21px;font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
 .m strong small{font-size:12px;color:var(--muted);font-weight:400}
-.m em{font-style:normal;font-size:12px;color:var(--acc);margin-left:6px;white-space:nowrap}
+.m em{display:block;font-style:normal;font-size:12px;line-height:1.3;color:var(--acc);white-space:nowrap}
 .plotbox{display:flex;flex-direction:column;min-width:0;min-height:0}
 .plothead{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 14px;font-size:12px;color:var(--dim);margin-bottom:4px}
 .plothead i{display:inline-block;width:16px;border-top:1px dashed #8b947e;vertical-align:middle;margin:0 5px 0 12px}
@@ -117,18 +119,18 @@ dialog::backdrop{background:rgba(3,5,9,.62);-webkit-backdrop-filter:blur(3px);ba
 .eqm math{font-family:"STIX Two Math","Cambria Math","Latin Modern Math",math;font-size:17px;color:var(--acc);margin:4px 0}
 .eqn{flex:none;color:var(--muted);font-size:14px;font-variant-numeric:tabular-nums;min-width:3.6em;text-align:right}
 @media(max-width:1240px){.app{grid-template-columns:256px minmax(0,1fr);grid-template-areas:"left center" "right right";height:auto}.left,.center{height:calc(100dvh - var(--hh) - var(--cqbar))}.right{border-left:0;border-top:1px solid var(--line);display:grid;grid-template-columns:minmax(0,420px) minmax(0,1fr);gap:32px;padding:4px 24px 28px;overflow:visible}.right section{border-bottom:0}}
-@media(max-width:780px){.top{height:auto;flex-wrap:wrap;padding:10px 14px;gap:10px}.brand span,.spacer{display:none}.app{grid-template-columns:1fr;grid-template-areas:"center" "left" "right";height:auto}.left,.center{height:auto}.left{border-right:0;border-top:1px solid var(--line)}#stage{flex:none;height:62vh;min-height:340px}.strip{grid-template-columns:1fr;height:auto}#plot{flex:none;height:120px}.right{grid-template-columns:1fr;gap:0;padding:4px 16px 28px}.hud{top:52px;left:14px}.hud .t{font-size:22px}.hud .tip{display:none}.viewbar{top:10px;right:10px;left:10px;justify-content:space-between}.speedkey{left:14px;width:190px}.eqm math{font-size:15px}.eqn{font-size:12.5px;min-width:3em}.dlg{padding:18px 18px 22px}}
+@media(max-width:780px){.top{height:auto;flex-direction:column;align-items:stretch;padding:10px 14px;gap:8px}.brand span{display:none}.tr{display:flex;align-items:center;gap:8px;min-width:0}.tr .pace{gap:6px}.tr .seg.sm button{padding:2px 7px}#pause{margin-left:auto}.top .btn{padding:5px 9px}.top .btn span{display:none}.app{grid-template-columns:1fr;grid-template-areas:"center" "left" "right";height:auto}.left,.center{height:auto}.left{border-right:0;border-top:1px solid var(--line)}#stage{flex:none;height:56vh;min-height:320px}.strip{grid-template-columns:1fr;height:auto;padding:12px 14px;gap:14px}.metrics{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px 10px;align-items:start}.m span{white-space:nowrap}.m strong{font-size:20px}#plot{flex:none;height:120px}.right{grid-template-columns:1fr;gap:0;padding:4px 16px 28px}.hud{top:52px;left:14px}.hud .t{font-size:22px}.hud .tip{display:none}.viewbar{top:10px;right:10px;left:10px;justify-content:space-between}.speedkey{left:14px;width:190px}.eqm math{font-size:15px}.eqn{font-size:12.5px;min-width:3em}.dlg{padding:18px 18px 22px}}
 </style>
 <body data-mode="cloud">
 <div class="cq-bar" role="navigation" aria-label="clinqclinq"><style>.cq-bar{position:relative;z-index:40;box-sizing:border-box;height:40px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 18px;font:500 14px/1 "Source Serif 4","Noto Serif TC","Iowan Old Style",Georgia,serif;letter-spacing:.02em;color:#cfd9e3;border-bottom:1px solid rgba(150,175,200,.18)}.cq-bar a{color:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:8px;opacity:.78;transition:opacity .15s;white-space:nowrap}.cq-bar a:hover{opacity:1}.cq-bar .cq-home{opacity:.55}.cq-bar .cq-arr{display:inline-block;transition:transform .15s}.cq-bar .cq-back:hover .cq-arr{transform:translateX(-3px)}.cq-bar svg{width:15px;height:15px;display:block}.cq-bar a:focus-visible{outline:1.5px solid #ffd283;outline-offset:3px;border-radius:3px}@media (max-width:520px){.cq-bar{padding:0 14px;font-size:13px}}</style><a class="cq-back" href="../"><span class="cq-arr" aria-hidden="true">←</span>Interactive physics</a><a class="cq-home" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M18.46 9.66A8.97 8.97 0 1 0 18.46 22.34" fill="none" stroke="currentColor" stroke-width="2.68" stroke-linecap="round"/><rect x="20.64" y="11.67" width="8.66" height="8.66" rx="2.17" fill="currentColor" transform="rotate(45 24.97 16)"/></svg>clinqclinq.studio</a></div>
 <header class="top">
 <div class="brand"><h1>Cesium MOT <em>Simulator</em></h1><span>¹³³Cs · D₂ 852 nm</span></div>
-<div class="seg" id="modeSeg"><button data-v="cloud" class="on">原子雲冷卻</button><button data-v="incoming">外部原子注入</button></div>
+<div class="tr"><div class="seg" id="modeSeg"><button data-v="cloud" class="on">原子雲冷卻</button><button data-v="incoming">外部原子注入</button></div>
 <div class="spacer"></div>
-<div class="pace"><span>模擬速度</span><div class="seg sm" id="paceSeg"><button data-v=".0002">.2</button><button data-v=".0005">.5</button><button data-v=".001" class="on">1</button><button data-v=".005">5</button><button data-v=".01">10</button></div><span>ms／秒</span></div>
+<button class="ghost" id="aboutBtn">模型說明</button></div>
+<div class="tr"><div class="pace"><span>模擬速度</span><div class="seg sm" id="paceSeg"><button data-v=".0002">.2</button><button data-v=".0005">.5</button><button data-v=".001" class="on">1</button><button data-v=".005">5</button><button data-v=".01">10</button></div><span>ms／秒</span></div>
 <button class="btn" id="pause"></button>
-<button class="btn" id="reset"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" style="fill:none"><path d="M2.4 6.2a3.6 3.6 0 1 0 1.2-2.8"/><path d="M2.2 1.6v2.5h2.5"/></svg>重新開始</button>
-<button class="ghost" id="aboutBtn">模型說明</button>
+<button class="btn" id="reset" aria-label="重新開始"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" style="fill:none"><path d="M2.4 6.2a3.6 3.6 0 1 0 1.2-2.8"/><path d="M2.2 1.6v2.5h2.5"/></svg><span>重新開始</span></button></div>
 </header>
 <div class="app">
 <aside class="panel left">
@@ -248,7 +250,7 @@ function vec(v,u){return '('+fixedList(v).join(', ')+')'+(u?' '+u:'')}
 function lenUnit(){return S.span<=1?['μm',1e6]:['mm',1e3]}
 function fill(el){const p=(el.value-el.min)/(el.max-el.min)*100;el.style.setProperty('--p',p+'%');el.style.setProperty('--a',Math.min(p,50)+'%');el.style.setProperty('--b',Math.max(p,50)+'%')}
 function labels(){const v=id=>+$(id).value;$('deltaOut').textContent=minus(v('delta').toFixed(2))+' Γ';$('satOut').textContent=v('sat').toFixed(3);$('gradOut').textContent=v('grad').toFixed(1)+' G/cm';$('waistOut').textContent=v('waist').toFixed(1)+' mm';$('atomNumberOut').textContent=v('atomNumber')+' 顆';$('initialOut').textContent=v('initial')+' mK';$('speedOut').textContent=v('speed').toFixed(1)+' m/s';$('reference').textContent=fmt(refT(v('delta'))*1e6)+' μK';document.querySelectorAll('input[type=range]').forEach(fill)}
-function setPaused(p){paused=p;$('pause').innerHTML=(p?IC.play:IC.pause)+(p?'繼續':'暫停');$('pause').classList.toggle('on',p)}
+function setPaused(p){paused=p;$('pause').innerHTML=(p?IC.play:IC.pause)+'<span>'+(p?'繼續':'暫停')+'</span>';$('pause').setAttribute('aria-label',p?'繼續':'暫停');$('pause').classList.toggle('on',p)}
 function reset(){random=rng(42);t=0;sample=0;budget=0;trail=[];history=[];selected=0;atoms=[];const v=Math.sqrt(C.kB*(+$('initial').value/1000)/C.m),n=+$('atomNumber').value;for(let i=0;i<n;i++){if(S.mode==='cloud')atoms.push(atom([0,1,2].map(()=>.0015*normal(random)),[0,1,2].map(()=>v*normal(random))));else atoms.push(atom([-.008-.001*random(),.00035*normal(random),.00035*normal(random)],[+$('speed').value+.08*normal(random),.05*normal(random),.05*normal(random)]));}setPaused(false);labels();measure()}
 function tempText(T){return T<1e-3?fmt(T*1e6,true)+' μK':fmt(T*1e3,true)+' mK'}
 function measure(){const s=stats(atoms);lastStats=s;history.push([t,s.T]);if(history.length>1800)history.shift();$('time').textContent=(t*1000).toFixed(S.pace<.005?2:1)+' ms';$('count').innerHTML=s.n+'<small> / '+atoms.length+'</small>';$('temp').innerHTML=s.n>1?tempText(s.T).replace(' ','<small> ')+'</small>':'—';$('dopplerRatio').innerHTML=s.n>1?fmt(s.T/dopplerLimit,true)+' T<sub>D</sub>':'';$('radius').innerHTML=s.n?fmt(s.rms*1000,true)+'<small> mm</small>':'—';$('escaped').textContent=atoms.length-s.n;const a=atoms[selected];$('track').textContent=!a?'':a.escaped?'追蹤粒子已逃逸':'追蹤粒子  |v| '+fmt(Math.hypot(...a.v))+' m/s · r '+fmt(Math.hypot(...a.p)*1000)+' mm'+(a.captured?' · 已捕獲':'')}
