@@ -14,9 +14,9 @@
   })();
 </script>
 <title>Qhoreutics — Quantum Sensory Experiment</title>
-<meta name="description" content="A quantum sensory experiment. A field of Bloch spheres dances on its own; take hold of one and steer its state with the cursor.">
+<meta name="description" content="A quantum sensory experiment. A field of spheres dances on its own; click one and steer its state.">
 <meta property="og:title" content="Qhoreutics · clinqclinq">
-<meta property="og:description" content="A quantum sensory experiment. A field of Bloch spheres dances on its own; take hold of one and steer its state with the cursor.">
+<meta property="og:description" content="A quantum sensory experiment. A field of spheres dances on its own; click one and steer its state.">
 <meta property="og:image" content="https://clinqclinq.studio/series/qhoreutics/thumb.webp">
 <link rel="icon" href="../../icons/cq.svg" type="image/svg+xml">
 
@@ -369,7 +369,7 @@ const THEMES = {
     additive: true,
     trailHot: new THREE.Color(1.0, 0.74, 0.46), trailEdge: new THREE.Color(1.0, 0.30, 0.11), trailAlpha: 0.78,
     marker: new THREE.Color(2.2, 0.95, 0.48),
-    vector: new THREE.Color(0.5, 0.08, 0.04), vectorOpacity: 0.18,
+    vector: new THREE.Color(0.5, 0.08, 0.04), vectorOpacity: 0,
     haloOpacity: 0.78,
     glow: [[0.00, 'rgba(255,246,230,1)'], [0.12, 'rgba(255,170,95,0.95)'], [0.35, 'rgba(255,80,30,0.42)'],
            [0.65, 'rgba(255,45,15,0.10)'], [1.00, 'rgba(255,30,10,0)']],
@@ -385,7 +385,7 @@ const THEMES = {
     additive: false,
     trailHot: new THREE.Color(0.78, 0.26, 0.05), trailEdge: new THREE.Color(0.95, 0.52, 0.22), trailAlpha: 0.85,
     marker: new THREE.Color(0.86, 0.30, 0.06),
-    vector: new THREE.Color(0.55, 0.18, 0.06), vectorOpacity: 0.32,
+    vector: new THREE.Color(0.55, 0.18, 0.06), vectorOpacity: 0,
     haloOpacity: 0.78,
     glow: [[0.00, 'rgba(232,110,40,0.85)'], [0.12, 'rgba(238,125,55,0.6)'], [0.35, 'rgba(240,120,60,0.22)'],
            [0.65, 'rgba(240,110,60,0.06)'], [1.00, 'rgba(240,110,60,0)']],
@@ -624,6 +624,8 @@ function tickKeyPan(dt) {
 }
 
 const TRAIL_MAX = 260;
+const TRAIL_SUB = 4;
+const TRAIL_VERTS = (TRAIL_MAX - 1) * TRAIL_SUB + 1;
 const TRAIL_HALF_WIDTH = 0.021;
 const trailMaterial = new THREE.ShaderMaterial({
   transparent: true, depthWrite: false, blending: THREE.AdditiveBlending,
@@ -655,24 +657,37 @@ const trailMaterial = new THREE.ShaderMaterial({
 });
 
 const trailIndex = (() => {
-  const idx = new Uint16Array((TRAIL_MAX - 1) * 6);
-  for (let i = 0; i < TRAIL_MAX - 1; i++) {
+  const idx = new Uint16Array((TRAIL_VERTS - 1) * 6);
+  for (let i = 0; i < TRAIL_VERTS - 1; i++) {
     const a = i * 2;
     idx.set([a, a + 1, a + 2, a + 1, a + 3, a + 2], i * 6);
   }
   return new THREE.BufferAttribute(idx, 1);
 })();
 const _ta = new THREE.Vector3(), _tb = new THREE.Vector3(), _tc = new THREE.Vector3();
+const _cr = Array.from({ length: 5 }, () => new THREE.Vector3());
+function crPoint(p0, p1, p2, p3, u, out) {
+  const d01 = Math.max(Math.sqrt(p0.distanceTo(p1)), 1e-5);
+  const d12 = Math.max(Math.sqrt(p1.distanceTo(p2)), 1e-5);
+  const d23 = Math.max(Math.sqrt(p2.distanceTo(p3)), 1e-5);
+  const t1 = d01, t2 = t1 + d12, t3 = t2 + d23, t = t1 + u * d12;
+  const L = (a, b, ta, tb, o) => o.copy(a).multiplyScalar((tb - t) / (tb - ta)).addScaledVector(b, (t - ta) / (tb - ta));
+  const A1 = L(p0, p1, 0, t1, _cr[0]), A2 = L(p1, p2, t1, t2, _cr[1]), A3 = L(p2, p3, t2, t3, _cr[2]);
+  const B1 = L(A1, A2, 0, t2, _cr[3]), B2 = L(A2, A3, t1, t3, _cr[4]);
+  return L(B1, B2, t1, t2, out);
+}
 
 class Trail {
   constructor(parent, lifetime, material = trailMaterial) {
     this.lifetime = lifetime;
     this.pts = [];
     this.geo = new THREE.BufferGeometry();
-    this.pos  = new Float32Array(TRAIL_MAX * 2 * 3);
-    this.age  = new Float32Array(TRAIL_MAX * 2);
-    this.side = new Float32Array(TRAIL_MAX * 2);
-    for (let i = 0; i < TRAIL_MAX; i++) { this.side[i * 2] = -1; this.side[i * 2 + 1] = 1; }
+    this.pos  = new Float32Array(TRAIL_VERTS * 2 * 3);
+    this.age  = new Float32Array(TRAIL_VERTS * 2);
+    this.side = new Float32Array(TRAIL_VERTS * 2);
+    this.sp = Array.from({ length: TRAIL_VERTS }, () => new THREE.Vector3());
+    this.st = new Float32Array(TRAIL_VERTS);
+    for (let i = 0; i < TRAIL_VERTS; i++) { this.side[i * 2] = -1; this.side[i * 2 + 1] = 1; }
     this.geo.setAttribute('position', new THREE.BufferAttribute(this.pos, 3));
     this.geo.setAttribute('aAge', new THREE.BufferAttribute(this.age, 1));
     this.geo.setAttribute('aSide', new THREE.BufferAttribute(this.side, 1));
@@ -691,20 +706,32 @@ class Trail {
   }
   update(now) {
     while (this.pts.length && now - this.pts[0].t > this.lifetime) this.pts.shift();
-    const n = this.pts.length;
-    if (n < 2) { this.geo.setDrawRange(0, 0); return; }
+    const m = this.pts.length;
+    if (m < 2) { this.geo.setDrawRange(0, 0); return; }
+    const P = this.pts, sp = this.sp, st = this.st;
+    let n = 0;
+    for (let i = 0; i < m - 1; i++) {
+      const p0 = P[Math.max(0, i - 1)].p, p1 = P[i].p, p2 = P[i + 1].p, p3 = P[Math.min(m - 1, i + 2)].p;
+      for (let k = 0; k < TRAIL_SUB; k++) {
+        const u = k / TRAIL_SUB;
+        if (k === 0) sp[n].copy(p1); else crPoint(p0, p1, p2, p3, u, sp[n]);
+        st[n] = lerp(P[i].t, P[i + 1].t, u);
+        n++;
+      }
+    }
+    sp[n].copy(P[m - 1].p); st[n] = P[m - 1].t; n++;
     const cam = camera.position;
     for (let i = 0; i < n; i++) {
-      const p = this.pts[i].p;
-      const prev = this.pts[Math.max(0, i - 1)].p;
-      const next = this.pts[Math.min(n - 1, i + 1)].p;
+      const p = sp[i];
+      const prev = sp[Math.max(0, i - 1)];
+      const next = sp[Math.min(n - 1, i + 1)];
       _ta.subVectors(next, prev);
       _tb.subVectors(cam, p);
       _tc.crossVectors(_ta, _tb);
       const len = _tc.length();
       if (len > 1e-9) _tc.multiplyScalar(1 / len); else _tc.set(0, 1, 0);
 
-      const age = clamp01((now - this.pts[i].t) / this.lifetime);
+      const age = clamp01((now - st[i]) / this.lifetime);
       const w = TRAIL_HALF_WIDTH * (1 - 0.55 * age);
       const o = i * 6;
       this.pos[o]     = p.x - _tc.x * w; this.pos[o + 1] = p.y - _tc.y * w; this.pos[o + 2] = p.z - _tc.z * w;
@@ -723,13 +750,13 @@ let simTime = 0;
 const nextFrame = () => new Promise(r => frameWaiters.push(r));
 async function waitSeconds(s) { let t = 0; while (t < s) t += await nextFrame(); }
 
-const sphereGeo   = new THREE.SphereGeometry(1, 40, 28);
+const sphereGeo   = new THREE.SphereGeometry(1, 72, 48);
 const markerGeo   = new THREE.SphereGeometry(0.045, 20, 14);
 const vectorGeo   = new THREE.CylinderGeometry(1, 1, 1, 8);
 const markerMat   = new THREE.MeshBasicMaterial({
   color: new THREE.Color(2.2, 0.95, 0.48), toneMapped: false, transparent: true });
 const vectorMat   = new THREE.MeshBasicMaterial({
-  color: new THREE.Color(0.5, 0.08, 0.04), transparent: true, opacity: 0.18,
+  color: new THREE.Color(0.5, 0.08, 0.04), transparent: true, opacity: 0,
   blending: THREE.AdditiveBlending, depthWrite: false });
 
 function makeGlowTexture(stops) {
