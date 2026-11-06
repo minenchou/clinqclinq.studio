@@ -1,22 +1,22 @@
 
 window.TOPICS = {
-  cool: { en: 'Laser cooling',          zh: '雷射冷卻', c: 'var(--accent)' },
-  art:  { en: 'Interactive installation', zh: '互動裝置', c: 'var(--pink)' }
+  cool: { en: 'AMO',          zh: '原子分子光物理', c: 'var(--accent)' },
+  art:  { en: 'Quantum', zh: '量子', c: 'var(--pink)' }
 };
 
 window.WORKS = [
   { section: 'lab', slug: 'mot-simulator', topic: 'cool', featured: true,
     en: 'Cesium MOT Simulator', zh: '銫原子 MOT 模擬器',
     en_d: 'Observe how magnetic and optical fields cool and trap a cloud of cesium atoms.',
-    zh_d: '觀察磁場與光場如何冷卻並捕抓一團銫原子雲。' },
-  { section: 'series', slug: 'qhoreutics', topic: 'art', featured: true,
-    en: 'Qhoreutics', zh: 'Qhoreutics',
-    en_d: 'A quantum sensory experiment. A field of spheres dances on its own; click one and steer its state.',
-    zh_d: '一場量子感官實驗。球體各自起舞，點選一顆並操控狀態。' }
+    zh_d: '觀察磁與光如何冷卻並捕抓銫原子雲。' },
+  { section: 'series', slug: 'qursive', topic: 'art', featured: true,
+    en: 'Qursive', zh: 'Qursive',
+    en_d: 'A quantum sensory experiment. A field of spheres dances on its own.',
+    zh_d: '一場量子感官實驗。球體各自起舞。' }
 ];
 
 window.SECTIONS = {
-  lab:    { en: 'Interactive physics', zh: '互動物理' },
+  lab:    { en: 'Explorable explanations', zh: '探索式解說' },
   series: { en: 'Series',              zh: '創作系列' }
 };
 
