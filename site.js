@@ -17,7 +17,7 @@ window.PALETTES = [
 
 window.SITE_ZH = {
   nav_work:    '作品',
-  nav_lab:     '互動解說',
+  nav_lab:     '互動知識',
   nav_series:  '創作系列',
   nav_about:   '關於',
   nav_contact: '聯絡'

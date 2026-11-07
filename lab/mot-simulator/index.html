@@ -1,4 +1,4 @@
-<!doctype html><html lang="zh-Hant"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%2032%2032%22%3E%3Crect%20width%3D%2232%22%20height%3D%2232%22%20rx%3D%227%22%20fill%3D%22%23101925%22/%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%229%22%20fill%3D%22none%22%20stroke%3D%22%239de8dc%22/%3E%3Ccircle%20cx%3D%2216%22%20cy%3D%2216%22%20r%3D%223%22%20fill%3D%22%23ffd283%22/%3E%3C/svg%3E"><title>Cesium MOT Simulator</title>
+<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="icon" href="https://clinqclinq.studio/icons/cq.ico" sizes="48x48"><link rel="icon" href="https://clinqclinq.studio/icons/cq.svg" type="image/svg+xml"><link rel="apple-touch-icon" href="https://clinqclinq.studio/icons/cq.png"><title>Cesium MOT Simulator</title>
 <meta name="description" content="Observe how magnetic and optical fields cool and trap a cloud of cesium atoms.">
 <meta property="og:title" content="Cesium MOT Simulator · clinqclinq">
 <meta property="og:description" content="Observe how magnetic and optical fields cool and trap a cloud of cesium atoms.">
@@ -39,8 +39,8 @@ a{color:var(--acc)}
 .center{grid-area:center;display:flex;flex-direction:column;min-width:0;min-height:0}
 section{padding:14px 0 8px;border-bottom:1px solid var(--line)}
 section:last-child{border-bottom:0}
-h2{font-size:12px;font-weight:600;letter-spacing:.12em;color:var(--dim);margin:0 0 12px;display:flex;justify-content:space-between;align-items:baseline}
-h2 .note{font-weight:400;letter-spacing:0;font-size:11.5px}
+h2{font-size:11.5px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:0 0 12px;display:flex;justify-content:space-between;align-items:baseline}
+h2 .note{font-weight:400;letter-spacing:0;text-transform:none;font-size:11.5px}
 .ctl{margin-bottom:12px}
 .ctl label{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:13px;color:var(--muted);margin-bottom:2px}
 .ctl output{color:var(--text);font-variant-numeric:tabular-nums;white-space:nowrap}
@@ -116,6 +116,7 @@ dialog::backdrop{background:rgba(3,5,9,.62);-webkit-backdrop-filter:blur(3px);ba
 .dlg h3{font-size:19px;font-weight:600;margin:0}
 .dlg p{color:#bcc7d7;line-height:1.9;font-size:14.5px;margin:10px 0}
 .dlg h4{font-size:13px;font-weight:600;letter-spacing:.06em;color:var(--dim);margin:22px 0 4px}
+sub,sup{line-height:0}
 .dlg .src{font-size:13px;color:var(--dim);margin-top:18px}
 .eq{display:flex;align-items:center;gap:14px;margin:6px 0}
 .eqm{flex:1;min-width:0;overflow-x:auto;overflow-y:hidden;scrollbar-width:thin}
@@ -132,92 +133,92 @@ dialog::backdrop{background:rgba(3,5,9,.62);-webkit-backdrop-filter:blur(3px);ba
 <body data-mode="cloud">
 <div class="cq-bar" role="navigation" aria-label="clinqclinq"><style>.cq-bar{position:relative;z-index:40;box-sizing:border-box;height:40px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 18px;font:500 14px/1 "Source Serif 4","Noto Serif TC","Iowan Old Style",Georgia,serif;letter-spacing:.02em;color:#cfd9e3;border-bottom:1px solid rgba(150,175,200,.18)}.cq-bar a{color:inherit;text-decoration:none;display:inline-flex;align-items:center;gap:8px;opacity:.78;transition:opacity .15s;white-space:nowrap}.cq-bar a:hover{opacity:1}.cq-bar .cq-home{opacity:.55}.cq-bar .cq-arr{display:inline-block;transition:transform .15s}.cq-bar .cq-back:hover .cq-arr{transform:translateX(-3px)}.cq-bar svg{width:15px;height:15px;display:block}.cq-bar a:focus-visible{outline:1.5px solid #ffd283;outline-offset:3px;border-radius:3px}@media (max-width:520px){.cq-bar{padding:0 14px;font-size:13px}}</style><a class="cq-back" href="../"><span class="cq-arr" aria-hidden="true">←</span>Interactive physics</a><a class="cq-home" href="../../"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M18.46 9.66A8.97 8.97 0 1 0 18.46 22.34" fill="none" stroke="currentColor" stroke-width="2.68" stroke-linecap="round"/><rect x="20.64" y="11.67" width="8.66" height="8.66" rx="2.17" fill="currentColor" transform="rotate(45 24.97 16)"/></svg>clinqclinq.studio</a></div>
 <header class="top">
-<div class="brand"><h1>Cesium MOT <em>Simulator</em></h1><span>¹³³Cs · D₂ 852 nm</span></div>
-<button class="ghost" id="aboutBtn">模型說明</button>
-<div class="tr"><div class="seg" id="modeSeg"><button data-v="cloud" class="on">原子雲冷卻</button><button data-v="incoming">外部原子注入</button></div>
+<div class="brand"><h1>Cesium MOT <em>Simulator</em></h1><span>¹³³Cs · D<sub>2</sub> 852 nm</span></div>
+<button class="ghost" id="aboutBtn">About</button>
+<div class="tr"><div class="seg" id="modeSeg"><button data-v="cloud" class="on">Cloud cooling</button><button data-v="incoming">Beam loading</button></div>
 <div class="spacer"></div>
-<div class="pace"><span class="pl">模擬速度</span><div class="seg sm" id="paceSeg"><button data-v=".0002">.2</button><button data-v=".0005">.5</button><button data-v=".001" class="on">1</button><button data-v=".005">5</button><button data-v=".01">10</button></div><span>ms／秒</span></div></div>
+<div class="pace"><span class="pl">Sim speed</span><div class="seg sm" id="paceSeg"><button data-v=".0002">.2</button><button data-v=".0005">.5</button><button data-v=".001" class="on">1</button><button data-v=".005">5</button><button data-v=".01">10</button></div><span>ms / s</span></div></div>
 <div class="tr tr-play"><button class="btn" id="pause"></button>
-<button class="btn" id="reset" aria-label="重新開始"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" style="fill:none"><path d="M2.4 6.2a3.6 3.6 0 1 0 1.2-2.8"/><path d="M2.2 1.6v2.5h2.5"/></svg><span>重新開始</span></button></div>
+<button class="btn" id="reset" aria-label="Restart"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.3" style="fill:none"><path d="M2.4 6.2a3.6 3.6 0 1 0 1.2-2.8"/><path d="M2.2 1.6v2.5h2.5"/></svg><span>Restart</span></button></div>
 </header>
 <div class="app">
 <aside class="panel left">
-<section class="s-field"><h2>光場與磁場</h2>
-<div class="ctl"><label for="delta">失諧 δ/Γ<output id="deltaOut"></output></label><input id="delta" type="range" min="-3" max="-.25" step=".05" value="-.5"></div>
-<div class="ctl"><label for="sat">每束光強 s₀<output id="satOut"></output></label><input id="sat" type="range" min="0" max=".15" step=".005" value=".08"></div>
-<div class="ctl"><label for="grad">軸向磁場梯度<output id="gradOut"></output></label><input id="grad" type="range" min="0" max="20" step=".5" value="10"></div>
-<div class="ctl"><label for="waist">光束 1/e² 半徑<output id="waistOut"></output></label><input id="waist" type="range" min="2" max="10" step=".5" value="5"></div>
-<div class="togs"><label class="tog"><input id="noise" type="checkbox" checked><span>光子反沖擴散</span></label><label class="tog"><input id="gravity" type="checkbox"><span>重力 −z</span></label></div>
+<section class="s-field"><h2>Light and magnetic field</h2>
+<div class="ctl"><label for="delta">Detuning δ/Γ<output id="deltaOut"></output></label><input id="delta" type="range" min="-3" max="-.25" step=".05" value="-.5"></div>
+<div class="ctl"><label for="sat">Per-beam intensity s<sub>0</sub><output id="satOut"></output></label><input id="sat" type="range" min="0" max=".15" step=".005" value=".08"></div>
+<div class="ctl"><label for="grad">Axial gradient<output id="gradOut"></output></label><input id="grad" type="range" min="0" max="20" step=".5" value="10"></div>
+<div class="ctl"><label for="waist">Beam 1/e² radius<output id="waistOut"></output></label><input id="waist" type="range" min="2" max="10" step=".5" value="5"></div>
+<div class="togs"><label class="tog"><input id="noise" type="checkbox" checked><span>Recoil heating</span></label><label class="tog"><input id="gravity" type="checkbox"><span>Gravity −z</span></label></div>
 </section>
-<section class="s-init"><h2>初始條件</h2>
-<div class="ctl"><label for="atomNumber">總原子數<output id="atomNumberOut"></output></label><input id="atomNumber" type="range" min="10" max="1000" step="10" value="240"></div>
-<div class="ctl" data-mode="cloud"><label for="initial">原子雲初始溫度<output id="initialOut"></output></label><input id="initial" type="range" min="1" max="20" step="1" value="5"></div>
-<div class="ctl" data-mode="incoming"><label for="speed">外部注入速度<output id="speedOut"></output></label><input id="speed" type="range" min=".5" max="25" step=".5" value="3"></div>
+<section class="s-init"><h2>Initial conditions</h2>
+<div class="ctl"><label for="atomNumber">Atom number<output id="atomNumberOut"></output></label><input id="atomNumber" type="range" min="10" max="1000" step="10" value="240"></div>
+<div class="ctl" data-mode="cloud"><label for="initial">Initial temperature<output id="initialOut"></output></label><input id="initial" type="range" min="1" max="20" step="1" value="5"></div>
+<div class="ctl" data-mode="incoming"><label for="speed">Beam speed<output id="speedOut"></output></label><input id="speed" type="range" min=".5" max="25" step=".5" value="3"></div>
 </section>
-<section class="s-disp"><h2>顯示</h2>
-<div class="row"><span>箭頭</span><div class="seg sm" id="vecSeg"><button data-v="B" class="on">磁場</button><button data-v="A">加速度</button><button data-v="none">無</button></div></div>
-<div class="row"><span>速率上限</span><span><div class="seg sm" id="speedSeg"><button data-v=".3">.3</button><button data-v="1">1</button><button data-v="3" class="on">3</button><button data-v="10">10</button></div></span></div>
-<div class="togs"><label class="tog"><input id="showField" type="checkbox" checked><span>3D 色彩切面</span></label><label class="tog"><input id="showCoils" type="checkbox"><span>線圈示意</span></label></div>
+<section class="s-disp"><h2>Display</h2>
+<div class="row"><span>Arrows</span><div class="seg sm" id="vecSeg"><button data-v="B" class="on">B field</button><button data-v="A">Accel.</button><button data-v="none">None</button></div></div>
+<div class="row"><span>Speed scale</span><span><div class="seg sm" id="speedSeg"><button data-v=".3">.3</button><button data-v="1">1</button><button data-v="3" class="on">3</button><button data-v="10">10</button></div></span></div>
+<div class="togs"><label class="tog"><input id="showField" type="checkbox" checked><span>3D slice</span></label><label class="tog"><input id="showCoils" type="checkbox"><span>Coils</span></label></div>
 </section>
-<section class="s-keys"><h2><span class="kb-only">快捷鍵</span><span class="touch-only">手勢操作</span></h2>
-<p class="hint kb-only"><kbd>Space</kbd>暫停或繼續<br><kbd>R</kbd>重新開始<br><kbd>F</kbd>放大中心或回到全景</p>
-<p class="hint touch-only"><kbd>單指拖曳</kbd>旋轉視角<br><kbd>雙指開合</kbd>縮放畫面<br><kbd>點擊粒子</kbd>追蹤粒子<br><kbd>點擊切面圖</kbd>讀取探針數值</p>
+<section class="s-keys"><h2><span class="kb-only">Shortcuts</span><span class="touch-only">Gestures</span></h2>
+<p class="hint kb-only"><kbd>Space</kbd>Pause or resume<br><kbd>R</kbd>Restart<br><kbd>F</kbd>Zoom to center or back to full view</p>
+<p class="hint touch-only"><kbd>Drag</kbd>Rotate view<br><kbd>Pinch</kbd>Zoom<br><kbd>Tap atom</kbd>Track it<br><kbd>Tap slice</kbd>Read probe values</p>
 </section>
 </aside>
 <main class="center">
-<div id="stage"><canvas id="scene" aria-label="可拖曳旋轉的三維原子位置與軌跡"></canvas>
-<div class="hud"><div class="t" id="time">0.0 ms</div><div id="track"></div><div class="tip">拖曳旋轉 · 滾輪或雙指縮放 · 點選粒子追蹤</div></div>
-<div class="viewbar"><div class="seg sm" id="viewSeg"><button data-v="persp" class="on">立體</button><button data-v="face">正視</button></div><button class="btn" id="focus">放大</button></div>
-<div class="speedkey"><div class="sk-head"><span>粒子速率 |v|（m/s）</span><small id="distLabel"></small></div><canvas id="dist" aria-label="粒子速率分佈與 Maxwell–Boltzmann 曲線"></canvas><div class="bar speedbar"></div><div class="sticks" id="speedTicks"></div></div>
+<div id="stage"><canvas id="scene" aria-label="3D atom positions and trajectory, drag to rotate"></canvas>
+<div class="hud"><div class="t" id="time">0.0 ms</div><div id="track"></div><div class="tip">Drag to rotate · Scroll or pinch to zoom · Click an atom to track</div></div>
+<div class="viewbar"><div class="seg sm" id="viewSeg"><button data-v="persp" class="on">3D</button><button data-v="face">Face-on</button></div><button class="btn" id="focus">Zoom</button></div>
+<div class="speedkey"><div class="sk-head"><span>Atom speed |v| (m/s)</span><small id="distLabel"></small></div><canvas id="dist" aria-label="Speed distribution with Maxwell–Boltzmann curve"></canvas><div class="bar speedbar"></div><div class="sticks" id="speedTicks"></div></div>
 </div>
 <div class="strip">
 <div class="metrics">
-<div class="m"><span>區域內原子</span><strong id="count">—</strong></div>
-<div class="m"><span>等效溫度</span><strong id="temp">—</strong><em id="dopplerRatio"></em></div>
-<div class="m"><span>RMS 半徑</span><strong id="radius">—</strong></div>
-<div class="m"><span>逃逸原子</span><strong id="escaped">—</strong></div>
+<div class="m"><span>In region</span><strong id="count">—</strong></div>
+<div class="m"><span>Temperature</span><strong id="temp">—</strong><em id="dopplerRatio"></em></div>
+<div class="m"><span>RMS radius</span><strong id="radius">—</strong></div>
+<div class="m"><span>Escaped</span><strong id="escaped">—</strong></div>
 </div>
-<div class="plotbox"><div class="plothead"><span>等效溫度 · 對數軸</span><span><i></i>低飽和參考 <span id="reference"></span><i class="td"></i>T<sub>D</sub> <span id="dopplerLimit"></span></span></div><canvas id="plot" aria-label="溫度隨模擬時間變化"></canvas></div>
+<div class="plotbox"><div class="plothead"><span>Effective temperature · log scale</span><span><i></i>Doppler theory <span id="reference"></span><i class="td"></i>T<sub>D</sub> <span id="dopplerLimit"></span></span></div><canvas id="plot" aria-label="Temperature vs. simulation time"></canvas></div>
 </div>
 </main>
 <aside class="panel right">
-<section><h2>空間場切面</h2>
-<select id="fieldKind" aria-label="顯示量">
-<optgroup label="磁場"><option value="B">磁場大小 |B|（G）</option><option value="Bx">磁場 Bx（G）</option><option value="By">磁場 By（G）</option><option value="Bz">磁場 Bz（G）</option></optgroup>
-<optgroup label="光強"><option value="Isum">六束總光強 ΣI / Isat</option><option value="Ix">單束 x 光強 I / Isat</option><option value="Iy">單束 y 光強 I / Isat</option><option value="Iz">單束 z 光強 I / Isat</option></optgroup>
-<optgroup label="有效 Zeeman 頻移"><option value="Zx">Zeeman 頻移 x（MHz）</option><option value="Zy">Zeeman 頻移 y（MHz）</option><option value="Zz">Zeeman 頻移 z（MHz）</option></optgroup>
-<optgroup label="有效失諧 · v = 0"><option value="detx">+x 光束有效失諧（Γ）</option><option value="dety">+y 光束有效失諧（Γ）</option><option value="detz">+z 光束有效失諧（Γ）</option></optgroup>
-<optgroup label="動力學 · v = 0"><option value="R">總散射率（10⁶ / s）</option><option value="A">平均加速度大小（m/s²）</option><option value="N">反沖速度 RMS（m/s，5 μs）</option></optgroup>
+<section><h2>Field slice</h2>
+<select id="fieldKind" aria-label="Quantity">
+<optgroup label="Magnetic field"><option value="B">|B| (G)</option><option value="Bx">Bx (G)</option><option value="By">By (G)</option><option value="Bz">Bz (G)</option></optgroup>
+<optgroup label="Intensity"><option value="Isum">Six beams total ΣI / Iₛₐₜ</option><option value="Ix">x beam I / Iₛₐₜ</option><option value="Iy">y beam I / Iₛₐₜ</option><option value="Iz">z beam I / Iₛₐₜ</option></optgroup>
+<optgroup label="Zeeman shift"><option value="Zx">Zeeman shift x (MHz)</option><option value="Zy">Zeeman shift y (MHz)</option><option value="Zz">Zeeman shift z (MHz)</option></optgroup>
+<optgroup label="Effective detuning · v = 0"><option value="detx">+x beam detuning (Γ)</option><option value="dety">+y beam detuning (Γ)</option><option value="detz">+z beam detuning (Γ)</option></optgroup>
+<optgroup label="Dynamics · v = 0"><option value="R">Total scattering rate (10⁶ / s)</option><option value="A">Mean acceleration |a| (m/s²)</option><option value="N">Recoil RMS (m/s, 5 μs)</option></optgroup>
 </select>
-<div class="row"><span>切面</span><div class="seg sm" id="planeSeg"><button data-v="xy">xy</button><button data-v="xz" class="on">xz</button><button data-v="yz">yz</button></div></div>
-<div class="row"><span>半寬</span><span><div class="seg sm" id="spanSeg"><button data-v="10">10</button><button data-v="5" class="on">5</button><button data-v="1">1</button><button data-v=".25">0.25</button></div><span class="unit">mm</span></span></div>
-<div class="ctl"><label for="offset">切面位置<output id="offsetOut"></output></label><input id="offset" class="bi" type="range" min="-5" max="5" step=".025" value="0" title="雙擊歸零"></div>
-<canvas id="sliceCanvas" aria-label="空間場切面，移動游標讀取數值"></canvas>
+<div class="row"><span>Plane</span><div class="seg sm" id="planeSeg"><button data-v="xy">xy</button><button data-v="xz" class="on">xz</button><button data-v="yz">yz</button></div></div>
+<div class="row"><span>Half-width</span><span><div class="seg sm" id="spanSeg"><button data-v="10">10</button><button data-v="5" class="on">5</button><button data-v="1">1</button><button data-v=".25">0.25</button></div><span class="unit">mm</span></span></div>
+<div class="ctl"><label for="offset">Slice offset<output id="offsetOut"></output></label><input id="offset" class="bi" type="range" min="-5" max="5" step=".025" value="0" title="Double-click to reset"></div>
+<canvas id="sliceCanvas" aria-label="Field slice, move the cursor to read values"></canvas>
 <div class="bar" id="fieldBar"></div><div class="ticks"><span id="fieldLow"></span><span id="fieldMiddle"></span><span id="fieldHigh"></span></div>
-<div class="row cmax" style="margin-top:10px"><span>色階上限</span><span><input id="fieldMax" type="number" min="0" step="any" value="5" aria-label="色階上限"><button class="chip on" id="autoColor">自動</button></span></div>
+<div class="row cmax" style="margin-top:10px"><span>Color max</span><span><input id="fieldMax" type="number" min="0" step="any" value="5" aria-label="Color max"><button class="chip on" id="autoColor">Auto</button></span></div>
 <p id="fieldInfo"></p>
 </section>
-<section><h2>探針讀數<span class="note">在切面上移動游標</span></h2>
+<section><h2>Probe<span class="note">Move the cursor over the slice</span></h2>
 <dl class="probe">
-<dt>位置</dt><dd id="pPos"></dd>
+<dt>Position</dt><dd id="pPos"></dd>
 <dt class="hl" id="pValName"></dt><dd class="hl" id="pVal"></dd>
 <dt>B</dt><dd id="pB"></dd>
 <dt>|B|</dt><dd id="pBm"></dd>
 <dt>s<sub>x, y, z</sub></dt><dd id="pS"></dd>
 <dt>ΣI / I<sub>sat</sub></dt><dd id="pI"></dd>
 <dt>R<sub>total</sub></dt><dd id="pR"></dd>
-<dt>平均加速度</dt><dd id="pA"></dd>
-<dt>反沖 RMS / 5 μs</dt><dd id="pN"></dd>
+<dt>Mean accel.</dt><dd id="pA"></dd>
+<dt>Recoil RMS / 5 μs</dt><dd id="pN"></dd>
 </dl>
 </section>
 </aside>
 </div>
 <dialog id="about"><div class="dlg">
-<header><h3>模型與適用範圍</h3><form method="dialog"><button class="ghost">關閉</button></form></header>
-<p>依據 C. J. Foot, <i>Atomic Physics</i> (2005) Ch.9。</p>
-<p>銫常數取自 D. A. Steck,  <a href="https://steck.us/alkalidata/" target="_blank" rel="noreferrer">Alkali D Line Data</a>。</p>
-<h4>延伸閱讀</h4>
-<p>以下文章提出更完整的 MOT 數值模型。</p>
+<header><h3>About the model</h3><form method="dialog"><button class="ghost">Close</button></form></header>
+<p>Based on C. J. Foot, <i>Atomic Physics</i> (Oxford, 2005), Ch. 9, Laser cooling and trapping.</p>
+<p>Cesium constants from D. A. Steck, <a href="https://steck.us/alkalidata/" target="_blank" rel="noreferrer">Alkali D Line Data</a>.</p>
+<h4>Further reading</h4>
+<p>More complete numerical models of the MOT.</p>
 <ul>
 <li>R. K. Hanley et al., J. Mod. Opt. 65, 667 (2018). <a href="https://doi.org/10.1080/09500340.2017.1401679" target="_blank" rel="noreferrer">doi</a></li>
 <li>X. Chen et al., AtomECS, arXiv:2105.06447 (2021). <a href="https://arxiv.org/abs/2105.06447" target="_blank" rel="noreferrer">arXiv</a></li>
@@ -257,16 +258,16 @@ function fixedList(v){const m=Math.max(...v.map(Math.abs));if(!(m>0))return v.ma
 function vec(v,u){return '('+fixedList(v).join(', ')+')'+(u?' '+u:'')}
 function lenUnit(){return S.span<=1?['μm',1e6]:['mm',1e3]}
 function fill(el){const p=(el.value-el.min)/(el.max-el.min)*100;el.style.setProperty('--p',p+'%');el.style.setProperty('--a',Math.min(p,50)+'%');el.style.setProperty('--b',Math.max(p,50)+'%')}
-function labels(){const v=id=>+$(id).value;$('deltaOut').textContent=minus(v('delta').toFixed(2))+' Γ';$('satOut').textContent=v('sat').toFixed(3);$('gradOut').textContent=v('grad').toFixed(1)+' G/cm';$('waistOut').textContent=v('waist').toFixed(1)+' mm';$('atomNumberOut').textContent=v('atomNumber')+' 顆';$('initialOut').textContent=v('initial')+' mK';$('speedOut').textContent=v('speed').toFixed(1)+' m/s';$('reference').textContent=fmt(refT(v('delta'))*1e6)+' μK';document.querySelectorAll('input[type=range]').forEach(fill)}
-function setPaused(p){paused=p;$('pause').innerHTML=(p?IC.play:IC.pause)+'<span>'+(p?'繼續':'暫停')+'</span>';$('pause').setAttribute('aria-label',p?'繼續':'暫停');$('pause').classList.toggle('on',p)}
+function labels(){const v=id=>+$(id).value;$('deltaOut').textContent=minus(v('delta').toFixed(2))+' Γ';$('satOut').textContent=v('sat').toFixed(3);$('gradOut').textContent=v('grad').toFixed(1)+' G/cm';$('waistOut').textContent=v('waist').toFixed(1)+' mm';$('atomNumberOut').textContent=String(v('atomNumber'));$('initialOut').textContent=v('initial')+' mK';$('speedOut').textContent=v('speed').toFixed(1)+' m/s';$('reference').textContent=fmt(refT(v('delta'))*1e6)+' μK';document.querySelectorAll('input[type=range]').forEach(fill)}
+function setPaused(p){paused=p;$('pause').innerHTML=(p?IC.play:IC.pause)+'<span>'+(p?'Resume':'Pause')+'</span>';$('pause').setAttribute('aria-label',p?'Resume':'Pause');$('pause').classList.toggle('on',p)}
 function reset(){random=rng(42);t=0;sample=0;budget=0;trail=[];history=[];selected=0;atoms=[];const v=Math.sqrt(C.kB*(+$('initial').value/1000)/C.m),n=+$('atomNumber').value;for(let i=0;i<n;i++){if(S.mode==='cloud')atoms.push(atom([0,1,2].map(()=>.0015*normal(random)),[0,1,2].map(()=>v*normal(random))));else atoms.push(atom([-.008-.001*random(),.00035*normal(random),.00035*normal(random)],[+$('speed').value+.08*normal(random),.05*normal(random),.05*normal(random)]));}setPaused(false);labels();measure()}
 function tempText(T){return T<1e-3?fmt(T*1e6,true)+' μK':fmt(T*1e3,true)+' mK'}
-function measure(){const s=stats(atoms);lastStats=s;history.push([t,s.T]);if(history.length>1800)history.shift();$('time').textContent=(t*1000).toFixed(S.pace<.005?2:1)+' ms';$('count').innerHTML=s.n+'<small> / '+atoms.length+'</small>';$('temp').innerHTML=s.n>1?tempText(s.T).replace(' ','<small> ')+'</small>':'—';$('dopplerRatio').innerHTML=s.n>1?fmt(s.T/dopplerLimit,true)+' T<sub>D</sub>':'';$('radius').innerHTML=s.n?fmt(s.rms*1000,true)+'<small> mm</small>':'—';$('escaped').textContent=atoms.length-s.n;const a=atoms[selected];$('track').textContent=!a?'':a.escaped?'追蹤粒子已逃逸':'追蹤粒子  |v| '+fmt(Math.hypot(...a.v))+' m/s · r '+fmt(Math.hypot(...a.p)*1000)+' mm'+(a.captured?'':'')}
+function measure(){const s=stats(atoms);lastStats=s;history.push([t,s.T]);if(history.length>1800)history.shift();$('time').textContent=(t*1000).toFixed(S.pace<.005?2:1)+' ms';$('count').innerHTML=s.n+'<small> / '+atoms.length+'</small>';$('temp').innerHTML=s.n>1?tempText(s.T).replace(' ','<small> ')+'</small>':'—';$('dopplerRatio').innerHTML=s.n>1?fmt(s.T/dopplerLimit,true)+' T<sub>D</sub>':'';$('radius').innerHTML=s.n?fmt(s.rms*1000,true)+'<small> mm</small>':'—';$('escaped').textContent=atoms.length-s.n;const a=atoms[selected];$('track').textContent=!a?'':a.escaped?'Tracked atom escaped':'Tracked atom · |v| '+fmt(Math.hypot(...a.v))+' m/s · r '+fmt(Math.hypot(...a.p)*1000)+' mm'+(a.captured?'':'')}
 function bindSeg(id,fn){const el=$(id);el.addEventListener('click',e=>{const b=e.target.closest('button[data-v]');if(!b)return;el.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));fn(b.dataset.v)})}
 function setSeg(id,v){$(id).querySelectorAll('button').forEach(x=>x.classList.toggle('on',x.dataset.v===v))}
 function aim(y,p){cam.ty=cam.yaw+(((y-cam.yaw)%TAU+3*Math.PI)%TAU-Math.PI);cam.tp=p}
 function setView(v){S.view=v;setSeg('viewSeg',v)}
-function updateFocus(){const z=cam.ts<.003;$('focus').textContent=z?'全景':'放大';$('focus').classList.toggle('on',z)}
+function updateFocus(){const z=cam.ts<.003;$('focus').textContent=z?'Full view':'Zoom';$('focus').classList.toggle('on',z)}
 function faceView(){const p=S.plane;if(p==='xz')aim(0,0);else if(p==='xy')aim(0,Math.PI/2);else aim(-Math.PI/2,0);cam.ts=S.span/1000*1.2;setView('face');updateFocus()}
 function perspView(){aim(.65,.42);setView('persp')}
 function toggleFocus(){cam.ts=cam.ts>.003?.0008:HOME[S.mode];updateFocus()}
@@ -298,21 +299,21 @@ const maxT=Math.max(.01,t),minT=history.length?history[0][0]:0,xx=v=>left+(v-min
 pc.setLineDash([4,4]);pc.strokeStyle='#8b947e';pc.beginPath();pc.moveTo(left,yy(refT(options().delta)));pc.lineTo(right,yy(refT(options().delta)));pc.stroke();pc.setLineDash([1.5,3]);pc.strokeStyle='#c98f8f';pc.beginPath();pc.moveTo(left,yy(dopplerLimit));pc.lineTo(right,yy(dopplerLimit));pc.stroke();pc.setLineDash([]);
 pc.strokeStyle='#9de8dc';pc.lineWidth=1.6;pc.beginPath();data.forEach((p,i)=>{if(i)pc.lineTo(xx(p[0]),yy(p[1]));else pc.moveTo(xx(p[0]),yy(p[1]))});pc.stroke();pc.fillStyle='#66748a';pc.textAlign='left';pc.fillText((minT*1000).toFixed(0)+' ms',left,H-4);pc.textAlign='right';pc.fillText((maxT*1000).toFixed(0)+' ms',right,H-4);pc.textAlign='left'}
 const fieldDefs={
-B:['磁場大小 |B|','G',false,''],
-Bx:['磁場 Bx','G',true,'有正負號的磁場 x 分量。'],By:['磁場 By','G',true,'有正負號的磁場 y 分量。'],Bz:['磁場 Bz','G',true,'有正負號的磁場 z 分量。'],
-Isum:['ΣI / Isat','',false,'ΣI / Isat = 2(sx + sy + sz)。僅顯示強度加總，力仍採獨立光束模型。'],
-Ix:['單束 x 光強','',false,'+x 與 −x 各有相同強度 sx = s₀ exp[−2(y² + z²)/w²]。'],
-Iy:['單束 y 光強','',false,'+y 與 −y 各有相同強度 sy = s₀ exp[−2(x² + z²)/w²]。'],
-Iz:['單束 z 光強','',false,'+z 與 −z 各有相同強度 sz = s₀ exp[−2(x² + y²)/w²]。'],
-Zx:['Zeeman 頻移 x','MHz',true,'原受力模型的 βx x / 2π，含偏振約定，並非直接取磁場 Bx 的符號。'],
-Zy:['Zeeman 頻移 y','MHz',true,'原受力模型的 βy y / 2π，含偏振約定，並非直接取磁場 By 的符號。'],
-Zz:['Zeeman 頻移 z','MHz',true,'原受力模型的 βz z / 2π。'],
-detx:['+x 有效失諧','Γ',true,'固定 v = 0，Δeff/Γ = δ/Γ − βx x/Γ。0 表示此模型中的局部共振。'],
-dety:['+y 有效失諧','Γ',true,'固定 v = 0，Δeff/Γ = δ/Γ − βy y/Γ。0 表示此模型中的局部共振。'],
-detz:['+z 有效失諧','Γ',true,'固定 v = 0，Δeff/Γ = δ/Γ − βz z/Γ。0 表示此模型中的局部共振。'],
-R:['總散射率','10⁶ / s',false,'六束光散射率之和，固定 v = 0。移動原子的數值另含都卜勒頻移。'],
-A:['平均加速度','m/s²',false,'|F/m + g|，固定 v = 0，同步使用重力開關，沒有包含隨機反沖。'],
-N:['反沖 RMS','m/s',false,'√⟨|Δv|²⟩ = vr √(2 Rtotal Δt)，Δt = 5 μs，固定 v = 0。關閉反沖時為 0。']};
+B:['|B|','G',false,'Quadrupole field B = b′·(−x/2, −y/2, z), where b′ is the axial gradient.'],
+Bx:['B<sub>x</sub>','G',true,'Quadrupole field B = b′·(−x/2, −y/2, z), where b′ is the axial gradient.'],By:['B<sub>y</sub>','G',true,'Quadrupole field B = b′·(−x/2, −y/2, z), where b′ is the axial gradient.'],Bz:['B<sub>z</sub>','G',true,'Quadrupole field B = b′·(−x/2, −y/2, z), where b′ is the axial gradient.'],
+Isum:['ΣI / I<sub>sat</sub>','',false,'2·(s<sub>x</sub> + s<sub>y</sub> + s<sub>z</sub>). Forces treat each beam independently, without interference.'],
+Ix:['s<sub>x</sub>','',false,'Each ±x beam has s<sub>x</sub> = s<sub>0</sub>·exp[−2·(y² + z²)/w²].'],
+Iy:['s<sub>y</sub>','',false,'Each ±y beam has s<sub>y</sub> = s<sub>0</sub>·exp[−2·(x² + z²)/w²].'],
+Iz:['s<sub>z</sub>','',false,'Each ±z beam has s<sub>z</sub> = s<sub>0</sub>·exp[−2·(x² + y²)/w²].'],
+Zx:['Zeeman shift x','MHz',true,'β<sub>x</sub>·x / 2π with β<sub>x</sub> = β<sub>z</sub>/2. The sign follows the σ<sup>±</sup> beam convention, not the sign of B<sub>x</sub>.'],
+Zy:['Zeeman shift y','MHz',true,'β<sub>y</sub>·y / 2π with β<sub>y</sub> = β<sub>z</sub>/2. The sign follows the σ<sup>±</sup> beam convention, not the sign of B<sub>y</sub>.'],
+Zz:['Zeeman shift z','MHz',true,'β<sub>z</sub>·z / 2π with β<sub>z</sub> = g·μ<sub>B</sub>·b′/ħ, g = 1.'],
+detx:['Δ<sub>eff</sub>, +x beam','Γ',true,'Δ<sub>eff</sub>/Γ = δ/Γ − β<sub>x</sub>·x/Γ at v = 0. Zero marks local resonance.'],
+dety:['Δ<sub>eff</sub>, +y beam','Γ',true,'Δ<sub>eff</sub>/Γ = δ/Γ − β<sub>y</sub>·y/Γ at v = 0. Zero marks local resonance.'],
+detz:['Δ<sub>eff</sub>, +z beam','Γ',true,'Δ<sub>eff</sub>/Γ = δ/Γ − β<sub>z</sub>·z/Γ at v = 0. Zero marks local resonance.'],
+R:['R<sub>total</sub>','10⁶ / s',false,'Sum over six beams at v = 0. Moving atoms also see a Doppler shift.'],
+A:['Mean accel.','m/s²',false,'|F/M + g| at v = 0, mean force only. Includes gravity when enabled.'],
+N:['Recoil RMS','m/s',false,'v<sub>r</sub>·√(2·R<sub>total</sub>·Δt) over Δt = 5 μs at v = 0. The factor 2 counts the absorption and emission kicks.']};
 function axes(){return S.plane==='xy'?[0,1,2]:S.plane==='yz'?[1,2,0]:[0,2,1]}
 function coordinate(u,v){const ax=axes(),p=[0,0,0];p[ax[0]]=u;p[ax[1]]=v;p[ax[2]]=(+$('offset').value||0)/1000;return p}
 function quantities(p,o){const B=[-.5*p[0],-.5*p[1],p[2]].map(x=>x*o.grad*100),r2=p.reduce((s,x)=>s+x*x,0),I=p.map(x=>o.s*Math.exp(-2*(r2-x*x)/(o.w*o.w))),Z=p.map((x,j)=>C.mu/C.h*o.grad*.01*(j===2?1:.5)*x),rr=rates(p,[0,0,0],o),R=rr.reduce((s,x)=>s+x,0),A=[0,1,2].map(j=>C.vr*(rr[2*j]-rr[2*j+1])-(o.gravity&&j===2?9.80665:0));return {B,I,Z,R,A,N:o.noise?C.vr*Math.sqrt(2*R*5e-6):0}}
@@ -321,7 +322,7 @@ function colorAt(t,signed){t=clamp(t,0,1);const stops=signed?[[48,126,224],[213,
 function colorMax(){return Math.max(1e-9,+$('fieldMax').value||1)}
 function cacheField(){const o=options(),k=$('fieldKind').value,key=JSON.stringify([o,k,S.plane,$('offset').value,S.span]);if(!fieldCache||fieldCache.key!==key){const extent=S.span/1000,N=40,st=2*extent/N,cells=[];for(let i=0;i<N;i++)for(let j=0;j<N;j++){const u=-extent+(i+.5)*st,v=-extent+(j+.5)*st;cells.push({u,v,value:valueOf(quantities(coordinate(u,v),o),k,o)})}fieldCache={key,extent,N,step:st,cells,ck:null};if(S.auto||k!==lastKind){const m=Math.max(...cells.map(x=>Math.abs(x.value)),Math.abs(valueOf(quantities(coordinate(0,0),o),k,o)));$('fieldMax').value=m>1e-12?Number((m*1.03).toPrecision(3)):1}lastKind=k}
 const m=colorMax(),ck=m+k;if(fieldCache.ck!==ck){const signed=fieldDefs[k][2];for(const c of fieldCache.cells)c.color=colorAt(signed?.5+.5*c.value/m:c.value/m,signed);fieldCache.ck=ck;updateFieldLegend(k,m)}return fieldCache}
-function updateFieldLegend(k,m){const d=fieldDefs[k];$('fieldBar').style.background=d[2]?'linear-gradient(90deg,rgb(48,126,224),rgb(213,222,227),rgb(232,100,63))':'linear-gradient(90deg,#142b54,#216984,#2da890,#d4c770,#ffe3aa)';$('fieldLow').textContent=d[2]?fmt(-m):'0';$('fieldMiddle').textContent=d[2]?'0':fmt(m/2);$('fieldHigh').textContent=fmt(m)+(d[1]?' '+d[1]:'');$('fieldInfo').textContent=d[3];$('pValName').textContent=d[0]}
+function updateFieldLegend(k,m){const d=fieldDefs[k];$('fieldBar').style.background=d[2]?'linear-gradient(90deg,rgb(48,126,224),rgb(213,222,227),rgb(232,100,63))':'linear-gradient(90deg,#142b54,#216984,#2da890,#d4c770,#ffe3aa)';$('fieldLow').textContent=d[2]?fmt(-m):'0';$('fieldMiddle').textContent=d[2]?'0':fmt(m/2);$('fieldHigh').textContent=fmt(m)+(d[1]?' '+d[1]:'');$('fieldInfo').innerHTML=d[3];$('pValName').innerHTML=d[0]}
 function offsetLabel(){const[u,k]=lenUnit();$('offsetOut').innerHTML='<i>'+'xyz'[axes()[2]]+'</i> = '+fmt(+$('offset').value*k/1e3)+' '+u}
 function setOffsetRange(){const o=$('offset');o.min=-S.span;o.max=S.span;o.step=S.span/200;o.value=clamp(+o.value,-S.span,S.span);fill(o);offsetLabel()}
 function vectorArrow(context,x,y,dx,dy){const n=Math.hypot(dx,dy);if(n<1e-10)return;dx/=n;dy/=n;const len=12;context.beginPath();context.moveTo(x-dx*len*.5,y-dy*len*.5);context.lineTo(x+dx*len*.5,y+dy*len*.5);context.lineTo(x+dx*(len*.5-4)-dy*3,y+dy*(len*.5-4)+dx*3);context.moveTo(x+dx*len*.5,y+dy*len*.5);context.lineTo(x+dx*(len*.5-4)+dy*3,y+dy*(len*.5-4)-dx*3);context.stroke()}

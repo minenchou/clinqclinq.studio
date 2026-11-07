@@ -16,7 +16,7 @@ window.WORKS = [
 ];
 
 window.SECTIONS = {
-  lab:    { en: 'Explorable explanations', zh: '探索式解說' },
+  lab:    { en: 'Explorable knowledge', zh: '互動知識' },
   series: { en: 'Series',              zh: '創作系列' }
 };
 
