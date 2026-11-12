@@ -5,19 +5,19 @@
         --lemon: #a8820c; --lemon-soft: #fbf0bf;
         color-scheme: light; }
 
-:root[data-palette="specimen"] { --bg: #f5f2ea; --blush: #f1ece2;
-        --ink: #22231f; --body: #43453f; --muted: #696b63; --faint: #8a8980; --line: #e2ddd0;
-        --accent: #2a6a4e; --soft: #e1eee6;
-        --pink: #a94460; --pink-soft: #f5e1e5;
-        --lemon: #4650a0; --lemon-soft: #e5e7f5; }
-
 :root[data-palette="classic"] { --bg: #fbfaf8; --blush: #fbfaf8;
         --ink: #1c1c1c; --body: #3a3a3a; --muted: #666666; --faint: #8e8e8e; --line: #e6e3de;
         --accent: #5673a8; --soft: #eef1f7;
         --pink: #5673a8; --pink-soft: #eef1f7;
         --lemon: #5673a8; --lemon-soft: #eef1f7; }
+:root[data-palette="classic"] .crystal .d { fill: #bbc9e4; }
 
 /*
+:root[data-palette="specimen"] { --bg: #f5f2ea; --blush: #f1ece2;
+        --ink: #22231f; --body: #43453f; --muted: #696b63; --faint: #8a8980; --line: #e2ddd0;
+        --accent: #2a6a4e; --soft: #e1eee6;
+        --pink: #a94460; --pink-soft: #f5e1e5;
+        --lemon: #4650a0; --lemon-soft: #e5e7f5; }
 :root[data-palette="flame-cs"] { --bg: #faf9f7; --blush: #f6eff6;
         --ink: #1c2233; --body: #3b4254; --muted: #61687b; --faint: #848b9c; --line: #e6e3e6;
         --accent: #4046b5; --soft: #e7e8fa;

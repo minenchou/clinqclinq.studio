@@ -11,7 +11,7 @@ window.PALETTES = [
   // { id: 'flame-cs', name: 'Flame Test',  zh: '焰色反應' },
   // { id: 'ice',      name: 'Ice & Glass', zh: '冰晶玻璃' },
   // { id: 'clink',    name: 'Clink Hour',  zh: '乾杯時刻' },
-  { id: 'specimen', name: 'Specimen',    zh: '礦物標本' },
+  //{ id: 'specimen', name: 'Specimen',    zh: '礦物標本' },
   { id: 'classic',  name: 'Classic',     zh: '經典簡約' }
 ];
 
