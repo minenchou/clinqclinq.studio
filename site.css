@@ -47,7 +47,6 @@ body { background: linear-gradient(180deg, var(--blush) 0, var(--bg) 620px) no-r
        font: 400 16px/1.7 var(--serif);
        font-optical-sizing: auto; -webkit-font-smoothing: antialiased;
        transition: background-color .25s, color .25s; }
-html[lang="zh-Hant"] body { line-height: 1.85; }
 .wrap { max-width: 880px; margin: 0 auto; padding: 88px 24px 64px; }
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
@@ -168,13 +167,13 @@ html[lang="zh-Hant"] .tl a { font-size: 13px; letter-spacing: 0.16em; }
 }
 
 :root {
-  --emblem-size: 200px;   --emblem-x: 0px;   --emblem-y: -16px;
+  --emblem-size: 200px;   --emblem-x: 0px;   --emblem-y: -3px;
   --emblem-size-m: 64px; --emblem-x-m: 0px; --emblem-y-m: 0px;
 }
 
 header { display: grid; grid-template-columns: 1fr max(160px, var(--emblem-size)); gap: 40px; align-items: start; }
-h1 { font-family: Fraunces, Georgia, serif; font-weight: 300; font-size: clamp(30px, 6vw, 46px);
-     line-height: 1.1; letter-spacing: -0.02em; text-box: trim-start cap alphabetic; }
+h1 { font-family: Fraunces, Georgia, serif; font-weight: 500; font-size: clamp(30px, 6vw, 46px);
+     line-height: 1.1; letter-spacing: -0.01em; text-box: trim-start cap alphabetic; }
 .lede { margin-top: 16px; color: var(--muted); font-size: 17px; max-width: 540px; }
 .links { margin-top: 20px; display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 15px; }
 .links a { color: var(--ink); background: linear-gradient(transparent 62%, var(--lemon-soft) 62%);
@@ -182,6 +181,8 @@ h1 { font-family: Fraunces, Georgia, serif; font-weight: 300; font-size: clamp(3
 .links a:hover { color: var(--pink); text-decoration: none; }
 section > p a:hover { color: var(--pink); background-size: 100% 100%; text-decoration: none; }
 h1 .tint { color: var(--accent); }
+h1 .stop { color: var(--pink); transition: color .25s; }
+:root[data-palette="classic"] h1 .stop { color: #bbc9e4; }
 .emblem { width: max(160px, var(--emblem-size)); display: grid; place-items: center; padding-top: 4px; }
 .crystal, .emblem .custom-icon { width: var(--emblem-size); height: var(--emblem-size);
                                  transform: translate(var(--emblem-x), var(--emblem-y)); }
@@ -195,11 +196,16 @@ h1 .tint { color: var(--accent); }
 
 section { margin-top: 56px; scroll-margin-top: 32px; }
 header + section { margin-top: 48px; }
-h2 { font-size: 13px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
+h2 { font-size: 13px; line-height: 22px; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted);
      padding-bottom: 10px; border-bottom: 1px solid var(--line); margin-bottom: 20px; }
 html[lang="zh-Hant"] h2 { font-size: 14px; letter-spacing: 0.18em; }
 section > p { color: var(--body); max-width: 640px; }
 section > p + p { margin-top: 14px; }
+[data-i18n-hold] { display: grid !important; }
+a[data-i18n-hold] { display: inline-grid !important; }
+[data-i18n-hold] > .i18n-v { grid-area: 1 / 1; visibility: hidden; display: block;
+                               color: inherit; font: inherit; letter-spacing: inherit; margin: 0; }
+[data-i18n-hold] > .i18n-v.on { visibility: visible; }
 
 .interests { list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 18px 40px; }
 .interests li { display: grid; grid-template-columns: 48px 1fr; gap: 16px; align-items: start; }
@@ -239,6 +245,14 @@ footer { margin-top: 72px; padding-top: 18px; border-top: 1px solid var(--line);
 }
 @media (min-width: 641px) and (max-width: 1023px) {
   section { scroll-margin-top: 72px; }
+}
+/* desktop: the emblem column is as tall as the text beside it and the logo is centred on it,
+   so the logo lines up with the title-to-links block and adds no height of its own */
+@media (min-width: 641px) {
+  header { align-items: stretch; }
+  .emblem { position: relative; padding-top: 0; }
+  .crystal, .emblem .custom-icon { position: absolute; top: 50%; left: 50%;
+    transform: translate(calc(-50% + var(--emblem-x)), calc(-50% + var(--emblem-y))); }
 }
 
 /*

@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Newsstand · clinqclinq</title>
+  <meta name="description" content="Newsstand from clinqclinq.">
+  <meta property="og:title" content="Newsstand · clinqclinq">
+  <meta property="og:description" content="Newsstand from clinqclinq.">
+  <meta property="og:url" content="https://clinqclinq.studio/newsstand/">
+  <link rel="icon" href="../icons/cq.ico" sizes="48x48">
+  <link rel="icon" href="../icons/cq.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../icons/cq.png">
+
+  <script src="../site.js"></script>
+  <base target="_blank">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600&family=Noto+Serif+TC:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../works.css">
+  <link rel="stylesheet" href="../site.css">
+</head>
+<body>
+  <a class="nav-home top-home" href="../" target="_self"><span class="hico" data-icon="nav" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="c" d="M18.46 9.66A8.97 8.97 0 1 0 18.46 22.34" stroke-width="2.68" stroke-linecap="round"/><rect class="d" x="20.64" y="11.67" width="8.66" height="8.66" rx="2.17" transform="rotate(45 24.97 16)"/></svg></span><span>clinqclinq</span></a>
+  <button class="fab lang-toggle" id="langToggle" type="button" aria-label="切換為中文" title="切換為中文">中</button>
+  <button class="fab palette-toggle" id="paletteToggle" type="button" aria-label="Change palette" title="Change palette">
+    <svg viewBox="0 0 18 18" aria-hidden="true"><circle class="p1" cx="9" cy="4.6" r="3.4"/><circle class="p2" cx="4.6" cy="12.2" r="3.4"/><circle class="p3" cx="13.4" cy="12.2" r="3.4"/></svg>
+  </button>
+
+  <button class="fab menu-toggle" id="menuToggle" type="button" aria-label="Sections" aria-expanded="false" aria-controls="menuPanel">
+    <span class="bars" aria-hidden="true"><span></span><span></span><span></span></span>
+  </button>
+  <div class="menu-scrim" id="menuScrim"></div>
+  <nav class="menu-panel" id="menuPanel" aria-label="Sections">
+    <ul class="tl">
+      <li><a class="lobby" href="../" target="_self"><span class="dot"></span><span data-i18n="nav_lobby">Lobby</span></a></li>
+      <li><a href="./" target="_self" aria-current="page"><span class="dot"></span><span data-i18n="nav_newsstand">Newsstand</span></a></li>
+      <li><a href="../gallery/" target="_self"><span class="dot"></span><span data-i18n="nav_gallery">Gallery</span></a></li>
+      <li><a href="../lab/" target="_self"><span class="dot"></span><span data-i18n="nav_lab">Lab</span></a></li>
+      <li><a href="../theater/" target="_self"><span class="dot"></span><span data-i18n="nav_theater">Theater</span></a></li>
+      <li><a href="../salon/" target="_self"><span class="dot"></span><span data-i18n="nav_salon">Salon</span></a></li>
+      <li><a href="../select/" target="_self"><span class="dot"></span><span data-i18n="nav_select">Select</span></a></li>
+      <li><a href="../supply/" target="_self"><span class="dot"></span><span data-i18n="nav_supply">Supply</span></a></li>
+      <li><a href="../#about" target="_self"><span class="dot"></span><span data-i18n="nav_about">About</span></a></li>
+      <li><a href="../#contact" target="_self"><span class="dot"></span><span data-i18n="nav_contact">Contact</span></a></li>
+    </ul>
+  </nav>
+
+  <nav class="sidenav" aria-label="Sections">
+    <a class="nav-home" href="../" target="_self"><span class="hico" data-icon="nav" aria-hidden="true"><svg viewBox="0 0 32 32"><path class="c" d="M18.46 9.66A8.97 8.97 0 1 0 18.46 22.34" stroke-width="2.68" stroke-linecap="round"/><rect class="d" x="20.64" y="11.67" width="8.66" height="8.66" rx="2.17" transform="rotate(45 24.97 16)"/></svg></span><span>clinqclinq</span></a>
+    <ul class="tl">
+      <li><a class="lobby" href="../" target="_self"><span class="dot"></span><span data-i18n="nav_lobby">Lobby</span></a></li>
+      <li><a href="./" target="_self" aria-current="page"><span class="dot"></span><span data-i18n="nav_newsstand">Newsstand</span></a></li>
+      <li><a href="../gallery/" target="_self"><span class="dot"></span><span data-i18n="nav_gallery">Gallery</span></a></li>
+      <li><a href="../lab/" target="_self"><span class="dot"></span><span data-i18n="nav_lab">Lab</span></a></li>
+      <li><a href="../theater/" target="_self"><span class="dot"></span><span data-i18n="nav_theater">Theater</span></a></li>
+      <li><a href="../salon/" target="_self"><span class="dot"></span><span data-i18n="nav_salon">Salon</span></a></li>
+      <li><a href="../select/" target="_self"><span class="dot"></span><span data-i18n="nav_select">Select</span></a></li>
+      <li><a href="../supply/" target="_self"><span class="dot"></span><span data-i18n="nav_supply">Supply</span></a></li>
+      <li><a href="../#about" target="_self"><span class="dot"></span><span data-i18n="nav_about">About</span></a></li>
+      <li><a href="../#contact" target="_self"><span class="dot"></span><span data-i18n="nav_contact">Contact</span></a></li>
+    </ul>
+  </nav>
+
+  <div class="wrap">
+    <header class="page-head">
+      <div>
+        <h1 data-i18n="page_h1"><span class="tint">Newsstand</span></h1>
+        <p class="lede" data-i18n="page_lede" data-i18n-hold></p>
+      </div>
+    </header>
+
+    <section id="works">
+      <div class="work-filters" id="workFilters" role="group" aria-label="Filter" hidden></div>
+      <div class="work-grid" id="workGrid"></div>
+    </section>
+
+    <footer>© <span id="y">2026</span> Copyright clinqclinq.studio</footer>
+  </div>
+
+  <script src="../works.js"></script>
+  <script>
+    window.PAGE_ZH = {
+      page_h1: '<span class="tint">報亭</span>',
+      page_lede: ''
+    };
+
+    (function () {
+      var SECTION = 'newsstand';
+      var grid = document.getElementById('workGrid');
+      var bar = document.getElementById('workFilters');
+      var list = WORKS.filter(function (t) { return t.section === SECTION; });
+      var current = 'all';
+      try { var h = location.hash.slice(1); if (TOPICS[h]) current = h; } catch (e) {}
+      function render() {
+        var zh = document.documentElement.lang === 'zh-Hant';
+        var counts = { all: list.length };
+        list.forEach(function (t) { counts[t.topic] = (counts[t.topic] || 0) + 1; });
+        var keys = Object.keys(TOPICS).filter(function (k) { return counts[k]; });
+        bar.hidden = keys.length < 2;
+        bar.innerHTML = ['all'].concat(keys).map(function (k) {
+          var label = k === 'all' ? (zh ? '全部' : 'All') : (zh ? TOPICS[k].zh : TOPICS[k].en);
+          return '<button type="button" data-k="' + k + '" aria-pressed="' + (k === current) + '">' + label + '<span class="n">' + counts[k] + '</span></button>';
+        }).join('');
+        grid.innerHTML = workCardsHTML(list, '../', zh, current);
+      }
+      bar.addEventListener('click', function (e) {
+        var b = e.target.closest('button');
+        if (!b) return;
+        current = b.getAttribute('data-k');
+        history.replaceState(null, '', current === 'all' ? location.pathname : '#' + current);
+        render();
+      });
+      window.__renderWorks = render;
+      render();
+    })();
+
+    (function () {
+      var lists = document.querySelectorAll('.tl');
+      var ACTIVE = 1;
+      function paint() {
+        lists.forEach(function (ul) {
+          var links = ul.querySelectorAll('a');
+          links.forEach(function (a, i) {
+            a.classList.toggle('active', i === ACTIVE);
+            a.classList.toggle('passed', i < ACTIVE);
+          });
+          ul.style.setProperty('--fill', (links[ACTIVE].offsetTop - links[0].offsetTop) + 'px');
+        });
+      }
+      window.__updateNav = paint;
+      window.addEventListener('resize', paint);
+      paint();
+    })();
+  </script>
+</body>
+</html>

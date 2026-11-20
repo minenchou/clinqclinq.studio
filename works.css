@@ -36,7 +36,7 @@
 .work-topic::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--c, var(--accent)); }
 .work-card strong { font-family: var(--serif); font-weight: 600; font-size: 19px; line-height: 1.35; transition: color .15s; }
 .work-card:hover strong { color: var(--pink); }
-.work-desc { color: var(--muted); font-size: 15px; line-height: 1.65; }
+.work-desc { color: var(--muted); font-size: 15px; line-height: 1.65; min-height: 3.3em; }
 @media (prefers-reduced-motion: reduce) { .work-thumb, .work-thumb img, .work-thumb .play { transition: none; } }
 
 .see-all { display: inline-flex; align-items: center; gap: 8px; margin-top: 26px;
@@ -64,3 +64,8 @@
 .featured-item .work-card { flex: 1; }
 .featured-item .see-all { margin-top: 18px; align-self: flex-start; }
 @media (max-width: 640px) { .featured-item .see-all { margin-top: 10px; margin-left: 138px; font-size: 15px; } }
+@media (min-width: 641px) {
+  #featuredGrid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 30px 20px; }
+  #featuredGrid .work-card strong { font-size: 18px; }
+  #featuredGrid .see-all { font-size: 15px; }
+}

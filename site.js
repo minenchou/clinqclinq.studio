@@ -16,11 +16,16 @@ window.PALETTES = [
 ];
 
 window.SITE_ZH = {
-  nav_work:    '作品',
-  nav_lab:     '互動知識',
-  nav_series:  '創作系列',
-  nav_about:   '關於',
-  nav_contact: '聯絡'
+  nav_lobby:     '大廳',
+  nav_newsstand: '報亭',
+  nav_gallery:   '展示廳',
+  nav_lab:       '實驗室',
+  nav_theater:   '劇場',
+  nav_salon:     '沙龍',
+  nav_select:    '選物',
+  nav_supply:    '補給站',
+  nav_about:     '關於',
+  nav_contact:   '聯絡'
 };
 
 (function () {
@@ -154,7 +159,15 @@ window.SITE_ZH = {
       var zh = lang === 'zh';
       nodes.forEach(function (el, i) {
         var k = el.getAttribute('data-i18n');
-        el.innerHTML = zh && ZH[k] != null ? ZH[k] : EN[i];
+        var zhText = ZH[k] != null ? ZH[k] : EN[i];
+        if (el.hasAttribute('data-i18n-hold')) {
+          // both languages sit in the same grid cell; the hidden one still takes up room,
+          // so the block keeps the height of the longer language and nothing below it moves
+          el.innerHTML = '<span class="i18n-v' + (zh ? '' : ' on') + '" lang="en">' + EN[i] + '</span>' +
+                         '<span class="i18n-v' + (zh ? ' on' : '') + '" lang="zh-Hant">' + zhText + '</span>';
+        } else {
+          el.innerHTML = zh ? zhText : EN[i];
+        }
       });
       root.lang = zh ? 'zh-Hant' : 'en';
       if (btn) {
@@ -177,7 +190,7 @@ window.SITE_ZH = {
     var q = new URLSearchParams(location.search).get('lang');
     if (q === 'zh' || q === 'en') initial = q;
     else { try { initial = localStorage.getItem('lang') || 'en'; } catch (e) {} }
-    if (initial === 'zh') apply('zh');
+    apply(initial);
 
     btn.addEventListener('click', function () { apply(isZh() ? 'en' : 'zh'); });
   }
