@@ -1,0 +1,16 @@
+# clinqclinq.studio
+# 不讓內容被拿去訓練 AI 模型；一般搜尋與 AI 搜尋引用照常開放。
+
+User-agent: GPTBot
+User-agent: ClaudeBot
+User-agent: anthropic-ai
+User-agent: Google-Extended
+User-agent: Applebot-Extended
+User-agent: CCBot
+User-agent: Bytespider
+User-agent: Meta-ExternalAgent
+User-agent: cohere-training-data-crawler
+Disallow: /
+
+User-agent: *
+Allow: /
