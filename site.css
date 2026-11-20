@@ -246,8 +246,6 @@ footer { margin-top: 72px; padding-top: 18px; border-top: 1px solid var(--line);
 @media (min-width: 641px) and (max-width: 1023px) {
   section { scroll-margin-top: 72px; }
 }
-/* desktop: the emblem column is as tall as the text beside it and the logo is centred on it,
-   so the logo lines up with the title-to-links block and adds no height of its own */
 @media (min-width: 641px) {
   header { align-items: stretch; }
   .emblem { position: relative; padding-top: 0; }

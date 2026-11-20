@@ -161,8 +161,6 @@ window.SITE_ZH = {
         var k = el.getAttribute('data-i18n');
         var zhText = ZH[k] != null ? ZH[k] : EN[i];
         if (el.hasAttribute('data-i18n-hold')) {
-          // both languages sit in the same grid cell; the hidden one still takes up room,
-          // so the block keeps the height of the longer language and nothing below it moves
           el.innerHTML = '<span class="i18n-v' + (zh ? '' : ' on') + '" lang="en">' + EN[i] + '</span>' +
                          '<span class="i18n-v' + (zh ? ' on' : '') + '" lang="zh-Hant">' + zhText + '</span>';
         } else {

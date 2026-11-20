@@ -1,6 +1,3 @@
-# clinqclinq.studio
-
-
 User-agent: GPTBot
 User-agent: ClaudeBot
 User-agent: anthropic-ai

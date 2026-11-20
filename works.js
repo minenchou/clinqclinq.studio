@@ -14,8 +14,7 @@ window.WORKS = [
     en: 'Qursive', zh: 'Qursive',
     en_d: 'A quantum sensory experiment. A field of spheres dances on its own.',
     zh_d: '一場量子感官實驗。球體各自起舞。' },
-  // url: the trip planner lives in its own repo; the thumbnail stays at supply/trip-planner/thumb.webp
-  { section: 'supply', slug: 'trip-planner', topic: 'tool', featured: true, url: 'https://clinqclinq.studio/trip-planner/',
+  { section: 'supply', slug: 'trip-planner', topic: 'tool', featured: true, url: 'https://clinqclinq.studio/supply/trip-planner/',
     en: 'Trip Planner', zh: 'Trip Planner',
     en_d: 'A small tool for viewing and editing AI-generated travel itineraries.',
     zh_d: '方便查看與編輯 AI 生成的旅遊行程的小工具。' }
