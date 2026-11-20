@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trip Planner</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha384-sHL9NAb7lN7rfvG5lfHpm643Xkcjzp4jFvuavGOndn6pjVqS6ny56CAt3nsEVT4H" crossorigin="anonymous">
+<style>
+:root{--bg:#fff6f2;--ink:#3a3550;--muted:#8f8f8f;--faint:#b3b3b3;--line:#ededed;--panel:#fffefd;--hover:#fdf0f5;--accent:#3d6eff;--warn:#ef5d7a;--alt:#b3b3b3;--sel:#ffffff;--focus:#eef1fe;--pill-on:#ffb07c;--cat:#55575c;--gbtn:#3d6eff;--toast:#696969;--mark-label:#3a3550;--alt-mark:#bdbdbd;--map-bg:#fffefd;--ok:#3fc28f;--dirty:#ffb454;--saving:#3d6eff;--err:#ef5d7a;--surface:#ffffff;--on:#ffffff;--photo-nav:#282c28;--help-btn:#fff799;--help-btn-text:#3a3550;--help-mark:#fbf0c3;--mark-border:#ffffff;--halo:#ffffff;--line2:color-mix(in srgb,var(--line),#000 5%);--line3:color-mix(in srgb,var(--line),#000 10%);--soft:color-mix(in srgb,var(--ink) 75%,var(--muted))}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;font-family:"Noto Serif TC","Songti TC","Source Han Serif TC","PMingLiU","MingLiU",serif;color:var(--ink);background:var(--bg)}
+button,input,select{font:inherit;color:inherit}
+.leaflet-container{font-family:inherit}
+#app{display:flex;height:100vh;height:100dvh;width:100%}
+#grab{display:none}
+#side{width:390px;min-width:320px;background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column}
+#head{padding:14px 16px 4px;position:relative}
+#ttl{font-size:calc(18px*var(--fz));font-weight:650;letter-spacing:.3px;display:block;margin-right:28px}
+#sub{font-size:calc(12.5px*var(--fz));color:var(--muted);line-height:1.5;display:block;margin-top:3px}
+.pen{border:none;background:none;cursor:pointer;color:var(--faint);padding:2px 5px;border-radius:6px;line-height:0;flex:none}
+.pen:hover{background:var(--hover);color:var(--ink)}
+.pen svg{width:14px;height:14px}
+#head .pen{position:absolute;right:12px;top:14px;opacity:0}
+#head:hover .pen,#head.editing .pen{opacity:1}
+.ed{outline:none;border-radius:4px;cursor:text;min-width:1em}
+.ed[contenteditable=true]{background:var(--surface);box-shadow:0 0 0 1px var(--line2)}
+.ed[contenteditable=true]:focus{box-shadow:0 0 0 1.5px var(--accent)}
+.ed[contenteditable=true]:empty::before{content:attr(data-ph);color:var(--faint)}
+#tabs{display:flex;gap:6px;align-items:center;padding:8px 16px 4px;flex-wrap:wrap}
+.pill,.fbtn{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 11px;font-size:calc(12.5px*var(--fz));line-height:1.35;cursor:pointer}
+.pill.on{background:var(--pill-on);color:var(--on);border-color:transparent}
+.sp{flex:1}
+#opts{display:flex;gap:12px;padding:2px 16px 8px;font-size:calc(12px*var(--fz));color:var(--muted);flex-wrap:wrap}
+#opts label{display:flex;gap:4px;align-items:center;cursor:pointer}
+#list{overflow:auto;flex:1;padding:0 8px 24px}
+.day{border:1px solid transparent;border-radius:10px;padding:6px 8px;margin:2px 0}
+.day.sel{background:var(--sel);border-color:var(--line);box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.day.dropt{border-color:var(--accent);background:var(--focus)}
+.day.dragging{opacity:.35}
+.dh{display:flex;align-items:center;gap:7px;cursor:pointer;border-radius:7px;padding:2px 0}
+.dh:hover{background:var(--hover)}
+.day.sel .dh:hover,.day.editing .dh:hover{background:transparent}
+.dh .pen{opacity:0}.dh:hover .pen,.day.sel .dh .pen,.day.editing .dh .pen{opacity:1}
+.dgrip,.grip{width:12px;flex:none;color:var(--faint);cursor:grab;font-size:calc(11px*var(--fz));line-height:calc(19px*var(--fz));text-align:center;opacity:0;user-select:none}
+.dh:hover .dgrip,.it:hover .grip{opacity:1}
+.dot{width:13px;height:13px;border-radius:50%;flex:none;border:none;padding:0}
+.day.editing .dot{cursor:pointer;box-shadow:0 0 0 2px var(--surface),0 0 0 3px var(--line2)}
+.dd{font-weight:650;font-size:calc(14px*var(--fz));white-space:nowrap}
+.dd.pick{position:relative;cursor:pointer;background:var(--surface);box-shadow:0 0 0 1px var(--line2);border-radius:4px;padding:0 4px}
+.dd.pick:hover{box-shadow:0 0 0 1.5px var(--accent)}
+.dd.pick input{position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;pointer-events:none;border:none;padding:0;margin:0}
+.dc{font-size:calc(13.5px*var(--fz))}
+.dmeta{font-size:calc(14px*var(--fz));font-variant-numeric:tabular-nums;color:var(--faint);white-space:nowrap;margin-left:auto}
+.dt{font-size:calc(12px*var(--fz));color:var(--muted);margin:2px 0 0 39px;line-height:1.45;display:block}
+.dt:empty{display:none}
+.day.editing .dt:empty{display:block}
+.items{margin:6px 0 2px}
+.it{display:flex;gap:6px;align-items:flex-start;padding:5px 3px 5px 0;border-radius:7px;position:relative;font-size:calc(13px*var(--fz));line-height:1.4;cursor:pointer}
+.it:hover{background:var(--hover)}
+.it.focus{background:var(--focus)}
+.it.editing{background:color-mix(in srgb,var(--hover) 40%,var(--surface));cursor:default}
+.ic.pick{cursor:pointer;box-shadow:0 0 0 2px var(--surface),0 0 0 3.5px var(--line3)}
+.badge.pick{cursor:pointer;box-shadow:0 0 0 2px var(--surface),0 0 0 3.5px var(--line3)}
+.catpick{display:grid;grid-template-columns:repeat(5,1fr);gap:2px}
+.pop .catpick button{display:flex;flex-direction:column;align-items:center;gap:4px;padding:7px 4px;font-size:calc(11.5px*var(--fz));text-align:center}
+.pop .catpick button.on{background:var(--focus)}
+.it.dragging{opacity:.35}
+.it.drop-before::before,.it.drop-after::after{content:"";position:absolute;left:4px;right:4px;height:2px;background:var(--accent);border-radius:2px}
+.it.drop-before::before{top:-1px}.it.drop-after::after{bottom:-1px}
+:root{--fz:1;--tw:calc(50px*var(--fz))}
+.tm{width:var(--tw);flex:none;font-variant-numeric:tabular-nums;font-size:calc(14px*var(--fz));color:var(--muted);line-height:calc(20px*var(--fz));text-align:center}
+.it.editing .tm:empty::before{content:"--:--";color:var(--faint)}
+.tm.warn{color:var(--warn);font-weight:600}
+.tsel{flex:none;width:var(--tw);justify-content:center;display:flex;align-items:center;gap:1px;font-variant-numeric:tabular-nums;line-height:calc(20px*var(--fz))}
+.tsel select{appearance:none;-webkit-appearance:none;border:1px solid var(--line2);border-radius:5px;background:var(--surface);height:calc(20px*var(--fz));padding:0 3px;font-size:calc(12.5px*var(--fz));font-variant-numeric:tabular-nums;cursor:pointer;outline:none;text-align:center}
+.tsel select:focus{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+.tsel select:disabled{color:var(--faint);cursor:default}
+.tsel span{color:var(--muted);font-size:calc(12px*var(--fz))}
+.tsel.warn select{color:var(--warn);font-weight:600}
+.ic{flex:none;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.ic svg{width:12px;height:12px}
+.ic.alt{background:var(--surface)!important;border:1.5px dashed var(--alt)}
+.ic.plain{background:transparent!important}
+.tx{flex:1;min-width:0;display:flex;flex-direction:column}
+.nm{font-weight:550;word-break:break-word}
+.nt{display:block;color:var(--muted);font-size:calc(12px*var(--fz));word-break:break-word;white-space:pre-wrap}
+.nt:empty{display:none}
+.it.editing .nt:empty{display:block}
+.meta2{font-size:calc(11.5px*var(--fz));color:var(--faint)}
+.it.small{font-size:calc(12.5px*var(--fz))}
+.it.small .nm{font-weight:400;color:var(--muted)}
+.it.alt .nm{color:var(--alt);font-weight:500}
+.tag{font-size:calc(10.5px*var(--fz));margin-left:6px;color:var(--on);background:var(--alt);border-radius:999px;padding:0 6px;font-weight:500;vertical-align:1px;white-space:nowrap}
+.acts{flex:none;display:flex;flex-direction:column;align-items:center;gap:4px}
+.it .pen{opacity:0;margin-top:1px}
+.it:hover .pen,.it.editing .pen{opacity:1}
+.busy{font-size:calc(11.5px*var(--fz));color:var(--accent)}
+.gm{display:flex;gap:8px;align-items:center;margin-top:4px;font-size:calc(12px*var(--fz))}
+.gm a{color:var(--accent);text-decoration:none;white-space:nowrap;font-weight:400}
+.gm a:hover{text-decoration:underline}
+.gm input{flex:1;min-width:0;border:1px dashed var(--line2);border-radius:6px;padding:3px 7px;font-size:calc(12px*var(--fz));background:var(--surface);outline:none}
+.gm input:focus{border-style:solid;border-color:var(--accent)}
+.add{display:flex;gap:6px;align-items:center;margin:6px 0 2px 18px}
+.add input{flex:1;border:1px dashed var(--line2);border-radius:7px;padding:5px 9px;font-size:calc(12.5px*var(--fz));background:transparent;outline:none}
+.add input:focus{border-style:solid;border-color:var(--accent);background:var(--surface)}
+.add .addcat{width:22px;height:22px;border:none;padding:0;cursor:pointer}.add .addcat svg{width:12px;height:12px}.add .addcat.auto{background:transparent;border:1.5px dashed var(--line3)}
+.addday{display:block;margin:8px 0;width:100%;border:1px dashed var(--line2);background:none;border-radius:9px;padding:7px;color:var(--muted);cursor:pointer;font-size:calc(12.5px*var(--fz))}
+.addday:hover{background:var(--hover)}
+#list{position:relative}
+.chips{display:flex;gap:6px;padding:6px 6px 8px;align-items:center;position:sticky;top:0;z-index:5;background:var(--panel);flex-wrap:wrap}
+.cats{display:flex;gap:3px;flex-wrap:wrap}
+.cats button{border:none;padding:0;cursor:pointer;background:var(--cat)}
+.cats button:hover{background:var(--cat);filter:brightness(.7);box-shadow:0 0 0 2px var(--surface),0 0 0 3.5px var(--line3)}
+.cats button:disabled{opacity:.2;cursor:default;box-shadow:none}
+.cats button.catpen{background:transparent;border:1.5px solid var(--cat);color:var(--cat)}
+.cats button.catpen svg{width:11px;height:11px}
+.cats button.catpen:hover{background:var(--hover);filter:none}
+.grp{display:flex;align-items:center;gap:7px;font-size:calc(12.5px*var(--fz));font-weight:650;color:var(--soft);padding:10px 6px 4px;position:relative}
+.grp .c{font-weight:400;color:var(--faint)}
+.emo{font-size:12px;line-height:1;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;display:block}
+.mk.big .emo,.iconpick .emo,.cer .cib .emo{font-size:15px}.csub .emo{font-size:10px}
+.catedit{width:304px;padding:6px;overflow:auto}
+.cer{display:flex;align-items:center;gap:6px;padding:2px 2px;border-radius:7px;position:relative}
+.cer.dragging{opacity:.35}
+.cer.drop-before::before,.cer.drop-after::after{content:"";position:absolute;left:4px;right:4px;height:2px;background:var(--accent);border-radius:2px}
+.cer.drop-before::before{top:-1px}.cer.drop-after::after{bottom:-1px}
+.cgrip{width:12px;flex:none;color:var(--faint);cursor:grab;font-size:calc(11px*var(--fz));line-height:calc(26px*var(--fz));text-align:center;user-select:none}
+.cgrip:hover{color:var(--ink)}
+.pop .cer button{width:auto;flex:none;display:flex;align-items:center;justify-content:center;padding:0;border-radius:50%}
+.pop .cer .cib{width:26px;height:26px}.cer .cib svg{width:15px;height:15px}
+.pop .cer .cib.on{box-shadow:0 0 0 2px var(--surface),0 0 0 3.5px var(--accent)}
+.cen{flex:1;min-width:0;border:1px solid transparent;border-radius:6px;padding:4px 7px;font-size:calc(13px*var(--fz));outline:none;background:transparent}
+.cen:hover{border-color:var(--line)}.cen:focus{border-color:var(--accent);background:var(--surface)}
+.pop .cer .cex{width:24px;height:24px;color:var(--faint);font-size:16px;line-height:1}
+.pop .cer .cex:hover{color:var(--warn);background:var(--hover)}
+.catedit .iconpick{margin:4px 0 8px 20px}
+.emoin{grid-column:1/-1;margin-top:4px;width:100%;border:1px dashed var(--line2);border-radius:7px;padding:5px 8px;font-size:13px;outline:none;background:var(--surface)}
+.emoin:focus{border-style:solid;border-color:var(--accent)}
+.catedit .add{margin:6px 0 2px 20px}
+.ev .ic{display:inline-flex;vertical-align:middle;width:18px;height:18px;margin:-3px 5px 0 0;background:var(--cat)}.ev .ic svg{width:11px;height:11px}
+.iconpick{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.pop .iconpick button{display:flex;align-items:center;justify-content:center;padding:4px;border-radius:8px}
+.iconpick .ic{width:26px;height:26px}.iconpick .ic svg{width:15px;height:15px}
+.pop .iconpick button.on{background:var(--focus);box-shadow:inset 0 0 0 1.5px var(--accent)}
+.ev{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:9px 11px;margin:6px 4px;cursor:pointer;position:relative}
+.ev:hover{background:var(--hover)}
+.ev.focus{border-color:var(--accent)}
+.ev.editing{cursor:default;background:var(--surface)}
+.ev .pen{position:absolute;right:6px;top:7px;opacity:0}
+.ev:hover .pen,.ev.editing .pen{opacity:1}
+.ev .en{font-weight:600;font-size:calc(13.5px*var(--fz));line-height:1.4;margin-right:22px;display:block}
+.ev .grip{opacity:0;display:inline-block;margin-left:-6px;margin-right:2px}.ev:hover .grip{opacity:1}
+.ev .em{font-size:calc(12px*var(--fz));color:var(--muted);margin-top:2px;display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.ev .eh{font-size:calc(12.5px*var(--fz));margin-top:4px;line-height:1.45;display:block}
+.badge{display:inline-block;font-size:calc(11px*var(--fz));border-radius:999px;padding:1px 8px;color:var(--on);margin-right:6px;vertical-align:1px}
+.qnote{font-size:calc(12px*var(--fz));color:var(--muted);line-height:1.5;padding:8px 8px 4px}
+#foot{border-top:1px solid var(--line);padding:8px 12px;display:flex;align-items:center;gap:6px;font-size:calc(12px*var(--fz));background:var(--panel)}#foot .sp{display:none}
+#status{color:var(--muted);display:flex;align-items:center;gap:6px;min-width:0;flex:1}
+#status i{width:8px;height:8px;border-radius:50%;background:var(--ok);flex:none}
+#status.dirty i{background:var(--dirty)}#status.saving i{background:var(--saving)}#status.err i{background:var(--err)}
+#status span{line-height:1.35}
+.fbtn{white-space:nowrap;flex:none}
+#undoBtn,#redoBtn{width:27px;height:27px;padding:0;border-radius:50%;display:inline-flex;align-items:center;justify-content:center}
+#helpBtn{background:var(--help-btn);color:var(--help-btn-text)}
+.fbtn:hover{background:var(--hover)}
+.fbtn:disabled{opacity:.4;cursor:default}
+.pop{position:fixed;background:var(--surface);border:1px solid var(--line);border-radius:10px;box-shadow:0 8px 24px rgba(110,80,140,.16);padding:5px;z-index:3000;min-width:160px;font-size:calc(13px*var(--fz))}
+.pop button{display:block;width:100%;text-align:left;border:none;background:none;padding:7px 10px;border-radius:7px;cursor:pointer}
+.pop button:hover{background:var(--hover)}
+.pop button.danger{color:var(--warn)}
+.pop hr{border:none;border-top:1px solid var(--line);margin:4px 0}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--toast);color:var(--on);padding:9px 14px;border-radius:9px;font-size:calc(13px*var(--fz));display:none;z-index:3100;box-shadow:0 6px 20px rgba(0,0,0,.2);align-items:center;gap:12px}
+#toast button{background:none;border:none;color:color-mix(in srgb,var(--pill-on) 55%,#fff);cursor:pointer;font-weight:600;padding:0}
+#mapwrap{flex:1;position:relative;overflow:hidden}
+#map{position:absolute;inset:0;background:var(--map-bg)}
+.mk{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--mark-border);box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.mk svg{width:12px;height:12px}
+.mk.big{width:28px;height:28px}.mk.big svg{width:15px;height:15px}
+.mk.alt{background:#fff!important;border:1.5px dashed var(--alt-mark);box-shadow:none}
+.mk.dim{opacity:.28}
+.mk.focus{box-shadow:0 0 0 3px var(--mark-border),0 0 0 5.5px var(--accent)}
+.leaflet-tooltip.lb{background:none;border:none;box-shadow:none;padding:0 0 0 2px;font-size:calc(12.5px*var(--fz));font-weight:600;color:var(--mark-label);text-shadow:0 0 3px var(--halo),0 0 3px var(--halo),0 0 3px var(--halo),0 0 3px var(--halo);white-space:nowrap}
+.leaflet-tooltip.lb::before{display:none}
+.leaflet-tooltip.lb.alt{color:var(--muted);font-weight:500}
+.leaflet-tooltip.lb.city{font-size:calc(12.5px*var(--fz));font-weight:700}
+.leaflet-tooltip.tipx{font-size:calc(12.5px*var(--fz));font-weight:600;white-space:nowrap;max-width:none;padding:4px 9px}
+#card{position:absolute;right:14px;top:14px;width:340px;max-width:calc(100% - 28px);max-height:calc(100% - 28px);overflow:auto;background:var(--surface);border-radius:16px;box-shadow:0 8px 28px rgba(0,0,0,.18);display:none;z-index:1100}
+.ph{position:relative;height:210px;background:var(--hover);margin:10px 10px 0;border-radius:12px;overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:calc(12.5px*var(--fz));text-align:center}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.ph .nav{position:absolute;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:50%;border:none;background:color-mix(in srgb,var(--photo-nav) 45%,transparent);color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.ph .nav.l{left:10px}.ph .nav.r{right:10px}
+.ph .dots{position:absolute;bottom:10px;left:0;right:0;display:flex;gap:6px;justify-content:center}
+.ph .dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.55)}
+.ph .dots i.on{background:#fff}
+.ph .cred{position:absolute;left:8px;bottom:6px;font-size:calc(10px*var(--fz));color:#fff;text-shadow:0 0 3px #000;max-width:70%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;opacity:.85}
+#card .cx{position:absolute;top:18px;right:18px;width:34px;height:34px;border-radius:50%;border:none;background:color-mix(in srgb,var(--photo-nav) 45%,transparent);color:#fff;font-size:17px;cursor:pointer;z-index:2}
+#card .cx.solid{background:var(--hover);color:var(--ink)}
+.cb{padding:12px 16px 16px}
+.ct{font-size:calc(18px*var(--fz));font-weight:700;line-height:1.35;text-align:center}
+.csub{font-size:calc(12.5px*var(--fz));color:var(--muted);margin-top:4px;display:flex;align-items:center;justify-content:center;gap:5px}.csub .ic{width:17px;height:17px}.csub .ic svg{width:10px;height:10px}
+.cd{font-size:calc(13.5px*var(--fz));line-height:1.65;margin-top:10px;white-space:pre-wrap}
+.cn{font-size:calc(12.5px*var(--fz));line-height:1.55;margin-top:6px;color:var(--soft);white-space:pre-wrap}
+.grate{font-size:calc(12.5px*var(--fz));margin-top:8px;text-align:center;color:var(--soft)}
+.grev{font-size:calc(12px*var(--fz));color:var(--soft);background:var(--hover);border-radius:8px;padding:7px 9px;margin-top:6px;line-height:1.5}
+.gbtn{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:14px;padding:10px 12px;border-radius:11px;background:var(--gbtn);color:var(--on)!important;text-decoration:none;font-size:calc(13.5px*var(--fz));font-weight:600}
+.gbtn:hover{filter:brightness(.92)}
+.lab{font-size:calc(11px*var(--fz));color:var(--faint);margin-top:12px;display:block}
+.qin{width:100%;border:1px solid var(--line);border-radius:7px;padding:5px 8px;font-size:calc(12px*var(--fz));margin-top:3px}
+.links{display:flex;gap:16px;margin-top:12px;font-size:calc(12.5px*var(--fz));flex-wrap:wrap}
+.links a{color:var(--accent);text-decoration:none}
+.links a:hover{text-decoration:underline}
+.links .fix{margin-left:auto;border:none;background:none;padding:0;color:var(--accent);cursor:pointer;font-size:calc(12.5px*var(--fz))}
+.links .fix:hover{text-decoration:underline}
+#card .gm{margin-top:10px}
+#theme,#help{position:absolute;right:14px;top:14px;width:330px;max-width:calc(100% - 28px);max-height:calc(100% - 28px);overflow:auto;background:var(--surface);border-radius:16px;box-shadow:0 8px 28px rgba(0,0,0,.18);display:none;z-index:1150;padding:14px 16px 16px}
+#theme .th,#help .th{display:flex;align-items:center;font-size:calc(16px*var(--fz));font-weight:700}
+#theme .th button,#help .th button{margin-left:auto;border:none;background:var(--hover);width:30px;height:30px;border-radius:50%;cursor:pointer;font-size:16px;color:var(--ink)}
+#theme .tg,#help .tg{font-size:calc(12px*var(--fz));color:var(--muted);font-weight:650;margin:14px 0 4px}
+#theme .tr{display:flex;align-items:center;gap:10px;padding:3px 2px;font-size:calc(13px*var(--fz))}
+#theme .sw{position:relative;width:26px;height:26px;border-radius:7px;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.12);cursor:pointer;overflow:hidden}
+#theme .sw input{position:absolute;left:-6px;top:-6px;width:calc(100% + 12px);height:calc(100% + 12px);opacity:0;cursor:pointer;border:none;padding:0}
+#theme .tn{flex:1;min-width:0}
+#theme .hx{width:80px;border:1px solid transparent;border-radius:6px;padding:2px 6px;font:calc(12px*var(--fz)) ui-monospace,Menlo,Consolas,monospace;color:var(--muted);background:transparent;outline:none}
+#theme .hx:hover{border-color:var(--line)}#theme .hx:focus{border-color:var(--accent);background:var(--surface);color:var(--ink)}
+#theme .sw0{width:26px;height:26px;flex:none}
+#theme .rg{width:80px;flex:none;margin:0;accent-color:var(--accent);cursor:pointer}
+#mapBtns{position:absolute;left:14px;top:14px;z-index:1000;display:flex;gap:6px}
+#mapBtns button{border:none;border-radius:999px;padding:6px 13px;font-size:calc(12.5px*var(--fz));cursor:pointer;background:color-mix(in srgb,var(--map-btn) var(--map-btn-o),transparent);color:var(--map-btn-text);box-shadow:0 1px 4px rgba(0,0,0,.14);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);white-space:nowrap}
+#theme .reset{margin-top:16px;border:none;background:none;color:var(--accent);cursor:pointer;padding:0;font-size:calc(12.5px*var(--fz))}
+#loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);color:var(--muted);font-size:calc(14px*var(--fz));z-index:4000}
+@media (hover:none){.dgrip,.grip,.dh .pen,.it .pen,.ev .pen,.ev .grip,#head .pen{opacity:1}}
+@media (max-width:760px){#app{flex-direction:column-reverse}#side{width:100%;min-width:0;height:var(--sideh,52%);flex:none;border-right:none;border-top:1px solid var(--line)}#mapwrap{flex:1 1 auto;min-height:0}
+#grab{display:block;flex:none;height:20px;margin-bottom:-8px;cursor:ns-resize;touch-action:none;position:relative}#grab::before{content:"";position:absolute;left:50%;top:8px;width:38px;height:4px;border-radius:2px;background:var(--line2);transform:translateX(-50%)}#side.resizing #grab::before{background:var(--accent)}#head{touch-action:none}#side.resizing{user-select:none}#card,#theme,#help{left:10px;right:10px;width:auto;top:10px;max-height:calc(100% - 20px)}.ph{height:160px}#mapBtns{left:10px;top:10px}}
+#help{width:400px;font-size:calc(13px*var(--fz));line-height:1.65}
+#help p{margin:4px 0}#help ol,#help ul{margin:4px 0;padding-left:20px}#help li{margin:3px 0}
+#help h4{font-size:calc(13.5px*var(--fz));margin:16px 0 4px;width:fit-content;padding:0 3px;background:linear-gradient(transparent 58%,var(--help-mark) 58%)}
+#help code{font:calc(12px*var(--fz)) ui-monospace,Menlo,Consolas,monospace;background:var(--hover);border-radius:4px;padding:0 4px}
+#help .row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin:6px 0}
+#help textarea{width:100%;height:84px;border:1px dashed var(--line2);border-radius:8px;padding:6px 8px;font:calc(12px*var(--fz)) ui-monospace,Menlo,Consolas,monospace;background:var(--surface);outline:none;resize:vertical;margin-top:4px}
+#help textarea:focus{border-style:solid;border-color:var(--accent)}
+#help details{margin-top:12px;border-top:1px solid var(--line);padding-top:8px}#help summary{cursor:pointer;font-weight:650;font-size:calc(13px*var(--fz))}
+#help .disc{border:none;background:none;padding:2px 4px;margin-left:6px;cursor:pointer;font:inherit;font-size:calc(12px*var(--fz));color:var(--muted)}#help .disc::before{content:"▸";display:inline-block;width:1em;transition:transform .15s}#help .disc[aria-expanded="true"]::before{transform:rotate(90deg)}#help .disc:hover{color:var(--ink,inherit)}
+#help #promptBox{margin:2px 0 8px}
+#help pre{white-space:pre-wrap;font:calc(11.5px*var(--fz))/1.55 ui-monospace,Menlo,Consolas,monospace;background:var(--hover);border-radius:8px;padding:8px;max-height:260px;overflow:auto;margin:6px 0}
+#help table{border-collapse:collapse;font-size:calc(12px*var(--fz));width:100%;margin:6px 0}#help td{border-top:1px solid var(--line);padding:3px 4px;vertical-align:top}#help td:first-child{white-space:nowrap;font-family:ui-monospace,Menlo,Consolas,monospace}
+#help .fine{font-size:calc(11.5px*var(--fz));color:var(--muted)}
+#help .credit{margin-top:18px;border-top:1px solid var(--line);padding-top:10px;font-size:calc(11px*var(--fz));line-height:1.6;color:var(--faint)}#help .credit p{margin:2px 0}
+#help .credit a{color:inherit;text-decoration:none;border-bottom:1px solid var(--line2)}#help .credit a:hover{color:var(--muted)}
+.leaflet-bar a,.leaflet-bar a:hover{background-color:var(--surface);color:var(--ink);border-bottom-color:var(--line)}
+.leaflet-container .leaflet-control-attribution{font-size:calc(11px*var(--fz));line-height:1.5;color:var(--muted);background:color-mix(in srgb,var(--surface) 75%,transparent);padding:1px 7px;border-top-left-radius:6px}
+.leaflet-container .leaflet-control-attribution a{color:var(--muted);text-decoration:none}
+.leaflet-container .leaflet-control-attribution a:hover{color:var(--ink);text-decoration:underline}
+.basetile{filter:url(#duo)}.labeltile{filter:url(#ink)}.osmtile{filter:saturate(.55) sepia(.18) hue-rotate(290deg) brightness(1.08) contrast(.9)}
+.pop .fzrow{display:flex;align-items:center;gap:4px;padding:3px 4px 3px 10px}
+.pop .fzrow .fzl{flex:1}
+.pop .fzrow .fzv{min-width:3.2em;text-align:center;font-variant-numeric:tabular-nums;color:var(--muted)}
+.pop .fzrow button{width:26px;height:26px;padding:0;display:flex;align-items:center;justify-content:center;border-radius:50%;color:var(--muted)}
+.pop .fzrow button{font-size:17px;line-height:1;font-family:system-ui,-apple-system,sans-serif}
+.pop .fzrow button:disabled{opacity:.3;cursor:default;background:none}
+</style></head><body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="duo" color-interpolation-filters="sRGB"><feColorMatrix type="saturate" values="0"></feColorMatrix><feComponentTransfer><feFuncR type="table" tableValues="0 1"></feFuncR><feFuncG type="table" tableValues="0 1"></feFuncG><feFuncB type="table" tableValues="0 1"></feFuncB></feComponentTransfer></filter><filter id="ink" color-interpolation-filters="sRGB"><feColorMatrix type="saturate" values="0"></feColorMatrix><feComponentTransfer><feFuncR type="table" tableValues="0.00 0.16 0.28 0.40 0.44 0.48 0.52 0.56 0.66 0.83 1.00"></feFuncR><feFuncG type="table" tableValues="0.00 0.16 0.28 0.40 0.44 0.48 0.52 0.56 0.66 0.83 1.00"></feFuncG><feFuncB type="table" tableValues="0.00 0.16 0.28 0.40 0.44 0.48 0.52 0.56 0.66 0.83 1.00"></feFuncB></feComponentTransfer></filter></svg>
+<div id="loading">載入行程中…</div>
+<div id="app">
+ <aside id="side">
+  <div id="grab"></div>
+  <div id="head"><span id="ttl" class="ed"></span><span id="sub" class="ed"></span></div>
+  <div id="tabs">
+   <button class="pill" data-tab="days">行程</button>
+   <button class="pill" data-tab="places">地點</button>
+   <button class="pill" data-tab="events">活動</button>
+   <span class="sp"></span>
+   <button class="pill" id="helpBtn">說明</button>
+  </div>
+  <div id="opts">
+   <label><input type="checkbox" id="optDetail" checked="">顯示交通與住宿細節</label>
+  </div>
+  <div id="list"></div>
+  <div id="foot">
+   <div id="status"><i></i><span>已暫存在瀏覽器</span></div>
+   <span class="sp"></span>
+   <button class="fbtn" id="undoBtn" title="復原" aria-label="復原">↶</button>
+   <button class="fbtn" id="redoBtn" title="重做" aria-label="重做">↷</button>
+   <button class="fbtn" id="saveBtn">儲存</button>
+   <button class="fbtn" id="moreBtn">工具</button>
+  </div>
+ </aside>
+ <div id="mapwrap"><div id="map"></div>
+  <div id="mapBtns"><button id="allbtn">全覽</button><button id="mapToggle"></button></div>
+  <div id="card"></div>
+  <div id="theme"></div>
+  <div id="help">
+   <div class="th">使用說明<button data-act="close" aria-label="關閉">×</button></div>
+   <p>這是一個方便查看與編輯 AI 生成的旅遊行程的小工具，目前以電腦版為主。修改時資料暫存在瀏覽器，按「儲存」寫回 .html 檔。免安裝、註冊或外部 API 金鑰。可以自行部署分享給其他人，手機也可以瀏覽編輯，只是部分功能不支援。</p>
+
+   <h4>請 AI 排行程</h4>
+   <ol>
+    <li>點擊下方按鈕複製提示詞，貼給你的 AI。</li>
+    <li>在最後寫上旅行條件。已經有行程也可以直接貼上。</li>
+    <li>把 AI 回覆的 JSON 整段貼到下方框框，按「匯入」。</li>
+    <li>檢查後按左下「儲存」，就得到一個屬於你的行程嚕！</li>
+   </ol>
+   <div class="row"><button class="pill" data-act="copyPrompt">複製 AI 提示詞</button><button class="disc" data-act="togglePrompt" aria-expanded="false" aria-controls="promptBox">顯示提示詞與資料格式</button></div>
+   <div id="promptBox" class="near" hidden="">
+    <p>行程資料存在 HTML 裡 id 為 trip-data 的區塊，格式是提示詞裡的 JSON。大部分欄位都能省略，最少只要 <code>{"days":[{"date":"2027-04-01","items":[{"n":"清水寺"}]}]}</code>。</p>
+    <pre id="helpPrompt"></pre>
+    <table>
+     <tbody><tr><td>t</td><td>開始時間，24 小時制</td></tr>
+     <tr><td>k</td><td>類別，只能用提示詞列出的類別；transit 與 stay 會套用所在區域的顏色，而不是當天的顏色</td></tr>
+     <tr><td>lat lon</td><td>緯度與經度，有座標才會出現在地圖上</td></tr>
+     <tr><td>q</td><td>Google 地圖搜尋字詞</td></tr>
+     <tr><td>wiki</td><td>英文維基條目名，用來找照片</td></tr>
+     <tr><td>alt</td><td>true 表示當天的備案</td></tr>
+     <tr><td>pool</td><td>候選地點，還沒決定是否排入</td></tr>
+     <tr><td>events</td><td>旅行期間當地的展覽、會議、節慶等活動</td></tr>
+     <tr><td>cats evCats</td><td>地點與活動類別，在介面裡改過才會出現</td></tr>
+     <tr><td>theme</td><td>改過的顏色，省略時用預設配色</td></tr>
+     <tr><td>updatedAt</td><td>最後修改時間，手動編輯時省略</td></tr>
+    </tbody></table>
+    <p class="fine"></p>
+   </div>
+   <textarea id="helpPaste" placeholder="貼上 AI 回覆的 JSON" spellcheck="false"></textarea>
+   <div class="row"><button class="pill" data-act="paste">匯入</button><span class="fine">匯入會取代目前的行程，按 ↶ 返回</span></div>
+
+   <h4>手動編輯</h4>
+   <ul>
+    <li>「工具」&gt;「重新開始」，從空白開始編輯。</li>
+    <li>「＋新增一天」&gt;「＋新增地點或行程」。</li>
+    <li>開頭打時間會自動排序，例如 <code>09:30 清水寺</code>。</li>
+    <li>按鉛筆編輯。按勾勾下方的圖釘自動定位。</li>
+    <li>找不到位置時，貼上 Google 地圖網址（需要電腦版）。</li>
+    <li>「地點」分頁可以存放候選地點，或設定成某天的備案。</li>
+   </ul>
+
+
+   <h4>下載</h4>
+   <div class="row">
+    <button class="pill" data-act="dlHTML">範例 HTML</button>
+    <button class="pill" data-act="dlJSON">範例 JSON</button>
+   </div>
+
+
+   <details><summary>外部服務與限制</summary>
+    <ul>
+     <li>地圖使用 <a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a> 與 Esri，載入失敗改用 <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>。自動定位使用 Nominatim。照片來自 Wikipedia、Wikimedia Commons 與 Openverse。</li>
+     <li>行程不會上傳到任何伺服器，只存在瀏覽器與檔案裡。定位和搜尋照片時，地點名稱會發送到以上的服務。</li>
+     <li>離線時地圖和照片不會載入。冷門地點自動定位可能找不到，需使用 Google 地圖網址定位。</li>
+     <li>地點、時間與開放資訊僅供參考，出發前請再確認。</li>
+    </ul>
+   </details>
+   <div class="credit">
+    <p>© 2026 <a data-link="studio" target="_blank" rel="noopener">clinqclinq studio</a><span data-link="github"> · <a target="_blank" rel="noopener">GitHub</a></span></p>
+    <p>MIT 授權，歡迎自由使用、修改與分享，請保留版權聲明與授權條款。</p>
+    <p>地圖 © Esri、HERE、Garmin、<a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>，Powered by Esri。</p>
+    <p>照片 © 各原作者，見「圖片來源」。</p>
+   </div>
+  </div>
+ </div>
+</div>
+<div id="toast"><span id="toastmsg"></span><button id="toastact"></button></div>
+<script id="trip-data" type="application/json">{"v":2,"id":"kyoto-sample","updatedAt":1795104433213,"title":"範例行程：京都三日遊","sub":"京都抹茶之旅","days":[{"id":"d1","date":"2027-04-01","city":"京都","color":"#f07aa0","title":"東山散步","items":[{"id":"i1","t":"09:00","n":"京都車站","k":"transit","lat":34.9858,"lon":135.7588,"q":"Kyoto Station","wiki":"Kyoto_Station","note":"寄放行李後搭公車往東山"},{"id":"i2","t":"09:40","n":"清水寺","k":"arch","lat":34.9949,"lon":135.785,"q":"Kiyomizu-dera Kyoto","wiki":"Kiyomizu-dera","desc":"建在音羽山腰的古寺，木造舞台可以俯瞰京都市區。","note":""},{"id":"i3","t":"11:30","n":"% Arabica 東山","k":"cafe","lat":34.9985,"lon":135.7803,"q":"% Arabica Kyoto Higashiyama","desc":"八坂塔附近的咖啡館，適合走累時停一下。","note":""},{"id":"i4","t":"12:30","n":"八坂神社","k":"culture","lat":35.0037,"lon":135.7785,"q":"Yasaka Shrine Kyoto","wiki":"Yasaka_Shrine","desc":"祇園的守護神社，朱紅色樓門是東山的地標。","note":""},{"id":"i5","t":"13:30","n":"錦市場午餐","k":"life","lat":35.005,"lon":135.7649,"q":"Nishiki Market Kyoto","wiki":"Nishiki_Market","desc":"約四百公尺長的室內市場，邊走邊吃最方便。","note":""},{"id":"i6","t":"15:30","n":"京都國立博物館","k":"culture","lat":34.9899,"lon":135.7731,"q":"Kyoto National Museum","wiki":"Kyoto_National_Museum","alt":true,"note":"下雨時的備案"},{"id":"i7","t":"18:30","n":"回飯店","k":"stay","note":"飯店名稱自行填入"}]},{"id":"d2","date":"2027-04-02","city":"京都","color":"#f6a2bb","title":"伏見稻荷與哲學之道","items":[{"id":"i8","t":"07:30","n":"伏見稻荷大社","k":"culture","lat":34.9671,"lon":135.7727,"q":"Fushimi Inari-taisha","wiki":"Fushimi_Inari-taisha","desc":"千本鳥居沿山而上，清晨人少比較好拍。","note":"走到四之辻大約一小時"},{"id":"i9","t":"11:00","n":"JR 奈良線往東福寺轉車","k":"transit","note":""},{"id":"i10","t":"13:00","n":"銀閣寺","k":"arch","lat":35.027,"lon":135.7982,"q":"Ginkaku-ji Kyoto","wiki":"Ginkaku-ji","desc":"室町時代的山莊寺院，枯山水與苔庭是重點。","note":""},{"id":"i11","t":"14:30","n":"哲學之道","k":"nature","lat":35.0225,"lon":135.7946,"q":"Philosopher's Path Kyoto","wiki":"Philosopher's_Walk","desc":"沿水渠的步道，櫻花季時兩旁開滿花。","note":""},{"id":"i12","t":"18:00","n":"回飯店","k":"stay","note":""}]},{"id":"d3","date":"2027-04-03","city":"京都","color":"#e5668f","title":"嵐山與金閣寺","items":[{"id":"i13","t":"08:30","n":"嵐山竹林小徑","k":"nature","lat":35.017,"lon":135.6713,"q":"Arashiyama Bamboo Grove","wiki":"Arashiyama","desc":"高聳竹林夾道的小路，早上光線最好。","note":""},{"id":"i14","t":"09:30","n":"天龍寺","k":"arch","lat":35.0158,"lon":135.6737,"q":"Tenryu-ji Kyoto","wiki":"Tenryū-ji","desc":"嵐山的禪寺，曹源池庭園借景後方山色。","note":""},{"id":"i15","t":"11:00","n":"渡月橋","k":"arch","lat":35.0128,"lon":135.6778,"q":"Togetsukyo Bridge","wiki":"Togetsukyō","desc":"橫跨桂川的木橋，嵐山最經典的畫面。","note":""},{"id":"i16","t":"13:30","n":"金閣寺","k":"arch","lat":35.0394,"lon":135.7292,"q":"Kinkaku-ji Kyoto","wiki":"Kinkaku-ji","desc":"貼滿金箔的舍利殿倒映在鏡湖池上。","note":""},{"id":"i17","t":"16:30","n":"京都車站","k":"transit","lat":34.9858,"lon":135.7588,"q":"Kyoto Station","wiki":"Kyoto_Station","note":""}]}],"pool":[{"id":"p1","n":"鴨川三條河岸","k":"nature","lat":35.0089,"lon":135.772,"q":"Kamo River Sanjo Kyoto","desc":"傍晚坐在河岸看夕陽，是京都人的日常。","city":"京都","note":""},{"id":"p2","n":"蔦屋書店","k":"life","city":"京都","note":"示範沒有座標的地點，需要自行補位置，點一下用 Google 地圖網址定位"}],"events":[{"id":"e1","n":"京都櫻花季","dates":"3 月下旬到 4 月上旬","city":"京都","venue":"哲學之道、鴨川","lat":35.0225,"lon":135.7946,"fit":"順路","how":"第二天下午走哲學之道時順便賞櫻，花期每年不同，出發前查開花預報。","q":"Philosopher's Path Kyoto","k":"e_節慶"}],"evCats":[{"key":"e_藝術","name":"藝術","icon":"art"},{"key":"e_會議","name":"會議","icon":"mic"},{"key":"e_表演","name":"表演","icon":"music"},{"key":"e_節慶","name":"節慶","icon":"gift"},{"key":"e_工作坊","name":"工作坊","icon":"ticket"}],"theme":{"helpMark":"#fff799"},"catsV2":1,"cats":[{"key":"nature","name":"自然","icon":"nature"},{"key":"art","name":"藝術","icon":"art"},{"key":"culture","name":"文化","icon":"culture"},{"key":"arch","name":"建築","icon":"arch"},{"key":"academic","name":"學術","icon":"academic"},{"key":"restaurant","name":"餐廳","icon":"restaurant"},{"key":"cafe","name":"咖啡","icon":"cafe"},{"key":"life","name":"生活","icon":"life"},{"key":"stay","name":"住宿","icon":"stay"},{"key":"transit","name":"交通","icon":"transit"}],"catsGone":[]}</script>
+<script id="sample-trip" type="application/json">{"v":2,"id":"kyoto-sample","updatedAt":1795100338118,"title":"範例行程：京都三日遊","sub":"京都抹茶之旅","days":[{"id":"d1","date":"2027-04-01","city":"京都","color":"#f07aa0","title":"東山散步","items":[{"id":"i1","t":"09:00","n":"京都車站","k":"transit","lat":34.9858,"lon":135.7588,"q":"Kyoto Station","wiki":"Kyoto_Station","note":"寄放行李後搭公車往東山"},{"id":"i2","t":"09:40","n":"清水寺","k":"arch","lat":34.9949,"lon":135.785,"q":"Kiyomizu-dera Kyoto","wiki":"Kiyomizu-dera","desc":"建在音羽山腰的古寺，木造舞台可以俯瞰京都市區。","note":""},{"id":"i3","t":"11:30","n":"% Arabica 東山","k":"cafe","lat":34.9985,"lon":135.7803,"q":"% Arabica Kyoto Higashiyama","desc":"八坂塔附近的咖啡館，適合走累時停一下。","note":""},{"id":"i4","t":"12:30","n":"八坂神社","k":"culture","lat":35.0037,"lon":135.7785,"q":"Yasaka Shrine Kyoto","wiki":"Yasaka_Shrine","desc":"祇園的守護神社，朱紅色樓門是東山的地標。","note":""},{"id":"i5","t":"13:30","n":"錦市場午餐","k":"life","lat":35.005,"lon":135.7649,"q":"Nishiki Market Kyoto","wiki":"Nishiki_Market","desc":"約四百公尺長的室內市場，邊走邊吃最方便。","note":""},{"id":"i6","t":"15:30","n":"京都國立博物館","k":"culture","lat":34.9899,"lon":135.7731,"q":"Kyoto National Museum","wiki":"Kyoto_National_Museum","alt":true,"note":"下雨時的備案"},{"id":"i7","t":"18:30","n":"回飯店","k":"stay","note":"飯店名稱自行填入"}]},{"id":"d2","date":"2027-04-02","city":"京都","color":"#f6a2bb","title":"伏見稻荷與哲學之道","items":[{"id":"i8","t":"07:30","n":"伏見稻荷大社","k":"culture","lat":34.9671,"lon":135.7727,"q":"Fushimi Inari-taisha","wiki":"Fushimi_Inari-taisha","desc":"千本鳥居沿山而上，清晨人少比較好拍。","note":"走到四之辻大約一小時"},{"id":"i9","t":"11:00","n":"JR 奈良線往東福寺轉車","k":"transit","note":""},{"id":"i10","t":"13:00","n":"銀閣寺","k":"arch","lat":35.027,"lon":135.7982,"q":"Ginkaku-ji Kyoto","wiki":"Ginkaku-ji","desc":"室町時代的山莊寺院，枯山水與苔庭是重點。","note":""},{"id":"i11","t":"14:30","n":"哲學之道","k":"nature","lat":35.0225,"lon":135.7946,"q":"Philosopher's Path Kyoto","wiki":"Philosopher's_Walk","desc":"沿水渠的步道，櫻花季時兩旁開滿花。","note":""},{"id":"i12","t":"18:00","n":"回飯店","k":"stay","note":""}]},{"id":"d3","date":"2027-04-03","city":"京都","color":"#e5668f","title":"嵐山與金閣寺","items":[{"id":"i13","t":"08:30","n":"嵐山竹林小徑","k":"nature","lat":35.017,"lon":135.6713,"q":"Arashiyama Bamboo Grove","wiki":"Arashiyama","desc":"高聳竹林夾道的小路，早上光線最好。","note":""},{"id":"i14","t":"09:30","n":"天龍寺","k":"arch","lat":35.0158,"lon":135.6737,"q":"Tenryu-ji Kyoto","wiki":"Tenryū-ji","desc":"嵐山的禪寺，曹源池庭園借景後方山色。","note":""},{"id":"i15","t":"11:00","n":"渡月橋","k":"arch","lat":35.0128,"lon":135.6778,"q":"Togetsukyo Bridge","wiki":"Togetsukyō","desc":"橫跨桂川的木橋，嵐山最經典的畫面。","note":""},{"id":"i16","t":"13:30","n":"金閣寺","k":"arch","lat":35.0394,"lon":135.7292,"q":"Kinkaku-ji Kyoto","wiki":"Kinkaku-ji","desc":"貼滿金箔的舍利殿倒映在鏡湖池上。","note":""},{"id":"i17","t":"16:30","n":"京都車站","k":"transit","lat":34.9858,"lon":135.7588,"q":"Kyoto Station","wiki":"Kyoto_Station","note":""}]}],"pool":[{"id":"p1","n":"鴨川三條河岸","k":"nature","lat":35.0089,"lon":135.772,"q":"Kamo River Sanjo Kyoto","desc":"傍晚坐在河岸看夕陽，是京都人的日常。","city":"京都","note":""},{"id":"p2","n":"蔦屋書店","k":"life","city":"京都","note":"示範沒有座標的地點，需要自行補位置，點一下用 Google 地圖網址定位"}],"events":[{"id":"e1","n":"京都櫻花季","dates":"3 月下旬到 4 月上旬","city":"京都","venue":"哲學之道、鴨川","lat":35.0225,"lon":135.7946,"fit":"順路","how":"第二天下午走哲學之道時順便賞櫻，花期每年不同，出發前查開花預報。","q":"Philosopher's Path Kyoto","k":"e_節慶"}],"evCats":[{"key":"e_藝術","name":"藝術","icon":"art"},{"key":"e_會議","name":"會議","icon":"mic"},{"key":"e_表演","name":"表演","icon":"music"},{"key":"e_節慶","name":"節慶","icon":"gift"},{"key":"e_工作坊","name":"工作坊","icon":"ticket"}],"theme":{},"catsV2":1,"cats":[{"key":"nature","name":"自然","icon":"nature"},{"key":"art","name":"藝術","icon":"art"},{"key":"culture","name":"文化","icon":"culture"},{"key":"arch","name":"建築","icon":"arch"},{"key":"academic","name":"學術","icon":"academic"},{"key":"restaurant","name":"餐廳","icon":"restaurant"},{"key":"cafe","name":"咖啡","icon":"cafe"},{"key":"life","name":"生活","icon":"life"},{"key":"stay","name":"住宿","icon":"stay"},{"key":"transit","name":"交通","icon":"transit"}],"catsGone":[]}</script>
+<script type="text/plain" id="ai-prompt">
+請幫我把旅行行程做成下面格式的 JSON。
+
+我會在最後給你其中一種
+・只給條件（日期或天數、進出城市、必去地點、已訂的交通與住宿、興趣與步調），請排出完整行程，並替每個城市補上候選地點
+・給現成行程，請照我的安排轉換，只補時間、座標與介紹，不要更動順序
+缺少日期、天數或城市時先問我，其他用合理預設，假設寫在 note 請我確認。資料齊全後只輸出 JSON，不要其他文字。
+
+格式
+{"title":"行程名","sub":"行程描述",
+ "days":[{"date":"YYYY-MM-DD","city":"城市","color":"#色碼","title":"當天主題",
+   "items":[{"t":"HH:MM","n":"名稱","k":"類別","lat":緯度,"lon":經度,
+             "q":"Google 地圖搜尋字詞","wiki":"英文維基條目名","desc":"一兩句介紹","note":"備註"}]}],
+ "pool":[{"n":"名稱","k":"類別","lat":緯度,"lon":經度,"q":"","desc":"","city":"城市"}],
+ "events":[{"n":"活動名","dates":"日期","city":"城市","venue":"場地","lat":null,"lon":null,
+            "fit":"順路|可安排|不順路","how":"備註","q":"場地 城市"}]}
+
+類別 k 只能用這些
+nature 自然景觀、art 美術館與展覽、culture 博物館與歷史場所、arch 有特色的建築、
+academic 學校與研究機構、restaurant 餐廳、cafe 咖啡館、life 逛街市集書店、
+stay 住宿與起床回飯店、transit 車站機場與移動
+
+規則
+1. 每一項都要有開始時間，交通、用餐、起床、回飯店也列進去，讓一天從頭到尾連得起來
+2. 停留時間要合理，大型博物館兩到三小時，同區域排在一起，避開休館日，跨區移動寫成交通項目並估時間
+3. lat、lon 是數字，盡量準到 100 公尺內；交通移動和回飯店可以省略座標
+4. q 用當地語言或英文正式名稱加城市；wiki 只在確定條目存在時填，不確定就省略
+5. desc 用繁體中文寫一兩句
+6. 每個城市一個色系，同城市的日子用同色系不同深淺，相鄰日深淺交錯；用柔和明亮的多巴胺色，例如粉 #f07aa0、藍 #7f9ef6、綠 #5ccb9a、橘 #f9a25e、紫 #b392f0、青 #45cabf，不要高飽和正色，也不要淡到白色圖示看不清
+7. 不一定要去的地點放 pool；當天可能去的留在那天並加 "alt": true
+8. 查不到的資訊不要編造，推測的寫在 note 請我確認
+9. events 只放旅行期間、路線附近真實存在的活動，沒有就給空陣列
+
+我的條件或行程
+（寫在這裡，文字、表格或條列都可以）
+（例如日期、城市、必去地點、興趣與步調）
+（已經有行程也可以直接貼上）
+
+</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha384-cxOPjt7s7Iz04uaHJceBmS+qpjv2JkIHNVcuOrM+YHwZOmJGBXI00mdUXEq65HTH" crossorigin="anonymous"></script>
+<script>
+"use strict";
+const TEMPLATE='<!DOCTYPE html>\n'+document.documentElement.outerHTML;
+/* ---------- categories ---------- */
+const P=(d)=>`<path d="${d}"/>`;
+const BASE={
+ nature:{name:'自然',svg:P('M2 20 9 8l4 6 3-4 6 10z')+'<circle cx="17" cy="6" r="2.2"/>'},
+ art:{name:'藝術',svg:P('M12 3a9 9 0 1 0 0 18c1 0 1.8-.8 1.8-1.8 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-1 .8-1.8 1.8-1.8h2.1A4.3 4.3 0 0 0 21 10.7C21 6.4 17 3 12 3z')+'<circle cx="7.5" cy="11" r="1.5" fill="var(--bgc)"/><circle cx="10" cy="7" r="1.5" fill="var(--bgc)"/><circle cx="14.5" cy="7" r="1.5" fill="var(--bgc)"/>'},
+ culture:{name:'文化',svg:P('M12 2 2 7.5h20zM4 9.5h3V17H4zm6.5 0h3V17h-3zM17 9.5h3V17h-3zM2 19h20v3H2z')},
+ arch:{name:'建築',svg:P('M3 22V10l5-3v15zm6 0V3l8 3v16zm9 0v-9l3 1.5V22z')},
+ academic:{name:'學術',svg:P('M12 3 1 9l11 6 9-4.9V17h2V9zM5 13.2v4.3C5 19.4 8.1 21 12 21s7-1.6 7-3.5v-4.3L12 17z')},
+ restaurant:{name:'餐廳',svg:P('M7 2v7a2 2 0 0 0 1.5 1.9V22h2V10.9A2 2 0 0 0 12 9V2h-1.3v6H9.9V2H8.6v6h-.8V2zm9.5 0C14.6 2 13 4.3 13 7.5V14h2.5v8H18V2z')},
+ cafe:{name:'咖啡',svg:P('M3 7h14v6a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5zm14 1.5h1.5a2.8 2.8 0 0 1 0 5.6H17v-1.9h1.5a.9.9 0 0 0 0-1.8H17zM3 19.5h15V21H3z')+P('M7 2.5c-.8 1 .8 1.8 0 3m3.5-3c-.8 1 .8 1.8 0 3')},
+ life:{name:'生活',svg:P('M5 8h14l1.2 14H3.8zm3.2 0V6.5a3.8 3.8 0 0 1 7.6 0V8h-1.8V6.5a2 2 0 0 0-4 0V8z')},
+ stay:{name:'住宿',svg:P('M2 19V5h2.2v8.5H11V8h7.5A3.5 3.5 0 0 1 22 11.5V19h-2.2v-2.5H4.2V19zm5-6.5a2.3 2.3 0 1 0 0-4.6 2.3 2.3 0 0 0 0 4.6z')},
+ transit:{name:'交通',svg:P('M12 2c-4.4 0-8 .5-8 4v9.5A3.5 3.5 0 0 0 7.5 19L6 20.5v.5h2.2l2-2h3.6l2 2H18v-.5L16.5 19a3.5 3.5 0 0 0 3.5-3.5V6c0-3.5-3.6-4-8-4z')+'<rect x="6.3" y="5.5" width="11.4" height="5" rx="1" fill="var(--bgc)"/><circle cx="8.5" cy="14.5" r="1.4" fill="var(--bgc)"/><circle cx="15.5" cy="14.5" r="1.4" fill="var(--bgc)"/>'}
+};
+const ICONS={};
+for(const k in BASE) ICONS[k]=BASE[k].svg;
+Object.assign(ICONS,{
+ perfume:P('M9 2h6v3H9zm6 .8h3.2v1.4H15zM10.5 5h3v2h-3zM7 8.5A1.5 1.5 0 0 1 8.5 7h7A1.5 1.5 0 0 1 17 8.5V20a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2z')+'<circle cx="12" cy="14.5" r="2.6" fill="var(--bgc)"/>',
+ cocktail:P('M3 3h18l-8 9v7h4v2H7v-2h4v-7z')+'<circle cx="12" cy="6.3" r="1.5" fill="var(--bgc)"/>',
+ ticket:P('M3 6h18v4a2 2 0 0 0 0 4v4H3v-4a2 2 0 0 0 0-4z')+'<rect x="14.4" y="7.2" width="1.3" height="2" fill="var(--bgc)"/><rect x="14.4" y="11" width="1.3" height="2" fill="var(--bgc)"/><rect x="14.4" y="14.8" width="1.3" height="2" fill="var(--bgc)"/>',
+ wine:P('M7 2h10l.5 5a5.5 5.5 0 0 1-4.5 5.9V20h3v2H8v-2h3v-7.1A5.5 5.5 0 0 1 6.5 7z'),
+ beer:P('M4 4h12v16a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2zm12 4h2a3 3 0 0 1 3 3v3a3 3 0 0 1-3 3h-2v-2h2a1 1 0 0 0 1-1v-3a1 1 0 0 0-1-1h-2z')+'<rect x="7" y="8" width="1.5" height="10" rx=".75" fill="var(--bgc)"/><rect x="11.5" y="8" width="1.5" height="10" rx=".75" fill="var(--bgc)"/>',
+ music:P('M9 4.5 20 2v13.5a3 3 0 1 1-2-2.83V6.4l-7 1.6v9.5a3 3 0 1 1-2-2.83z'),
+ mic:P('M9 5a3 3 0 0 1 6 0v6a3 3 0 0 1-6 0zm-3.5 5.5h2a4.5 4.5 0 0 0 9 0h2A6.5 6.5 0 0 1 13 16.9V20h3v2H8v-2h3v-3.1a6.5 6.5 0 0 1-5.5-6.4z'),
+ camera:P('M4 7h3.5l1.8-2.5h5.4L16.5 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2z')+'<circle cx="12" cy="13.5" r="3.9" fill="var(--bgc)"/><circle cx="12" cy="13.5" r="2.3"/>',
+ film:P('M3 10h18v9.5a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 19.5zm-.3-4.3 16.6-3.1.6 3.4L3.3 9.1z'),
+ sparkle:P('M11 2l2.2 6.3 6.3 2.2-6.3 2.2L11 19l-2.2-6.3L2.5 10.5l6.3-2.2zm7.5 11.5 1 2.5 2.5 1-2.5 1-1 2.5-1-2.5-2.5-1 2.5-1z'),
+ star:P('M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3l-5.9 3.3 1.3-6.6-4.9-4.6 6.6-.8z'),
+ heart:P('M12 21s-7.5-4.6-9.5-9.3C1.2 8.4 3.2 4.5 7 4.5c2.1 0 3.6 1.2 5 3 1.4-1.8 2.9-3 5-3 3.8 0 5.8 3.9 4.5 7.2C19.5 16.4 12 21 12 21z'),
+ book:P('M3 4.5A1.5 1.5 0 0 1 4.5 3H11v17H4.5A1.5 1.5 0 0 0 3 21.5zm18 0A1.5 1.5 0 0 0 19.5 3H13v17h6.5a1.5 1.5 0 0 1 1.5 1.5z'),
+ gift:P('M3 8h8v4H3zm10 0h8v4h-8zM4.5 13H11v8H4.5zm8.5 0h6.5v8H13zM12 7.6C10.6 3.8 6.6 3.9 7 6.4 7.3 7.9 10 7.8 12 7.6zm0 0c1.4-3.8 5.4-3.7 5-1.2-.3 1.5-3 1.4-5 1.2z'),
+ flower:'<circle cx="12" cy="6.5" r="3.4"/><circle cx="16.3" cy="9.6" r="3.4"/><circle cx="14.6" cy="14.6" r="3.4"/><circle cx="9.4" cy="14.6" r="3.4"/><circle cx="7.7" cy="9.6" r="3.4"/><circle cx="12" cy="11" r="2.4" fill="var(--bgc)"/>',
+ leaf:P('M20 3C9 3 4 8.5 4 15.5c0 1.6.3 3 .9 4.5 1-4.2 4-8 9-10.2-4 3-6.6 6.6-7.6 10.7C15.5 21 20 15 20 3z'),
+ tree:P('M12 2 5 12h3.5L5 17h6v5h2v-5h6l-3.5-5H19z'),
+ sun:'<circle cx="12" cy="12" r="4.3"/>'+[0,45,90,135,180,225,270,315].map(a=>`<rect x="11.1" y="1.5" width="1.8" height="4" rx=".9" transform="rotate(${a} 12 12)"/>`).join(''),
+ boat:P('M3 15h18l-2.5 5h-13zM11 3h2v11h-2zm2 1 6 9h-6zm-3 2-5 7h5z'),
+ bike:'<circle cx="6" cy="16" r="3.6" fill="none" stroke="var(--fgc)" stroke-width="2"/><circle cx="18" cy="16" r="3.6" fill="none" stroke="var(--fgc)" stroke-width="2"/><path d="M6 16 9.5 8.5h6L18 16M9.5 8.5 12.5 16l3-7.5M8 6.5h3" fill="none" stroke="var(--fgc)" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>',
+ cup:P('M6 3h12l-1.2 16.5A2.5 2.5 0 0 1 14.3 22H9.7a2.5 2.5 0 0 1-2.5-2.5z')+'<rect x="7.2" y="7" width="9.6" height="2" fill="var(--bgc)"/>',
+ chip:'<rect x="6" y="6" width="12" height="12" rx="1.6"/>'+[8,11.3,14.6].map(v=>`<rect x="${v}" y="2.6" width="1.4" height="3"/><rect x="${v}" y="18.4" width="1.4" height="3"/><rect x="2.6" y="${v}" width="3" height="1.4"/><rect x="18.4" y="${v}" width="3" height="1.4"/>`).join('')+'<rect x="9.3" y="9.3" width="5.4" height="5.4" rx=".8" fill="var(--bgc)"/>',
+ atom:'<g fill="none" stroke="var(--fgc)" stroke-width="1.7"><ellipse cx="12" cy="12" rx="10" ry="3.9"/><ellipse cx="12" cy="12" rx="10" ry="3.9" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="10" ry="3.9" transform="rotate(120 12 12)"/></g><circle cx="12" cy="12" r="2.1"/>',
+ coin:'<circle cx="12" cy="12" r="9.5"/><circle cx="12" cy="12" r="6.3" fill="none" stroke="var(--bgc)" stroke-width="1.5"/><rect x="11.15" y="8.6" width="1.7" height="6.8" rx=".5" fill="var(--bgc)"/>',
+ alert:P('M12 2.5 1.5 21h21z')+'<rect x="11" y="9" width="2" height="6.5" rx="1" fill="var(--bgc)"/><circle cx="12" cy="18" r="1.15" fill="var(--bgc)"/>',
+ uncat:'<path d="M8.8 9a3.2 3.2 0 1 1 4.6 2.9c-.9.4-1.4 1.1-1.4 2.1v.6" fill="none" stroke="var(--fgc)" stroke-width="2.3" stroke-linecap="round"/><circle cx="12" cy="18.7" r="1.4"/>'
+});
+const ICON_ORDER=['perfume','cocktail','ticket','wine','beer','cup','music','mic','camera','film','sparkle','star','heart','book','gift','flower','leaf','tree','sun','boat','bike','chip','atom','coin','alert',...Object.keys(BASE)];
+const BUILTIN=Object.keys(BASE);
+/* every category, built-in or hers, lives in the trip data as an ordered list she can rename, re-icon, reorder and delete:
+   S.cats for places, S.evCats for events. An icon is a key of ICONS or an emoji */
+let CATS={}, CATKEYS=[], ECATS={}, ECATKEYS=[];
+function syncCats(t){
+  t=t||S||{}; CATS={}; ECATS={};
+  (t.cats||[]).forEach(c=>{ CATS[c.key]=c; }); CATKEYS=(t.cats||[]).map(c=>c.key);
+  (t.evCats||[]).forEach(c=>{ ECATS[c.key]=c; }); ECATKEYS=(t.evCats||[]).map(c=>c.key);
+}
+const UNCAT='未分類';
+const catName=k=>CATS[k]?CATS[k].name:UNCAT, evCatName=k=>ECATS[k]?ECATS[k].name:UNCAT;
+const EV_RULES=[[/香|精油|氣味|perfum|parfum|osmoth/i,'香氛'],[/調飲|調酒|cocktail|wine|spirits|品酒/i,'調飲'],[/工作坊|創作課|workshop|課程/i,'工作坊'],[/演出|音樂會|concert|表演|\blive\b/i,'表演'],
+  [/沉浸|互動|robot|electronica|8K|新媒體|immersive/i,'科技藝術'],[/遊行|新年|春節|節慶|festival|carnival/i,'節慶'],[/會議|論壇|forum|expo|summit|conference|峰會|大會/i,'會議'],[/展|exhibition|museum|美術館|gallery/i,'藝術']];
+const EV_ICON={藝術:'art',展覽:'art',科技藝術:'sparkle',科技:'chip',金融:'coin',節慶:'gift',物理:'atom',注意事項:'alert',香氛:'perfume',調飲:'cocktail',工作坊:'ticket',表演:'music',會議:'mic',其他:'star'};
+const EV_DEFAULT=['藝術','會議','表演','節慶','工作坊'];
+function evRule(e){ const t=(e.n||'')+' '+(e.venue||''); const r=EV_RULES.find(r=>r[0].test(t)); return r?r[1]:''; }
+function guessEv(e){ const n=evRule(e); const c=(S&&S.evCats||[]).find(c=>c.name===n)||(S&&S.evCats||[]).find(c=>c.name==='其他'); return c?c.key:''; }
+const DETAIL=new Set(['transit','stay']);
+const FIT={'順路':'#3fc28f','可安排':'#7b97f5','不順路':'#bcb4cc'};
+const WD='日一二三四五六';
+const PALETTE=['#f07aa0','#7f9ef6','#5ccb9a','#f9a25e','#b392f0','#45cabf','#f6a2bb','#a6bcf9','#86dab2','#fbb985','#c6abf5','#77dbd2','#e5668f','#6a89ee','#45bb86','#f08f45'];
+const CHECK='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></svg>';
+const PIN='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"/></svg>';
+const PEN='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 17.25V21h3.75L17.8 9.94l-3.75-3.75zM20.7 7.04a1 1 0 0 0 0-1.41l-2.33-2.33a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75z"/></svg>';
+const svgOf=(s,fg,bg)=>`<svg viewBox="0 0 24 24" fill="${fg}" style="--bgc:${bg};--fgc:${fg}">${s}</svg>`;
+const iconSvg=(ic,fg,bg)=>ic&&!ICONS[ic]?`<span class="emo">${esc(ic)}</span>`:svgOf(ICONS[ic]||ICONS.sparkle,fg,bg);
+function icon(k,fg,bg){ const c=CATS[k]; return iconSvg(c?c.icon:'uncat',fg,bg); }
+function eicon(k,fg,bg){ const c=ECATS[k]; return iconSvg(c?c.icon:'uncat',fg,bg); }
+
+/* ---------- colour settings: defaults live here, her changes live in the trip data (S.theme) and are saved with the file ---------- */
+const THEME_DEF={panel:'#fffefd',bg:'#fff6f2',surface:'#ffffff',sel:'#ffffff',hover:'#fdf0f5',focus:'#eef1fe',line:'#ededed',ink:'#3a3550',muted:'#8f8f8f',faint:'#b3b3b3',onColor:'#ffffff',accent:'#3d6eff',warn:'#ef5d7a',alt:'#b3b3b3',
+  pillOn:'#ffb07c',cat:'#55575c',gbtn:'#3d6eff',toast:'#696969',photoNav:'#282c28',helpBtn:'#fff799',helpBtnText:'#3a3550',helpMark:'#fbf0c3',mapBtn:'#ffffff',mapBtnT:'65',mapBtnText:'#3a3550',
+  sea:'#b5e3f5',land:'#e4f7e3',border:'#b5e3f5',baseText:'#8ba9bb',cityText:'#999999',road:'#f7fcf6',markLabel:'#3a3550',labelHalo:'#ffffff',markBorder:'#ffffff',altMark:'#bdbdbd',mapBg:'#fffefd',
+  fitOn:'#3fc28f',fitMaybe:'#7b97f5',fitOff:'#bdbdbd',statusOk:'#3fc28f',statusDirty:'#ffb454',statusSaving:'#3d6eff',statusErr:'#ef5d7a'};
+const THEME_GROUPS=[
+  ['介面',[['panel','行程區底色'],['bg','頁面底色'],['surface','卡片、按鈕與輸入框'],['sel','展開中的日子'],['hover','滑鼠移過'],['focus','點選中的項目'],['line','框線'],['ink','主要文字'],['muted','次要文字'],['faint','淡色文字與圖示'],['onColor','色塊上的文字與圖示'],['accent','強調色'],['warn','時間警示'],['alt','備案標籤']]],
+  ['按鈕',[['pillOn','選中的按鈕'],['cat','類別按鈕'],['gbtn','Google 地圖按鈕'],['toast','提示訊息'],['photoNav','照片上的箭頭與關閉鈕'],['helpBtn','說明鈕底色'],['helpBtnText','說明鈕文字'],['helpMark','說明小標題底線'],['mapBtn','地圖按鈕底色'],['mapBtnT','地圖按鈕底色透明度'],['mapBtnText','地圖按鈕文字']]],
+  ['地圖',[['sea','海'],['land','陸地'],['border','國界與海岸線'],['baseText','國名、海名、小城市名'],['cityText','大城市名'],['road','道路'],['markLabel','行程標記文字'],['labelHalo','標記文字外光'],['markBorder','行程標記外框'],['altMark','候選與備案標記'],['mapBg','地圖載入前底色']]],
+  ['活動標籤',[['fitOn','順路'],['fitMaybe','可安排'],['fitOff','不順路']]],
+  ['存檔狀態',[['statusOk','已存檔'],['statusDirty','尚未存檔'],['statusSaving','儲存中'],['statusErr','存檔失敗']]]];
+const THEME_CSS={panel:'--panel',bg:'--bg',sel:'--sel',hover:'--hover',focus:'--focus',line:'--line',ink:'--ink',muted:'--muted',faint:'--faint',accent:'--accent',warn:'--warn',alt:'--alt',
+  pillOn:'--pill-on',cat:'--cat',gbtn:'--gbtn',toast:'--toast',mapBtn:'--map-btn',mapBtnText:'--map-btn-text',helpBtn:'--help-btn',helpBtnText:'--help-btn-text',helpMark:'--help-mark',markLabel:'--mark-label',altMark:'--alt-mark',mapBg:'--map-bg',statusOk:'--ok',statusDirty:'--dirty',
+  surface:'--surface',onColor:'--on',photoNav:'--photo-nav',markBorder:'--mark-border',labelHalo:'--halo',statusSaving:'--saving',statusErr:'--err'};
+const th=k=>(S&&S.theme&&S.theme[k])||THEME_DEF[k];
+const ON=()=>th('onColor');
+const hex2rgb=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const mixc=(a,b,t)=>a.map((v,i)=>v+(b[i]-v)*t);
+function ramp(pts){ return L=>{ for(let k=0;k<pts.length-1;k++){ const [a,ca]=pts[k],[b,cb]=pts[k+1]; if(L<=b||k===pts.length-2){ const t=b>a?Math.max(0,Math.min(1,(L-a)/(b-a))):0; return mixc(ca,cb,t); } } }; }
+function setTable(id,fn){ const g=[...Array(201)].map((_,i)=>fn(i/200));
+  document.querySelectorAll(`#${id} feFuncR,#${id} feFuncG,#${id} feFuncB`).forEach((e,ch)=>e.setAttribute('tableValues',g.map(c=>(Math.max(0,Math.min(255,c[ch]))/255).toFixed(3)).join(' '))); }
+/* the basemap is grey; its brightness picks the colour. Measured on the real tiles: baked-in names 0.62-0.77, sea 0.81-0.82, borders 0.82-0.88, land 0.94 */
+function buildMapFilters(){
+  const txt=hex2rgb(th('baseText')), sea=hex2rgb(th('sea')), bd=hex2rgb(th('border')), land=hex2rgb(th('land')), road=hex2rgb(th('road'));
+  setTable('duo',ramp([[0,mixc(txt,[0,0,0],.38)],[.77,txt],[.80,sea],[.822,sea],[.835,bd],[.865,bd],[.905,land],[.955,land],[1,road]]));
+  const c=hex2rgb(th('cityText')), W=[255,255,255], G=[0,.16,.28,.40,.44,.48,.52,.56,.66,.83,1];
+  setTable('ink',L=>{ const x=L*10, i=Math.min(9,Math.floor(x)), g=G[i]+(G[i+1]-G[i])*(x-i); return g<=.40?c.map(v=>v*g/.40):mixc(c,W,(g-.40)/.60); });
+}
+let themeKey='';
+function applyTheme(){
+  const st=document.documentElement.style; for(const k in THEME_CSS) st.setProperty(THEME_CSS[k],th(k));
+  st.setProperty('--map-btn-o',(100-Math.max(0,Math.min(100,+th('mapBtnT')||0)))+'%');
+  FIT['順路']=th('fitOn'); FIT['可安排']=th('fitMaybe'); FIT['不順路']=th('fitOff');
+  const key=['baseText','sea','border','land','road','cityText'].map(th).join(); if(key!==themeKey){ themeKey=key; buildMapFilters(); }
+}
+function setTheme(k,v,final){ if(!S.theme) S.theme={}; if(v===THEME_DEF[k]) delete S.theme[k]; else S.theme[k]=v;
+  applyTheme(); if(final) commit(); else { renderMap(); renderList(); } }
+function themeRow(name,val,onInput,onFinal){
+  const r=el('div','tr'); const sw=el('label','sw'); sw.style.background=val;
+  const c=el('input'); c.type='color'; c.value=val; sw.appendChild(c);
+  const hx=el('input','hx'); hx.value=val; hx.spellcheck=false;
+  c.addEventListener('input',()=>{ sw.style.background=c.value; hx.value=c.value; onInput(c.value); });
+  c.addEventListener('change',()=>onFinal(c.value));
+  hx.addEventListener('keydown',ev=>{ ev.stopPropagation(); if(ev.key==='Enter'){ ev.preventDefault(); hx.blur(); } else if(ev.key==='Escape'){ hx.value=c.value; hx.blur(); } });
+  hx.addEventListener('change',()=>{ let v=hx.value.trim().toLowerCase(); if(/^[0-9a-f]{6}$/.test(v)) v='#'+v; if(/^#[0-9a-f]{3}$/.test(v)) v='#'+[...v.slice(1)].map(x=>x+x).join('');
+    if(!/^#[0-9a-f]{6}$/.test(v)){ hx.value=c.value; return; } hx.value=v; if(v===c.value) return; c.value=v; sw.style.background=v; onFinal(v); });
+  r.append(sw,el('span','tn',name),hx); return r;
+}
+/* transparency is a percentage, 0 = solid */
+const THEME_RANGE=new Set(['mapBtnT']);
+function rangeRow(name,val,onInput,onFinal){
+  const r=el('div','tr'); const s=el('input','rg'); s.type='range'; s.min='0'; s.max='100'; s.step='5'; s.value=val;
+  const t=el('span','tn',`${name}：${val}%`);
+  s.addEventListener('input',()=>{ t.textContent=`${name}：${s.value}%`; onInput(s.value); });
+  s.addEventListener('change',()=>onFinal(s.value));
+  s.addEventListener('keydown',ev=>ev.stopPropagation());
+  r.append(el('span','sw0'),t,s); return r;
+}
+function renderTheme(){
+  const p=$('#theme'); if(!UI.themeOpen){ p.style.display='none'; p.innerHTML=''; return; }
+  const a=document.activeElement; if(a&&p.contains(a)&&p.childElementCount) return;
+  const top=p.scrollTop; p.innerHTML=''; p.style.display='block';
+  const h=el('div','th','色彩設定'); const x=el('button','','×'); x.onclick=closeTheme; h.appendChild(x); p.appendChild(h);
+  THEME_GROUPS.forEach(([g,rows])=>{ p.appendChild(el('div','tg',g)); rows.forEach(([k,n])=>p.appendChild((THEME_RANGE.has(k)?rangeRow:themeRow)(n,th(k),v=>setTheme(k,v,false),v=>setTheme(k,v,true)))); });
+  p.appendChild(el('div','tg','每天顏色'));
+  S.days.forEach(d=>p.appendChild(themeRow(`${dateLabel(d.date)} ${d.city}`,d.color,v=>{ d.color=v; renderMap(); renderList(); },v=>{ d.color=v; commit(); })));
+  const rs=el('button','reset','介面與地圖顏色恢復預設');
+  rs.onclick=()=>{ rs.blur(); if(!S.theme||!Object.keys(S.theme).length) return; S.theme={}; applyTheme(); commit(); toast('已恢復預設顏色','復原',undo); };
+  p.appendChild(rs); p.scrollTop=top;
+}
+function openTheme(){ UI.themeOpen=true; UI.card=null; closeHelp(); renderCard(); renderTheme(); }
+function closeTheme(){ UI.themeOpen=false; renderTheme(); }
+/* ---------- state ---------- */
+let S=null, snap='', undoStack=[], redoStack=[];
+const UI={tab:'days',sel:null,focus:null,card:null,showAll:true,showDetail:true,busy:{},editItem:null,editDay:null,editEvent:null,editHead:false,unfound:{},cardFix:null};
+const $=s=>document.querySelector(s);
+const el=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;};
+const uid=()=>Math.random().toString(36).slice(2,9);
+const esc=t=>String(t??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const tmin=t=>{if(!t)return null;const m=/^(\d{1,2}):(\d{2})$/.exec(t);return m?(+m[1])*60+(+m[2]):null;};
+function normT(v){v=(v||'').trim().replace(/[：.．]/g,':').replace(/\s/g,'');if(!v)return '';
+  const m=/^(\d{1,2})(?::?(\d{2}))?$/.exec(v); if(!m)return null; const h=+m[1],mi=+(m[2]||0); if(h>29||mi>59)return null;
+  return String(h).padStart(2,'0')+':'+String(mi).padStart(2,'0');}
+function dateLabel(iso){const d=new Date(iso+'T12:00:00');return `${d.getMonth()+1}/${d.getDate()}（${WD[d.getDay()]}）`;}
+function dateRanges(list,suf){ const sd=x=>dateLabel(x).split('（')[0], out=[]; let a=0;
+  for(let i=1;i<=list.length;i++){ if(i<list.length&&list[i]===shiftISO(list[i-1],1)&&(!suf||suf(i)===suf(i-1))) continue;
+    out.push((i-1>a?sd(list[a])+'-'+sd(list[i-1]):sd(list[a]))+(suf?suf(a):'')); a=i; }
+  return out.join('、'); }
+function shiftISO(iso,n){const d=new Date(iso+'T12:00:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10);}
+const hasPos=it=>typeof it.lat==='number'&&typeof it.lon==='number';
+const gmaps=q=>'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(q);
+const gsearch=q=>'https://www.google.com/search?q='+encodeURIComponent(q);
+function lsGet(k){try{return JSON.parse(localStorage.getItem(k));}catch(e){return null;}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v));return true;}catch(e){return false;}}
+/* the browser copy belongs to one trip in one file: keyed by trip id and the page's path, so two files made from the same template never overwrite each other */
+const LSK=id=>'trip:'+id+'|'+location.pathname;
+let PAGE_KEY='';
+
+/* ---------- lookup ---------- */
+function lists(){const L=S.days.map((d,di)=>({list:d.items,di,day:d}));L.push({list:S.pool,di:-1,day:null});return L;}
+function findItem(id){for(const L of lists()){const i=L.list.findIndex(x=>x.id===id);if(i>=0)return {...L,idx:i,it:L.list[i]};}return null;}
+const findEvent=id=>S.events.find(e=>e.id===id);
+/* stations and hotels take the color of the area they sit in (a departure station on a travel day keeps its own city's color); lines still use the day's color */
+function coreOf(d){ return d.items.filter(x=>hasPos(x)&&!x.alt&&!DETAIL.has(x.k)); }
+function itemColor(it,di){ if(di<0) return th('altMark'); const d=S.days[di]; if(!DETAIL.has(it.k)||!hasPos(it)) return d.color;
+  const dist=p=>Math.hypot(p.lat-it.lat,p.lon-it.lon); if(coreOf(d).some(p=>dist(p)<0.15)) return d.color;
+  let best=null,bd=Infinity; S.days.forEach(x=>coreOf(x).forEach(p=>{const v=dist(p); if(v<bd){bd=v;best=x;}}));
+  return best&&bd<0.15?best.color:d.color; }
+const dayColor=di=>di<0?th('altMark'):S.days[di].color;
+const cityOf=f=>f.day?f.day.city:(f.it.city||'');
+
+/* ---------- history & saving ---------- */
+let PDOWN=false, pend=null, saveTimer=null, fileTimer=null;
+const isEditingText=()=>{const a=document.activeElement;return !!(a&&a.isContentEditable);};
+function commit(opts={}){
+  const now=JSON.stringify({...S,updatedAt:0});
+  if(now===snap){ if(opts.render!==false) requestRender('full'); return; }
+  undoStack.push(snap); if(undoStack.length>150) undoStack.shift(); redoStack=[]; snap=now;
+  S.updatedAt=Date.now(); persist(); renderMap(); updateFoot(); requestRender(opts.render===false?'part':'full');
+}
+function restore(str){ S=JSON.parse(str); S.updatedAt=Date.now(); syncCats(); validateUI(); persist(); renderAll(); }
+function undo(){ if(!undoStack.length) return; redoStack.push(snap); snap=undoStack.pop(); restore(snap); toast('已復原'); }
+function redo(){ if(!redoStack.length) return; undoStack.push(snap); snap=redoStack.pop(); restore(snap); toast('已重做'); }
+function validateUI(){ if(UI.sel!==null&&UI.sel>=S.days.length) UI.sel=null;
+  if(UI.card&&UI.card.type==='item'&&!findItem(UI.card.id)) UI.card=null;
+  if(UI.card&&UI.card.type==='event'&&!findEvent(UI.card.id)) UI.card=null;
+  if(UI.focus&&!findItem(UI.focus)) UI.focus=null; if(UI.editItem&&!findItem(UI.editItem)) UI.editItem=null; }
+function requestRender(kind){ pend=(pend==='full'||kind==='full')?'full':'part'; if(PDOWN||isEditingText()) return; flush(); }
+function flush(){ if(!pend) return; const p=pend; pend=null; if(p==='full') renderAll(); else {renderCard(); updateFoot();} }
+document.addEventListener('pointerdown',()=>{PDOWN=true;},true);
+['pointerup','pointercancel','dragend'].forEach(t=>document.addEventListener(t,()=>{PDOWN=false; setTimeout(()=>{if(!PDOWN&&!isEditingText()) flush();},0);},true));
+function persist(){
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(()=>{ if(!lsSet(PAGE_KEY,S)) toast('瀏覽器暫存空間不足，請記得按儲存'); },300);
+  fileDirty=true;
+  if(FH){ setStatus('dirty','儲存中…'); clearTimeout(fileTimer); fileTimer=setTimeout(()=>saveToFile(false),1200); }
+  else setStatus('dirty','有修改，尚未存檔');
+}
+function setStatus(st,msg){ const s=$('#status'); s.className=st; s.querySelector('span').textContent=msg||'已暫存在瀏覽器'; }
+/* the HTML file itself is the save file: first save asks where it is, later saves write back silently */
+const CAN_FS='showSaveFilePicker' in window;
+/* the name of the file she opened, so saving and exports follow it instead of an older file of the same trip */
+const CUR_FILE=(()=>{ try{ const n=decodeURIComponent(location.pathname.split('/').pop()||''); return /\.html?$/i.test(n)?n:''; }catch(e){ return ''; } })();
+const fileStem=()=>CUR_FILE?CUR_FILE.replace(/\.html?$/i,''):safeName();
+const fhKey=()=>'fh:'+S.id+(CUR_FILE?'|'+CUR_FILE:'');
+let FH=null, fileDirty=false;
+function idb(){ return new Promise((res,rej)=>{ const r=indexedDB.open('trip-planner',1); r.onupgradeneeded=()=>r.result.createObjectStore('kv'); r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+async function idbGet(k){ try{ const db=await idb(); return await new Promise(res=>{ const q=db.transaction('kv').objectStore('kv').get(k); q.onsuccess=()=>res(q.result); q.onerror=()=>res(null); }); }catch(e){ return null; } }
+async function idbSet(k,v){ try{ const db=await idb(); db.transaction('kv','readwrite').objectStore('kv').put(v,k); }catch(e){} }
+function buildHTML(){ const json=JSON.stringify(S).replace(/</g,'\\u003c'); return TEMPLATE.replace(/(<script id="trip-data" type="application\/json">)[\s\S]*?(<\/script>)/,(m,a,b)=>a+json+b); }
+async function saveToFile(interactive){
+  if(!CAN_FS){ if(interactive){ saveFile(fileStem()+'.html',buildHTML()); fileDirty=false; setStatus('saved','已下載新的 HTML 檔'); } return; }
+  try{
+    if(!FH){ if(!interactive) return; FH=await window.showSaveFilePicker({suggestedName:CUR_FILE||safeName()+'.html',types:[{description:'HTML',accept:{'text/html':['.html']}}]}); idbSet(fhKey(),FH); }
+    let p=await FH.queryPermission({mode:'readwrite'});
+    if(p!=='granted'){ if(!interactive){ setStatus('dirty','按「儲存」重新授權'); return; } p=await FH.requestPermission({mode:'readwrite'}); if(p!=='granted') return; }
+    const w=await FH.createWritable(); await w.write(buildHTML()); await w.close();
+    fileDirty=false; setStatus('saved','已儲存到 '+FH.name);
+  }catch(e){ if(e&&e.name==='AbortError') return; setStatus('err','存檔失敗，點「工具」另存'); }
+}
+/* ---------- editable text ---------- */
+function ed(text,o){
+  const e=el(o.tag||'span','ed '+(o.cls||'')); e.textContent=text||''; e.dataset.ph=o.ph||''; if(o.k) e.dataset.k=o.k;
+  if(!o.on) return e;
+  e.contentEditable='true'; e.spellcheck=false;
+  let orig='';
+  e.addEventListener('focus',()=>{orig=e.textContent;});
+  e.addEventListener('keydown',ev=>{
+    if(ev.key==='Enter'&&!ev.isComposing&&!(o.multi&&ev.shiftKey)){ev.preventDefault();e.blur();}
+    else if(ev.key==='Escape'){ev.preventDefault();e.textContent=orig;e.dataset.cancel='1';e.blur();}
+    ev.stopPropagation();});
+  e.addEventListener('paste',ev=>{ev.preventDefault();let t=(ev.clipboardData||window.clipboardData).getData('text/plain')||'';
+    if(!o.multi) t=t.replace(/\s*\n\s*/g,' '); document.execCommand('insertText',false,t);});
+  e.addEventListener('blur',()=>{
+    if(e.dataset.cancel){delete e.dataset.cancel;return;}
+    const v=e.innerText.replace(/ /g,' ').replace(/\n{3,}/g,'\n\n').trim();
+    if(!v) e.textContent='';
+    if(v!==orig.trim()){ const r=o.save(v); if(r===false) e.textContent=orig; }
+    setTimeout(()=>{if(!PDOWN&&!isEditingText()) flush();},0);
+  });
+  e.addEventListener('click',ev=>ev.stopPropagation());
+  e.addEventListener('dragstart',ev=>ev.preventDefault());
+  return e;
+}
+function penBtn(on,fn){const b=el('button','pen');b.innerHTML=on?CHECK:PEN;b.onclick=ev=>{ev.stopPropagation(); if(on&&document.activeElement&&document.activeElement.blur) document.activeElement.blur(); fn();};return b;}
+function grip(cls,menu,drag){ const g=el('span',cls,'⋮⋮'); if(drag){ g.draggable=true; g.addEventListener('dragstart',drag); g.addEventListener('dragend',endDrag); }
+  g.addEventListener('click',ev=>{ ev.stopPropagation(); const m=menu(); if(m&&m.length) popMenu(g,m); }); return g; }
+function iconGrid(cur,cb){
+  const g=el('div','iconpick');
+  ICON_ORDER.forEach(k=>{ const b=el('button',k===cur?'on':''); const ic=el('span','ic'); ic.style.background=th('cat'); ic.innerHTML=svgOf(ICONS[k],ON(),th('cat'));
+    b.appendChild(ic); b.onclick=ev=>{ ev.stopPropagation(); cb(k); }; g.appendChild(b); });
+  const e=el('input','emoin'); e.placeholder='輸入或貼上 emoji'; if(cur&&!ICONS[cur]) e.value=cur;
+  const first=v=>{ v=v.trim(); if(!v) return ''; try{ if(window.Intl&&Intl.Segmenter){ return [...new Intl.Segmenter().segment(v)].pop().segment; } }catch(x){} return [...v].pop(); };
+  const take=()=>{ const v=first(e.value); if(v&&/[^\x00-\x7f]/.test(v)) cb(v); };
+  e.addEventListener('input',ev=>{ if(!ev.isComposing) take(); }); e.addEventListener('compositionend',take);
+  e.addEventListener('keydown',ev=>ev.stopPropagation());
+  g.appendChild(e); return g;
+}
+function catsEditor(anchor,kind){
+  closePop(); const p=el('div','pop catedit'); p.id='pop';
+  const listOf=()=>kind==='event'?S.evCats:S.cats;
+  let openIcon=null, dragKey=null;
+  const fit=()=>later(()=>{ const t=p.getBoundingClientRect().top; p.style.maxHeight=Math.max(160,innerHeight-t-8)+'px'; });
+  const build=()=>{
+    const top=p.scrollTop; p.innerHTML=''; const list=listOf();
+    list.forEach(c=>{
+      const r=el('div','cer'); r.dataset.key=c.key;
+      const g=el('span','cgrip','⋮⋮'); g.draggable=true;
+      g.addEventListener('dragstart',ev=>{ dragKey=c.key; r.classList.add('dragging'); ev.dataTransfer.effectAllowed='move'; try{ ev.dataTransfer.setData('text/plain',c.key); ev.dataTransfer.setDragImage(r,10,10); }catch(x){} });
+      g.addEventListener('dragend',()=>{ dragKey=null; p.querySelectorAll('.cer').forEach(n=>n.classList.remove('dragging','drop-before','drop-after')); });
+      r.addEventListener('dragover',ev=>{ if(!dragKey||dragKey===c.key) return; ev.preventDefault(); const rc=r.getBoundingClientRect(); const after=ev.clientY>rc.top+rc.height/2; r.classList.toggle('drop-after',after); r.classList.toggle('drop-before',!after); });
+      r.addEventListener('dragleave',()=>r.classList.remove('drop-before','drop-after'));
+      r.addEventListener('drop',ev=>{ if(!dragKey||dragKey===c.key) return; ev.preventDefault(); ev.stopPropagation();
+        const after=r.classList.contains('drop-after'); const L=listOf(); const from=L.findIndex(x=>x.key===dragKey); if(from<0) return;
+        const [m]=L.splice(from,1); let to=L.findIndex(x=>x.key===c.key); if(after) to++; L.splice(to,0,m); dragKey=null; commit(); build(); });
+      const ib=el('button','ic cib'+(openIcon===c.key?' on':'')); ib.style.background=th('cat'); ib.innerHTML=iconSvg(c.icon,ON(),th('cat'));
+      ib.onclick=ev=>{ ev.stopPropagation(); openIcon=openIcon===c.key?null:c.key; build(); };
+      const nm=el('input','cen'); nm.value=c.name; nm.dataset.k='cat:'+c.key;
+      nm.addEventListener('keydown',ev=>{ ev.stopPropagation(); if(ev.key==='Enter'&&!ev.isComposing){ ev.preventDefault(); nm.blur(); } else if(ev.key==='Escape'){ nm.value=c.name; nm.blur(); } });
+      nm.addEventListener('change',()=>{ const v=nm.value.trim(); if(!v){ nm.value=c.name; return; } if(v!==c.name){ c.name=v; commit(); } });
+      r.append(g,ib,nm);
+      if(list.length>1){ const x=el('button','cex','×'); x.onclick=ev=>{ ev.stopPropagation(); if(openIcon===c.key) openIcon=null; deleteCat(kind,c); build(); }; r.appendChild(x); }
+      p.appendChild(r);
+      if(openIcon===c.key) p.appendChild(iconGrid(c.icon,ic=>{ c.icon=ic; if(ICONS[ic]) openIcon=null; commit(); build(); if(!ICONS[ic]) later(()=>{ const n=p.querySelector('.emoin'); if(n){ n.focus(); n.value=ic; } }); }));
+    });
+    const w=el('div','add'); const inp=el('input'); inp.placeholder='＋ 新增類別'; inp.dataset.k='catadd';
+    inp.addEventListener('keydown',ev=>{ ev.stopPropagation(); if(ev.key==='Escape'){ closePop(); return; } if(ev.key!=='Enter'||ev.isComposing) return; ev.preventDefault();
+      const v=inp.value.trim(); if(!v) return; const key=(kind==='event'?'e_':'c_')+uid();
+      listOf().push({key,name:v,icon:kind==='event'?(EV_ICON[v]||'star'):'sparkle'}); openIcon=key; commit(); build(); later(()=>{ const n=p.querySelector('[data-k="catadd"]'); if(n) n.focus(); }); });
+    w.appendChild(inp); p.appendChild(w); p.scrollTop=top; fit();
+  };
+  build(); placePop(p,anchor); fit();
+}
+function deleteCat(kind,cat){
+  if(kind==='event'){
+    S.evCats=S.evCats.filter(c=>c!==cat); syncCats();
+    let n=0; S.events.forEach(e=>{ if(e.k===cat.key){ e.k=''; n++; } });
+    commit(); toast(`已刪除類別「${cat.name}」${n?`，${n} 個活動移到未分類`:''}`,'復原',undo); return;
+  }
+  S.cats=S.cats.filter(c=>c!==cat); (S.catsGone=S.catsGone||[]).push(cat.key); syncCats();
+  let n=0; allItems().forEach(({it})=>{ if(it.k===cat.key){ it.k=''; n++; } });
+  commit(); toast(`已刪除類別「${cat.name}」${n?`，${n} 個地點移到未分類`:''}`,'復原',undo);
+}
+function catPen(kind){ const b=el('button','ic catpen'); b.innerHTML=PEN; b.onclick=ev=>{ ev.stopPropagation(); catsEditor(b,kind); }; return b; }
+function catMenu(anchor,cur,cb,ev,auto){ closePop(); const p=el('div','pop'); p.id='pop'; const g=el('div','catpick');
+  const keys=ev?ECATKEYS:CATKEYS, M=ev?ECATS:CATS, fn=ev?eicon:icon;
+  if(auto){ const b=el('button',cur?'':'on'); b.title='依名稱自動判斷'; const ic=el('span','ic'); ic.style.border='1.5px dashed var(--line3)'; ic.innerHTML=svgOf(ICONS.uncat,th('faint'),th('surface'));
+    b.append(ic,document.createTextNode('自動')); b.onclick=()=>{closePop();cb('');}; g.appendChild(b); }
+  keys.forEach(k=>{ const b=el('button',k===cur?'on':''); const ic=el('span','ic'); ic.style.background=th('cat'); ic.innerHTML=fn(k,ON(),th('cat')); b.append(ic,document.createTextNode(M[k].name)); b.onclick=()=>{closePop();cb(k);}; g.appendChild(b); });
+  p.appendChild(g); placePop(p,anchor); }
+function renderAll(){
+  const a=document.activeElement, k=a&&a.dataset&&a.dataset.k;
+  syncCats(); applyTheme(); renderHead(); renderList(); renderMap(); renderCard(); renderTheme(); updateFoot();
+  if(k){const n=document.querySelector(`[data-k="${CSS.escape(k)}"]`); if(n){n.focus(); if(n.isContentEditable){try{const r=document.createRange();r.selectNodeContents(n);r.collapse(false);const s=getSelection();s.removeAllRanges();s.addRange(r);}catch(e){}}}}
+}
+const later=fn=>setTimeout(fn,0);
+
+/* ---------- header ---------- */
+function renderHead(){
+  const h=$('#head'); h.innerHTML=''; h.classList.toggle('editing',UI.editHead);
+  h.appendChild(Object.assign(ed(S.title,{on:UI.editHead,k:'ttl',ph:'行程名稱',save:v=>{S.title=v;commit({render:false});}}),{id:'ttl'}));
+  h.appendChild(Object.assign(ed(S.sub,{on:UI.editHead,k:'sub',ph:'行程描述',multi:true,save:v=>{S.sub=v;commit({render:false});}}),{id:'sub'}));
+  h.appendChild(penBtn(UI.editHead,()=>{UI.editHead=!UI.editHead; later(()=>{renderHead(); if(UI.editHead) $('#ttl').focus();});}));
+  document.title=S.title||'Trip Planner';
+  document.querySelectorAll('#tabs [data-tab]').forEach(b=>b.classList.toggle('on',b.dataset.tab===UI.tab));
+  $('#opts').style.display=UI.tab==='days'?'':'none';
+  $('#mapToggle').textContent=UI.showAll?'顯示所有地點':'僅顯示行程';
+}
+function updateFoot(){ $('#undoBtn').disabled=!undoStack.length; $('#redoBtn').disabled=!redoStack.length; }
+
+/* ---------- days list ---------- */
+let PL_DUPS={};
+let DRAG=null; // {type:'item'|'day', id}
+function renderList(){
+  const L=$('#list'); const top=L.scrollTop; L.innerHTML='';
+  if(UI.tab==='events') renderEvents(L);
+  else if(UI.tab==='places') renderPlaces(L);
+  else { S.days.forEach((d,di)=>L.appendChild(dayBlock(d,di)));
+    const ad=el('button','addday','＋ 新增一天'); ad.onclick=()=>{const last=S.days[S.days.length-1];
+      S.days.push({id:uid(),date:last?shiftISO(last.date,1):new Date().toISOString().slice(0,10),city:last?last.city:'',color:PALETTE[S.days.length%PALETTE.length],title:'',items:[]});
+      UI.sel=S.days.length-1; UI.editDay=S.days[UI.sel].id; commit();}; L.appendChild(ad); }
+  L.scrollTop=top;
+}
+/* picking a new date for a day moves that day and every later day by the same number of days */
+function setDate(di,iso){ const d=S.days[di]; if(!d||iso===d.date) return;
+  const delta=Math.round((new Date(iso+'T12:00:00')-new Date(d.date+'T12:00:00'))/864e5); for(let i=di;i<S.days.length;i++) S.days[i].date=shiftISO(S.days[i].date,delta);
+  commit(); if(di<S.days.length-1) toast(`後面的日子也一起移動 ${delta>0?'+':''}${delta} 天`,'復原',undo); }
+function toggleDayEdit(d,di){ if(UI.editDay===d.id){ UI.editDay=null; later(()=>renderAll()); } else { UI.editDay=d.id; UI.sel=di; renderAll(); later(()=>{const n=document.querySelector(`[data-k="city:${d.id}"]`); if(n) n.focus();}); } }
+function dayBlock(d,di){
+  const editing=UI.editDay===d.id;
+  const b=el('div','day'+(UI.sel===di?' sel':'')+(editing?' editing':'')); b.dataset.di=di;
+  const h=el('div','dh');
+  const g=grip('dgrip',()=>[
+      ['移到候選',()=>{ const mv=d.items.filter(x=>hasPos(x)&&x.k!=='transit'); d.items=d.items.filter(x=>!(hasPos(x)&&x.k!=='transit')); mv.forEach(x=>{x.alt=false;x.city=x.city||d.city;S.pool.push(x);}); commit(); toast(`這天的 ${mv.length} 個地點移到候選`,'復原',undo); }],
+      S.days.length>1&&['刪除',()=>{ S.days.splice(di,1); for(let i=di;i<S.days.length;i++) S.days[i].date=shiftISO(S.days[i].date,-1); UI.sel=null; commit(); toast(`已刪除 ${dateLabel(d.date)}，後面日期往前一天`,'復原',undo); },'danger']],
+    ev=>{DRAG={type:'day',id:d.id}; b.classList.add('dragging'); ev.dataTransfer.effectAllowed='move'; try{ev.dataTransfer.setData('text/plain',d.id);ev.dataTransfer.setDragImage(b,10,10);}catch(e){}});
+  const dot=el('button','dot'); dot.style.background=d.color;
+  dot.onclick=ev=>{ if(!editing) return; ev.stopPropagation(); const c=el('input'); c.type='color'; c.value=d.color; c.style.position='fixed'; c.style.opacity='0'; document.body.appendChild(c); c.onchange=()=>{d.color=c.value;c.remove();commit();}; c.click(); };
+  const dd=el('span','dd'+(editing?' pick':''),dateLabel(d.date));
+  if(editing){ const inp=el('input'); inp.type='date'; inp.value=d.date; inp.tabIndex=-1; dd.appendChild(inp);
+    dd.onclick=ev=>{ ev.stopPropagation(); try{ inp.showPicker(); }catch(e){ inp.focus(); inp.click(); } };
+    inp.addEventListener('change',()=>{ if(inp.value) setDate(di,inp.value); }); }
+  const dc=ed(d.city,{on:editing,cls:'dc',k:'city:'+d.id,ph:'城市',save:v=>{d.city=v;commit({render:false});}});
+  const ts=d.items.filter(x=>!x.alt&&x.t).map(x=>x.t);
+  const meta=el('span','dmeta',ts.length?`${ts[0]}–${ts[ts.length-1]}`:'');
+  h.append(g,dot,dd,dc,meta,penBtn(editing,()=>toggleDayEdit(d,di)));
+  h.onclick=()=>{ if(editing) return; if(UI.sel===di){UI.sel=null;UI.focus=null;renderAll();fitAll();} else selectDay(di,true); };
+  b.appendChild(h);
+  b.appendChild(ed(d.title,{on:editing,cls:'dt',k:'dt:'+d.id,ph:'主題',save:v=>{d.title=v;commit({render:false});}}));
+  b.addEventListener('dragover',ev=>{ if(!DRAG) return; if(DRAG.type==='item'&&ev.target.closest('.it')) return; if(DRAG.type==='day'&&DRAG.id===d.id) return; ev.preventDefault(); b.classList.add('dropt'); });
+  b.addEventListener('dragleave',ev=>{ if(!b.contains(ev.relatedTarget)) b.classList.remove('dropt'); });
+  b.addEventListener('drop',ev=>{ if(!DRAG) return; if(DRAG.type==='item'&&ev.target.closest('.it')) return; ev.preventDefault(); b.classList.remove('dropt');
+    if(DRAG.type==='item') moveItem(DRAG.id,d.items,d.items.length); else moveDay(DRAG.id,di); });
+  if(UI.sel===di){
+    const box=el('div','items'); let prev=null;
+    d.items.forEach(it=>{ const r=itemRow(it,d.items,di,prev,'day'); if(r) box.appendChild(r); if(it.t&&!it.alt) prev=tmin(it.t); });
+    box.appendChild(addRow(d.items,di)); b.appendChild(box);
+  }
+  return b;
+}
+function endDrag(){ DRAG=null; document.querySelectorAll('.dragging,.drop-before,.drop-after,.dropt').forEach(n=>n.classList.remove('dragging','drop-before','drop-after','dropt')); }
+function moveDay(id,toIdx){ const from=S.days.findIndex(x=>x.id===id); if(from<0||from===toIdx) return endDrag();
+  const dates=S.days.map(x=>x.date); const [d]=S.days.splice(from,1); S.days.splice(toIdx,0,d); S.days.forEach((x,i)=>x.date=dates[i]);
+  UI.sel=toIdx; endDrag(); commit(); toast(`已把這天的行程移到 ${dateLabel(S.days[toIdx].date)}`,'復原',undo); }
+function itemMenu(it,di){
+  const f=findItem(it.id); const m=[];
+  if(di>=0) m.push([it.alt?'改回行程':'設為備案',()=>{it.alt=!it.alt; commit(); toast(it.alt?`「${it.n}」改為備案`:`「${it.n}」改回行程`);}]);
+  else m.push(['排進行程',()=>later(()=>{ const r=document.querySelector(`.it[data-id="${it.id}"] .grip`); popMenu(r||$('#list'),S.days.map(d=>[`${dateLabel(d.date)} ${d.city}`,()=>moveItem(it.id,d.items,d.items.length)])); })]);
+  if(di>=0) m.push(['移到候選',()=>moveItem(it.id,S.pool,S.pool.length)]);
+  m.push('hr',['刪除',()=>deleteItem(it.id),'danger']);
+  return m;
+}
+function itemRow(it,list,di,prevT,mode){
+  const hasP=hasPos(it); const small=DETAIL.has(it.k)&&!hasP;
+  if(mode==='day'&&!UI.showDetail&&small&&UI.editItem!==it.id) return null;
+  const editing=UI.editItem===it.id;
+  const r=el('div','it'+(small?' small':'')+(it.alt?' alt':'')+(UI.focus===it.id?' focus':'')+(editing?' editing':''));
+  r.dataset.id=it.id;
+  r.appendChild(grip('grip',()=>itemMenu(it,di), mode==='day'?(ev=>{DRAG={type:'item',id:it.id}; r.classList.add('dragging'); ev.dataTransfer.effectAllowed='move'; try{ev.dataTransfer.setData('text/plain',it.id);ev.dataTransfer.setDragImage(r,10,10);}catch(e){}}):null));
+  if(mode==='day'){ const tm=editing?timePick(it,list):el('span','tm',it.t||'');
+    if(it.t&&prevT!==null&&!it.alt&&tmin(it.t)<prevT) tm.classList.add('warn'); r.appendChild(tm); }
+  const col=di>=0&&!it.alt?itemColor(it,di):th('altMark');
+  const ic=el('span','ic'+(it.alt||di<0?' alt':'')+(!hasP?' plain':'')+(editing?' pick':''));
+  if(it.alt||di<0) ic.innerHTML=icon(it.k,th('altMark'),th('surface'));
+  else if(hasP){ ic.style.background=col; ic.innerHTML=icon(it.k,ON(),col); }
+  else ic.innerHTML=icon(it.k,th('faint'),th('panel'));
+  if(editing) ic.onclick=ev=>{ ev.stopPropagation(); catMenu(ic,it.k,k=>{it.k=k;commit();}); };
+  r.appendChild(ic);
+  const tx=el('div','tx');
+  const nm=ed(it.n,{on:editing,cls:'nm',k:'n:'+it.id,ph:'名稱',save:v=>{if(!v){toast('名稱不能空白');return false;} it.n=v; commit({render:false});}});
+  if(it.alt&&!editing) nm.appendChild(el('span','tag','備案'));
+  tx.appendChild(nm);
+  tx.appendChild(ed(it.note,{on:editing,cls:'nt',k:'nt:'+it.id,ph:'備註',multi:true,save:v=>{it.note=v;commit({render:false});}}));
+  if(mode==='places'&&!editing){ tx.appendChild(el('span','meta2',placeMeta(it))); }
+  if(UI.busy[it.id]) tx.appendChild(el('span','busy',UI.busy[it.id]));
+  if(UI.unfound[it.id]||(di<0&&!hasP)) tx.appendChild(gmRow(it));
+  r.appendChild(tx);
+  const acts=el('div','acts');
+  acts.appendChild(penBtn(editing,()=>{ UI.editItem=editing?null:it.id; later(()=>{renderList(); if(!editing){const n=document.querySelector(`.it[data-id="${it.id}"] .nm`); if(n) n.focus();}}); }));
+  if(editing){ const pin=el('button','pen pin'); pin.innerHTML=PIN;
+    pin.onclick=ev=>{ ev.stopPropagation(); const a=document.activeElement; if(a&&a.blur) a.blur();
+      later(()=>{ UI.editItem=null; delete UI.unfound[it.id]; geocode(it.id,true); }); };
+    acts.appendChild(pin); }
+  r.appendChild(acts);
+  r.onclick=ev=>{ if(editing) return; if(hasP){ openItem(it.id,true); return; }
+    /* no coordinates: nothing to show in a card, so go straight to editing */
+    const fk=ev.target.closest('.tm')?'t:':'nt:';
+    UI.editItem=it.id; UI.focus=null; UI.card=null; renderCard();
+    later(()=>{ renderList(); const n=document.querySelector(`[data-k="${fk}${it.id}"]`); if(n){ n.focus(); try{const rg=document.createRange();rg.selectNodeContents(n);rg.collapse(false);const sl=getSelection();sl.removeAllRanges();sl.addRange(rg);}catch(e){} } }); };
+  if(mode==='day'){
+    r.addEventListener('dragover',ev=>{ if(!DRAG||DRAG.type!=='item'||DRAG.id===it.id) return; ev.preventDefault(); const rc=r.getBoundingClientRect(); const after=ev.clientY>rc.top+rc.height/2; r.classList.toggle('drop-after',after); r.classList.toggle('drop-before',!after); });
+    r.addEventListener('dragleave',()=>r.classList.remove('drop-before','drop-after'));
+    r.addEventListener('drop',ev=>{ if(!DRAG||DRAG.type!=='item'||DRAG.id===it.id) return; ev.preventDefault(); ev.stopPropagation(); const after=r.classList.contains('drop-after'); r.classList.remove('drop-before','drop-after'); const idx=list.indexOf(it); moveItem(DRAG.id,list,after?idx+1:idx); });
+  }
+  return r;
+}
+/* time is picked, not typed: hour and minute selects, minutes in 10-minute steps; arrow keys or the wheel step it, minutes carry into the hour */
+function timePick(it,list){
+  const w=el('span','tsel'); const pad=n=>String(n).padStart(2,'0');
+  const cur=it.t||''; const ch=cur?cur.slice(0,2):'', cm=cur?cur.slice(3,5):'';
+  const opt=(s,v)=>{const o=el('option','',v||'--');o.value=v;s.appendChild(o);};
+  const hs=el('select'); hs.dataset.k='t:'+it.id; opt(hs,''); for(let h=0;h<24;h++) opt(hs,pad(h)); if(ch&&+ch>23) opt(hs,ch);
+  const ms=el('select'); ms.dataset.k='tm:'+it.id; const mins=['00','10','20','30','40','50']; if(cm&&!mins.includes(cm)){mins.push(cm);mins.sort();} mins.forEach(m=>opt(ms,m));
+  hs.value=ch; ms.value=cm||'00'; ms.disabled=!ch;
+  let timer=null;
+  const save=()=>{ clearTimeout(timer); timer=null; const v=hs.value?hs.value+':'+ms.value:''; if(v===(it.t||'')) return; it.t=v; resort(list); commit(); };
+  const set=(h,m)=>{ hs.value=pad(h); if(![...ms.options].some(o=>o.value===pad(m))) opt(ms,pad(m)); ms.value=pad(m); ms.disabled=false; clearTimeout(timer); timer=setTimeout(save,600); };
+  const step=(s,dir)=>{
+    if(!hs.value){ set(9,0); return; }
+    const h=+hs.value, m=+ms.value;
+    if(s===hs){ set((h+dir+24)%24,m); return; }
+    let t=h*60+m; t=dir>0?Math.floor(t/10)*10+10:Math.ceil(t/10)*10-10; t=(t+1440)%1440; set(Math.floor(t/60),t%60); };
+  [hs,ms].forEach(s=>{
+    s.addEventListener('keydown',ev=>{ ev.stopPropagation();
+      if(ev.key==='ArrowUp'||ev.key==='ArrowDown'){ ev.preventDefault(); step(s,ev.key==='ArrowUp'?1:-1); }
+      else if(ev.key==='Enter'){ ev.preventDefault(); s.blur(); } });
+    s.addEventListener('wheel',ev=>{ if(document.activeElement!==s) return; ev.preventDefault(); step(s,ev.deltaY<0?1:-1); },{passive:false});
+    s.addEventListener('change',()=>{ if(s===hs) ms.disabled=!hs.value; save(); });
+    s.addEventListener('blur',()=>setTimeout(()=>{ if(timer) save(); },0));
+    s.addEventListener('click',ev=>ev.stopPropagation());
+  });
+  w.append(hs,el('span','',':'),ms); return w;
+}
+/* place not found: search it on Google Maps, then paste the page URL back here to read its coordinates */
+function gmRow(it){
+  const f=findItem(it.id); const w=el('div','gm');
+  const a=el('a','','在 Google 地圖搜尋 ↗'); a.href=gmaps(it.n+(f&&cityOf(f)?' '+cityOf(f):'')); a.target='_blank'; a.rel='noopener';
+  a.addEventListener('click',ev=>ev.stopPropagation());
+  const inp=el('input'); inp.placeholder='貼上 Google 地圖網址'; inp.dataset.k='gm:'+it.id;
+  const go=v=>{ if(v.trim()) applyGmaps(it.id,v); };
+  inp.addEventListener('click',ev=>ev.stopPropagation());
+  inp.addEventListener('keydown',ev=>{ ev.stopPropagation(); if(ev.key==='Enter'&&!ev.isComposing){ ev.preventDefault(); go(inp.value); } else if(ev.key==='Escape'){ if(w.closest('#card')){ UI.cardFix=null; inp.blur(); renderCard(); return; } delete UI.unfound[it.id]; renderList(); } });
+  inp.addEventListener('paste',ev=>{ const t=(ev.clipboardData||window.clipboardData).getData('text/plain')||''; if(!t.trim()) return; ev.preventDefault(); inp.value=t.trim(); go(t); });
+  w.append(a,inp); return w;
+}
+function parseGmaps(raw){
+  let t=String(raw||'').trim(); try{ t=decodeURIComponent(t); }catch(e){}
+  const N='(-?\\d{1,3}(?:\\.\\d+)?)';
+  const pats=[new RegExp('!3d'+N+'!4d'+N), new RegExp('@'+N+','+N), new RegExp('/(?:search|place|dir)/'+N+'[,\\s+]+'+N),
+    new RegExp('[?&](?:q|query|ll|center|destination|daddr|sll)='+N+'[,\\s+]+'+N), new RegExp('^'+N+'\\s*[,\\s]\\s*'+N+'$')];
+  let m=null; for(const p of pats){ m=p.exec(t); if(m) break; }
+  if(!m) return null; const lat=+m[1], lon=+m[2];
+  if(!(Math.abs(lat)<=90&&Math.abs(lon)<=180)||(lat===0&&lon===0)) return null;
+  const nm=/\/maps\/place\/([^\/@?]+)/.exec(t); let name=nm?nm[1].replace(/\+/g,' ').trim():'';
+  if(/^-?\d+(\.\d+)?[,\s]/.test(name)) name='';
+  return {lat,lon,name};
+}
+function applyGmaps(id,v){
+  const f=findItem(id); if(!f) return; const p=parseGmaps(v);
+  if(!p){ toast(/goo\.gl|maps\.app/i.test(v)?'短網址讀不到座標，請在 Google 地圖網頁版複製完整網址':'網址裡找不到座標，請在 Google 地圖點選地點再複製網址'); return; }
+  const it=f.it, moved=!hasPos(it)||Math.hypot(it.lat-p.lat,it.lon-p.lon)>0.01;
+  if(moved&&hasPos(it)){ delete it.wiki; delete it.ph; }
+  it.lat=+p.lat.toFixed(5); it.lon=+p.lon.toFixed(5); if(p.name&&(moved||!it.q)) it.q=p.name+(cityOf(f)?' '+cityOf(f):'');
+  const a=document.activeElement; if(a&&a.blur) a.blur();
+  delete UI.unfound[id]; UI.cardFix=null; UI.focus=id; commit(); flyTo(f.it); toast(`已設定「${f.it.n}」的位置`,'復原',undo);
+}
+function moveItem(id,toList,toIdx){
+  const f=findItem(id); if(!f) return;
+  const [it]=f.list.splice(f.idx,1); if(f.list===toList&&f.idx<toIdx) toIdx--;
+  toList.splice(toIdx,0,it);
+  const dest=lists().find(L=>L.list===toList);
+  if(dest&&dest.di<0){ it.alt=false; if(f.day&&!it.city) it.city=f.day.city; toast(`「${it.n}」移到候選地點`,'復原',undo); }
+  else if(dest&&dest.di!==f.di){ if(UI.tab==='days') UI.sel=dest.di; toast(`「${it.n}」排進 ${dateLabel(dest.day.date)}`,'復原',undo); }
+  endDrag(); commit();
+}
+function resort(list){ let key=-1; const k=list.map((it,i)=>{const m=tmin(it.t); if(m!==null&&!it.alt) key=m; return {it,key:(m!==null&&!it.alt)?m:key,i};});
+  k.sort((a,b)=>a.key-b.key||a.i-b.i); list.splice(0,list.length,...k.map(x=>x.it)); }
+function guessKind(t){ const k=guessRaw(t); return CATS[k]?k:''; }
+function guessRaw(t){
+  if(/^(回飯店|起床|睡覺|放行李|旅館|退房|休息|整理行李|check-?in|寄放行李)|飯店|旅館|hostel|hotel/i.test(t)) return 'stay';
+  if(/走路|步行|地鐵|火車|電車|公車|搭車|搭乘|^搭|Eurostar|Nightjet|RER|渡輪|計程車|移動|機場|飛行|起飛|>|→|車站|Hbf|Station|Airport|碼頭/i.test(t)) return 'transit';
+  for(const c of (S&&S.cats)||[]){ if(BASE[c.key]) continue; if(t.toLowerCase().includes(c.name.toLowerCase())) return c.key; if(c.kw){ try{ if(new RegExp(c.kw,'i').test(t)) return c.key; }catch(e){} } }
+  if(/咖啡|下午茶|café|cafe|coffee/i.test(t)) return 'cafe';
+  if(/(早|午|晚)餐|餐廳|小吃|啤酒館|restaurant|bistro/i.test(t)) return 'restaurant';
+  if(/公園|花園|湖|山|海灘|森林|植物園|park|garden|lake/i.test(t)) return 'nature';
+  if(/美術館|畫廊|藝術|gallery|art/i.test(t)) return 'art';
+  if(/大學|學院|研究所|實驗室|University|Institute|College/i.test(t)) return 'academic';
+  if(/教堂|城堡|宮|塔|橋|大教堂|cathedral|castle|palace|tower/i.test(t)) return 'arch';
+  if(/市集|街|購物|百貨|書店|market|street/i.test(t)) return 'life';
+  return 'culture';
+}
+function addRow(list,di){
+  const w=el('div','add'); const inp=el('input'); inp.dataset.k='add:'+di; inp.placeholder=di<0?'＋ 新增地點':'＋ 新增地點或行程';
+  if(di<0){ const cb=el('button','ic addcat'); const k0=CATS[UI.addCat]?UI.addCat:'';
+    if(k0){ cb.style.background=th('cat'); cb.innerHTML=icon(k0,ON(),th('cat')); cb.title='類別　'+CATS[k0].name; }
+    else { cb.classList.add('auto'); cb.innerHTML=svgOf(ICONS.uncat,th('faint'),th('surface')); cb.title='類別　依名稱自動判斷'; }
+    cb.onclick=ev=>{ ev.stopPropagation(); catMenu(cb,k0,k=>{ UI.addCat=k; renderList(); later(()=>{ const n=document.querySelector('[data-k="add:-1"]'); if(n) n.focus(); }); },false,true); };
+    w.appendChild(cb); }
+  inp.addEventListener('keydown',ev=>{ ev.stopPropagation(); if(ev.key!=='Enter'||ev.isComposing) return; ev.preventDefault();
+    const v=inp.value.trim(); if(!v) return; inp.value='';
+    const m=/^(\d{1,2}[:：.]\d{2})\s+(.+)$/.exec(v); let t='',n=v; if(m){t=normT(m[1])||'';n=m[2];}
+    const k=di<0&&CATS[UI.addCat]?UI.addCat:guessKind(n); const it={id:uid(),t,n,note:'',k}; if(di<0) it.city='';
+    list.push(it); if(t) resort(list); commit();
+  });
+  w.appendChild(inp); return w;
+}
+function deleteItem(id){ const f=findItem(id); if(!f) return; const n=f.it.n; f.list.splice(f.idx,1);
+  if(UI.card&&UI.card.id===id) UI.card=null; if(UI.focus===id) UI.focus=null; if(UI.editItem===id) UI.editItem=null; commit(); toast(`已刪除「${n}」`,'復原',undo); }
+function selectDay(di,zoom){ UI.sel=di; UI.tab='days'; UI.focus=null; renderAll(); if(zoom) fitDay(di);
+  later(()=>{const n=document.querySelector(`.day[data-di="${di}"]`); if(n) n.scrollIntoView({block:'nearest',behavior:'smooth'});}); }
+function openItem(id,zoomIt){ const f=findItem(id); if(!f) return;
+  if(f.di>=0&&UI.tab==='days') UI.sel=f.di;
+  UI.focus=id; UI.card={type:'item',id}; renderAll(); if(zoomIt&&hasPos(f.it)) flyTo(f.it);
+  later(()=>{const r=document.querySelector(`.it[data-id="${id}"]`); if(r) r.scrollIntoView({block:'nearest',behavior:'smooth'});}); }
+function popMenu(anchor,items){
+  closePop(); const p=el('div','pop'); p.id='pop';
+  items.filter(Boolean).forEach(x=>{ if(x==='hr'){p.appendChild(el('hr'));return;} if(x instanceof Node){p.appendChild(x);return;} const b=el('button',x[2]||'',x[0]); b.onclick=()=>{closePop();x[1]();}; p.appendChild(b); });
+  placePop(p,anchor);
+}
+function placePop(p,anchor){
+  document.body.appendChild(p); const r=anchor.getBoundingClientRect();
+  let left=Math.min(r.left,innerWidth-p.offsetWidth-8), top=r.bottom+4; if(top+p.offsetHeight>innerHeight-8) top=r.top-p.offsetHeight-4;
+  p.style.left=Math.max(8,left)+'px'; p.style.top=Math.max(8,top)+'px';
+  const outside=ev=>{ if(!p.contains(ev.target)) closePop(); };
+  later(()=>document.addEventListener('mousedown',outside)); p._off=()=>document.removeEventListener('mousedown',outside);
+}
+function closePop(){const p=$('#pop'); if(p){ const a=document.activeElement; if(a&&p.contains(a)&&a.blur) a.blur(); p._off&&p._off(); p.remove();}}
+
+/* ---------- places tab ---------- */
+function renderPlaces(L){
+  const ch=el('div','chips');
+  L.appendChild(ch);
+  const all=[]; S.days.forEach((d,di)=>d.items.forEach(it=>{ if(hasPos(it)) all.push({it,di,d}); }));
+  const pool=S.pool.filter(hasPos).map(it=>({it,di:-1}));
+  const rows=all.concat(pool);
+  /* the same place on several days is one row; its meta line lists every day */
+  const groups=new Map();
+  rows.forEach(x=>{ const k2=x.it.lat.toFixed(4)+','+x.it.lon.toFixed(4)+(x.di<0?'|p':'');
+    if(!groups.has(k2)) groups.set(k2,[]); groups.get(k2).push(x); });
+  PL_DUPS={}; const reps=[];
+  groups.forEach(g=>{ const r=g.find(x=>!x.it.alt)||g[0]; PL_DUPS[r.it.id]=g; reps.push(r); });
+  const cats=el('div','cats'); ch.appendChild(cats);
+  cats.appendChild(catPen('place'));
+  CATKEYS.forEach(k=>{
+    const g=reps.filter(x=>x.it.k===k);
+    const b=el('button','ic'); b.innerHTML=icon(k,ON(),th('cat')); b.disabled=!g.length; cats.appendChild(b);
+    if(!g.length) return;
+    const h=el('div','grp'); h.dataset.cat=k; const ic=el('span','ic'); ic.style.background=th('cat'); ic.innerHTML=icon(k,ON(),th('cat'));
+    h.append(ic,document.createTextNode(CATS[k].name),el('span','c',String(g.length))); L.appendChild(h);
+    b.onclick=()=>{ L.scrollTop=h.offsetTop-ch.offsetHeight; };
+    const box=el('div','items'); box.style.margin='0';
+    g.forEach(x=>{ const f=findItem(x.it.id); box.appendChild(itemRow(x.it,f.list,x.di,null,'places')); });
+    L.appendChild(box);
+  });
+  uncatGroup(L,ch,cats,reps.filter(x=>!CATS[x.it.k]),'places');
+  const box=el('div','items'); S.pool.filter(it=>!hasPos(it)).forEach(it=>box.appendChild(itemRow(it,S.pool,-1,null,'places'))); box.appendChild(addRow(S.pool,-1)); L.appendChild(box);
+}
+/* 未分類 collects what has no (or a deleted) category: a chip at the end of the category row and a group at the end of the list */
+function uncatGroup(L,ch,cats,g,mode){
+  if(!g.length) return;
+  const b=el('button','ic'); b.innerHTML=svgOf(ICONS.uncat,ON(),th('cat')); cats.appendChild(b);
+  const h=el('div','grp'); h.dataset.cat=''; const ic=el('span','ic'); ic.style.background=th('cat'); ic.innerHTML=svgOf(ICONS.uncat,ON(),th('cat'));
+  h.append(ic,document.createTextNode(UNCAT),el('span','c',String(g.length))); L.appendChild(h);
+  b.onclick=()=>{ L.scrollTop=h.offsetTop-ch.offsetHeight; };
+  if(mode==='events'){ g.forEach(e=>L.appendChild(eventCard(e))); return; }
+  const box=el('div','items'); box.style.margin='0';
+  g.forEach(x=>{ const f=findItem(x.it.id); box.appendChild(itemRow(x.it,f.list,x.di,null,'places')); });
+  L.appendChild(box);
+}
+function placeMeta(it){
+  const g=(PL_DUPS[it.id]||[]).filter(x=>x.di>=0); const f=findItem(it.id);
+  if(f.di<0) return `候選${it.city?'・'+it.city:''}`;
+  if(g.length<2) return `${dateLabel(f.day.date)} ${f.day.city}${it.t?' '+it.t:''}${it.alt?'・備案':''}`;
+  return dateRanges(g.map(x=>x.d.date),i=>g[i].it.alt?'（備案）':'');
+}
+
+/* ---------- events ---------- */
+function fitMenu(anchor,e){ popMenu(anchor,['順路','可安排','不順路'].map(v=>[v,()=>{e.fit=v;commit();}])); }
+function renderEvents(L){
+  const ch=el('div','chips'); L.appendChild(ch); const cats=el('div','cats'); ch.appendChild(cats);
+  cats.appendChild(catPen('event'));
+  if(S.eventsNote) L.appendChild(el('div','qnote',S.eventsNote));
+  ECATKEYS.forEach(k=>{
+    const g=S.events.filter(e=>e.k===k);
+    const b=el('button','ic'); b.innerHTML=eicon(k,ON(),th('cat')); b.disabled=!g.length; cats.appendChild(b);
+    if(!g.length) return;
+    const h=el('div','grp'); h.dataset.cat=k; const ic=el('span','ic'); ic.style.background=th('cat'); ic.innerHTML=eicon(k,ON(),th('cat'));
+    h.append(ic,document.createTextNode(ECATS[k].name),el('span','c',String(g.length))); L.appendChild(h);
+    b.onclick=()=>{ L.scrollTop=h.offsetTop-ch.offsetHeight; };
+    g.forEach(e=>L.appendChild(eventCard(e)));
+  });
+  uncatGroup(L,ch,cats,S.events.filter(e=>!ECATS[e.k]),'events');
+  const w=el('div','add'); w.style.margin='6px 4px 2px'; const inp=el('input'); inp.placeholder='＋ 新增活動或展覽'; inp.dataset.k='addev';
+  inp.addEventListener('keydown',ev=>{ev.stopPropagation(); if(ev.key!=='Enter'||ev.isComposing)return; const v=inp.value.trim(); if(!v)return;
+    const e={id:uid(),n:v,dates:'',city:'',venue:'',lat:null,lon:null,fit:'可安排',how:'',q:v}; e.k=guessEv(e); S.events.push(e); UI.editEvent=e.id; commit();});
+  w.appendChild(inp); L.appendChild(w);
+}
+function eventCard(e){
+  const editing=UI.editEvent===e.id;
+  const c=el('div','ev'+(UI.card&&UI.card.id===e.id?' focus':'')+(editing?' editing':''));
+  const sv=(k,o={})=>ed(e[k],{...o,on:editing,k:'e'+k+':'+e.id,save:v=>{e[k]=v;commit({render:false});}});
+  const en=el('div','en');
+  en.appendChild(grip('grip',()=>[['刪除',()=>{S.events=S.events.filter(x=>x!==e); if(UI.card&&UI.card.id===e.id) UI.card=null; UI.editEvent=null; commit(); toast('已刪除活動','復原',undo);},'danger']]));
+  const ic=el('span','ic'+(editing?' pick':'')); ic.innerHTML=eicon(e.k,ON(),th('cat'));
+  if(editing) ic.onclick=ev=>{ ev.stopPropagation(); catMenu(ic,e.k,k=>{e.k=k;commit();},true); };
+  const bd=el('span','badge'+(editing?' pick':''),e.fit||'可安排'); bd.style.background=FIT[e.fit]||'#999';
+  if(editing) bd.onclick=ev=>{ev.stopPropagation();fitMenu(bd,e);};
+  en.append(ic,bd,sv('n',{ph:'活動名稱'})); c.appendChild(en);
+  const em=el('div','em'); em.append(sv('dates',{ph:'日期'}),el('span','','・'),sv('city',{ph:'城市'}),el('span','','・'),sv('venue',{ph:'場地'})); c.appendChild(em);
+  c.appendChild(sv('how',{cls:'eh',ph:'備註',multi:true}));
+  c.appendChild(penBtn(editing,()=>{ UI.editEvent=editing?null:e.id; later(()=>renderList()); }));
+  c.onclick=()=>{ if(editing) return; UI.card={type:'event',id:e.id}; renderAll(); if(typeof e.lat==='number') flyTo(e,14); };
+  return c;
+}
+
+/* ---------- info card with photos ---------- */
+let cardToken=0;
+function cardTarget(){ if(!UI.card) return null;
+  if(UI.card.type==='event'){ const o=findEvent(UI.card.id); if(!o) return null; return {o,ek:o.k,sub:evCatName(o.k),sub2:[o.dates,o.city,o.venue].filter(Boolean).join('・'),q:o.q||o.venue||o.n,wiki:o.wiki,gq:o.n.split('（')[0]+' '+(o.city||''),desc:o.how,note:''}; }
+  const f=findItem(UI.card.id); if(!f) return null; const o=f.it;
+  return {o,k:o.k,sub:catName(o.k),q:o.q||(o.n+' '+cityOf(f)),wiki:o.wiki,gq:o.q||(o.n+' '+cityOf(f)),desc:o.desc,note:o.note}; }
+function renderCard(){
+  const c=$('#card'); const T=cardTarget(); if(!T){UI.card=null;UI.cardFix=null;c.style.display='none';c.innerHTML='';return;}
+  if(UI.cardFix&&UI.cardFix!==UI.card.id) UI.cardFix=null;
+  if(UI.themeOpen){ UI.themeOpen=false; renderTheme(); } closeHelp();
+  const a=document.activeElement; if(a&&c.contains(a)) return;
+  const o=T.o;
+  c.innerHTML=''; c.style.display='block';
+  const ph=el('div','ph'); ph.textContent='照片載入中…'; c.appendChild(ph);
+  const x=el('button','cx','×'); x.onclick=()=>{UI.card=null;renderCard();renderList();}; c.appendChild(x);
+  const b=el('div','cb');
+  b.appendChild(el('div','ct',o.n));
+  if(T.sub){ const sb=el('div','csub'); const ic=el('span','ic'); ic.style.background=th('altMark'); ic.innerHTML=T.ek?eicon(T.ek,ON(),th('altMark')):icon(T.k,ON(),th('altMark')); sb.appendChild(ic); sb.appendChild(document.createTextNode(T.sub)); b.appendChild(sb); }
+  if(T.sub2) b.appendChild(el('div','csub',T.sub2));
+  if(T.desc) b.appendChild(el('div','cd',T.desc));
+  if(T.note) b.appendChild(el('div','cn',T.note));
+  const g=el('a','gbtn'); g.href=gmaps(T.q); g.target='_blank'; g.rel='noopener';
+  g.innerHTML='<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C8.1 2 5 5.1 5 9c0 5.2 7 13 7 13s7-7.8 7-13c0-3.9-3.1-7-7-7zm0 9.5a2.5 2.5 0 110-5 2.5 2.5 0 010 5z"/></svg>在 Google 地圖開啟';
+  b.appendChild(g);
+  b.appendChild(el('span','lab','Google 地圖搜尋字詞'));
+  const qi=el('input','qin'); qi.value=o.q||''; qi.placeholder=T.q; qi.addEventListener('keydown',ev=>{ev.stopPropagation();if(ev.key==='Enter')qi.blur();});
+  qi.addEventListener('change',()=>{o.q=qi.value.trim(); delete o.ph; commit();}); b.appendChild(qi);
+  const ln=el('div','links');
+  const link=(t,h)=>{const a=el('a','',t+' ↗'); a.href=h; a.target='_blank'; a.rel='noopener'; ln.appendChild(a); return a;};
+  if(o.official && /^https:\/\//.test(o.official)) link('官方資訊',o.official);
+  if(T.wiki) link('Wikipedia','https://en.wikipedia.org/wiki/'+encodeURIComponent(T.wiki));
+  link('Google',gsearch(T.gq));
+  const src=link('圖片來源','#'); src.style.display='none';
+  b.appendChild(ln);
+  if(UI.card.type==='item'){
+    const fx=el('button','fix','修正'); fx.onclick=ev=>{ ev.stopPropagation(); fx.blur(); UI.cardFix=UI.cardFix===o.id?null:o.id; renderCard(); if(UI.cardFix) later(()=>{const n=$('#card .gm input'); if(n) n.focus();}); };
+    ln.appendChild(fx); if(UI.cardFix===o.id) b.appendChild(gmRow(o)); }
+  c.appendChild(b);
+  const token=++cardToken;
+  getPhotos(o,T).then(photos=>{ if(token!==cardToken) return; showPhotos(ph,x,photos,src); });
+}
+function showPhotos(ph,x,photos,src){
+  ph.innerHTML='';
+  if(!photos||!photos.length){ ph.textContent='找不到照片，可以按「在 Google 地圖開啟」看'; x.classList.add('solid'); return; }
+  photos=photos.slice(); let i=0; const img=new Image(); img.referrerPolicy='no-referrer'; img.alt=''; ph.appendChild(img);
+  const dots=el('div','dots'); photos.forEach(()=>dots.appendChild(el('i'))); if(photos.length>1) ph.appendChild(dots);
+  const show=()=>{ img.src=photos[i].u; if(photos[i].s){src.href=photos[i].s; src.style.display='';} else src.style.display='none'; [...dots.children].forEach((d,j)=>d.classList.toggle('on',j===i)); };
+  img.onerror=()=>{ photos.splice(i,1); if(!photos.length){ph.textContent='照片載入失敗';src.style.display='none';return;} dots.lastChild&&dots.lastChild.remove(); i=i%photos.length; show(); };
+  if(photos.length>1){ const l=el('button','nav l','‹'), r=el('button','nav r','›');
+    l.onclick=ev=>{ev.stopPropagation();i=(i-1+photos.length)%photos.length;show();}; r.onclick=ev=>{ev.stopPropagation();i=(i+1)%photos.length;show();};
+    ph.append(l,r);
+    let sx=null; ph.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;},{passive:true}); ph.addEventListener('touchend',e=>{ if(sx===null) return; const dx=e.changedTouches[0].clientX-sx; if(Math.abs(dx)>40){ i=(i+(dx<0?1:-1)+photos.length)%photos.length; show(); } sx=null; }); }
+  show();
+}
+/* Photos come from free sources that need no key, tried in order until there are at least 3:
+   the Wikipedia article's own images, a Wikipedia search for the place, a Wikimedia Commons search,
+   Commons photos taken near the coordinates, then Openverse (CC-licensed photos incl. Flickr).
+   Found photos are saved into the trip data (o.ph) so the next open is instant. */
+const COMMONS='https://commons.wikimedia.org/w/api.php?action=query&format=json&origin=*&prop=imageinfo&iiprop=url&iiurlwidth=900';
+async function jget(u){ try{ const r=await fetch(u); return r.ok?await r.json():null; }catch(e){ return null; } }
+async function wikiMedia(title,out){ const j=await jget('https://en.wikipedia.org/api/rest_v1/page/media-list/'+encodeURIComponent(title)); if(!j) return;
+  (j.items||[]).filter(it=>it.type==='image'&&it.showInGallery!==false&&!/\.(svg|gif)$/i.test(it.title||'')&&it.srcset&&it.srcset.length).forEach(it=>{
+    const s=it.srcset[it.srcset.length-1].src; out.push({u:s.startsWith('//')?'https:'+s:s,s:'https://commons.wikimedia.org/wiki/'+encodeURIComponent((it.title||'').replace(/ /g,'_'))}); }); }
+function commonsPages(j,out){ if(!j||!j.query) return; Object.values(j.query.pages||{}).sort((a,b)=>(a.index||0)-(b.index||0)).forEach(p=>{ const ii=p.imageinfo&&p.imageinfo[0];
+  if(ii&&ii.thumburl&&!/\.(svg|tiff?|pdf|djvu|webm|ogv)$/i.test(p.title)) out.push({u:ii.thumburl,s:ii.descriptionurl||('https://commons.wikimedia.org/wiki/'+encodeURIComponent(p.title.replace(/ /g,'_')))}); }); }
+async function findPhotos(o,T){
+  const out=[]; const q=T.q||o.n; const enough=()=>uniq(out).length>=3;
+  if(T.wiki) await wikiMedia(T.wiki,out);
+  if(!enough()&&!T.wiki){ const j=await jget('https://en.wikipedia.org/w/api.php?action=query&list=search&srlimit=1&format=json&origin=*&srsearch='+encodeURIComponent(q)); const t=j&&j.query&&j.query.search&&j.query.search[0]; if(t) await wikiMedia(t.title,out); }
+  if(!enough()) commonsPages(await jget(COMMONS+'&generator=search&gsrnamespace=6&gsrlimit=10&gsrsearch='+encodeURIComponent(q+' filetype:bitmap')),out);
+  if(!enough()&&typeof o.lat==='number') commonsPages(await jget(COMMONS+`&generator=geosearch&ggsnamespace=6&ggslimit=12&ggsradius=150&ggscoord=${o.lat}|${o.lon}`),out);
+  if(!enough()&&typeof o.lat==='number') commonsPages(await jget(COMMONS+`&generator=geosearch&ggsnamespace=6&ggslimit=12&ggsradius=600&ggscoord=${o.lat}|${o.lon}`),out);
+  if(!enough()){ const j=await jget('https://api.openverse.org/v1/images/?page_size=8&q='+encodeURIComponent(q)); (j&&j.results||[]).forEach(r=>{ if(r.url) out.push({u:r.thumbnail||r.url,s:r.foreign_landing_url||r.url}); }); }
+  return uniq(out).slice(0,8);
+}
+function uniq(a){ const seen=new Set(); return a.filter(p=>{const k=p.u.replace(/\/\d+px-/,'/');if(seen.has(k))return false;seen.add(k);return true;}); }
+const PH_PENDING={};
+async function getPhotos(o,T){
+  if(o.ph&&o.ph.length) return o.ph;
+  if(!PH_PENDING[o.id]) PH_PENDING[o.id]=findPhotos(o,T).then(ph=>{ delete PH_PENDING[o.id]; if(ph.length){ o.ph=ph; savePhotosQuietly(); } return ph; });
+  return PH_PENDING[o.id];
+}
+/* storing photos is not an edit: no undo step, but it is saved with the trip */
+function savePhotosQuietly(){ snap=JSON.stringify({...S,updatedAt:0}); clearTimeout(savePhotosQuietly.t); savePhotosQuietly.t=setTimeout(()=>{ lsSet(PAGE_KEY,S); if(FH) saveToFile(false); else if(!fileDirty) setStatus('dirty','新照片尚未存檔'); },800); }
+async function fillAllPhotos(){
+  const todo=[]; S.days.forEach(d=>d.items.forEach(it=>{ if(hasPos(it)&&!(it.ph&&it.ph.length)) todo.push({it,city:d.city}); })); S.pool.forEach(it=>{ if(hasPos(it)&&!(it.ph&&it.ph.length)) todo.push({it,city:it.city||''}); });
+  S.events.forEach(e=>{ if(!(e.ph&&e.ph.length)) todo.push({it:e,ev:true}); });
+  const seen=new Set(); let n=0, found=0;
+  for(const x of todo){ n++; toast(`補照片中 ${n}/${todo.length}…`);
+    const o=x.it; const T=x.ev?{q:o.q||o.venue||o.n,wiki:o.wiki}:{q:o.q||(o.n+' '+x.city),wiki:o.wiki};
+    const key=o.n+'|'+o.lat; let ph;
+    if(seen.has(key)){ const twin=allItems().find(y=>y.it!==o&&y.it.n===o.n&&y.it.ph); ph=twin?twin.it.ph:[]; } else ph=await findPhotos(o,T);
+    seen.add(key); if(ph.length){ o.ph=ph; found++; } await new Promise(r=>setTimeout(r,150)); }
+  savePhotosQuietly(); toast(`完成，${found} 個地點補到照片`);
+}
+/* ---------- geocoding (Nominatim, one request per click) ---------- */
+async function geocode(id,auto){
+  const f=findItem(id); if(!f) return; const it=f.it;
+  /* search only inside the area the trip already covers that day (or that city's candidates), so a common name can't jump to another country */
+  const city=cityOf(f);
+  let near=f.day?f.day.items.filter(x=>hasPos(x)&&x.id!==id):S.pool.filter(x=>hasPos(x)&&x.id!==id&&city&&x.city===city);
+  if(!near.length&&city) S.days.forEach(d=>{ if(d.city===city) near=near.concat(d.items.filter(hasPos)); });
+  UI.busy[id]='找位置中…'; renderList();
+  try{
+    let lat,lon,wiki=null,q=null;
+    let url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&extratags=1&accept-language=zh-TW,en&q='+encodeURIComponent(it.n+(city?' '+city:''));
+    if(near.length){ const la=near.map(x=>x.lat), lo=near.map(x=>x.lon); url+=`&bounded=1&viewbox=${Math.min(...lo)-.3},${Math.max(...la)+.3},${Math.max(...lo)+.3},${Math.min(...la)-.3}`; }
+    let r=await fetch(url); let j=r.ok?await r.json():[];
+    if(!j.length&&city){ r=await fetch(url.replace(encodeURIComponent(it.n+' '+city),encodeURIComponent(it.n))); j=r.ok?await r.json():[]; }
+    if(j.length){ lat=+j[0].lat; lon=+j[0].lon; const w=j[0].extratags&&j[0].extratags.wikipedia; if(w&&/^en:/.test(w)) wiki=w.slice(3).replace(/ /g,'_'); q=j[0].name?(j[0].name+(city?' '+city:'')):null; }
+    delete UI.busy[id]; const g=findItem(id); if(!g){renderList();return;}
+    if(lat===undefined){ UI.unfound[id]=true; renderAll(); return; }
+    const moved=hasPos(g.it)&&Math.hypot(g.it.lat-lat,g.it.lon-lon)>0.01; if(moved){ delete g.it.wiki; delete g.it.ph; delete g.it.q; }
+    g.it.lat=+lat.toFixed(5); g.it.lon=+lon.toFixed(5); if(wiki&&!g.it.wiki) g.it.wiki=wiki; if(q&&!g.it.q) g.it.q=q;
+    UI.focus=id; commit(); flyTo(g.it);
+    toast(`已定位「${g.it.n}」，不對的話可以修正`,'修正',()=>{ UI.cardFix=id; openItem(id,false); later(()=>{const n=$('#card .gm input'); if(n) n.focus();}); });
+  }catch(e){ delete UI.busy[id]; UI.unfound[id]=true; renderList(); }
+}
+
+/* ---------- map (Leaflet) ---------- */
+let map, layer, routeLayer, labelTips=[];
+function initMap(){
+  map=L.map('map',{zoomControl:false,attributionControl:true,worldCopyJump:true,maxBounds:[[-85.06,-1e5],[85.06,1e5]],maxBoundsViscosity:1}).setView([50,8],5);
+  L.control.zoom({position:'bottomright'}).addTo(map); document.querySelectorAll('.leaflet-control-zoom a').forEach(a=>a.removeAttribute('title')); map.attributionControl.setPrefix('<a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>');
+  /* basemap must work with no API key: Esri light gray canvas + labels, switching to OpenStreetMap if Esri tiles keep failing */
+  const esri=n=>`https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/${n}/MapServer/tile/{z}/{y}/{x}`;
+  const base=L.tileLayer(esri('World_Light_Gray_Base'),{maxNativeZoom:16,maxZoom:20,className:'basetile',attribution:'Powered by <a href="https://www.esri.com" target="_blank" rel="noopener">Esri</a> | &copy; Esri, HERE, Garmin, <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}).addTo(map);
+  const labels=L.tileLayer(esri('World_Light_Gray_Reference'),{maxNativeZoom:16,maxZoom:20,pane:'overlayPane',className:'labeltile'}).addTo(map);
+  let fails=0, switched=false;
+  base.on('tileerror',()=>{ if(switched||++fails<6) return; switched=true; map.removeLayer(base); map.removeLayer(labels);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,className:'osmtile',attribution:'&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'}).addTo(map); });
+  routeLayer=L.layerGroup().addTo(map); layer=L.layerGroup().addTo(map);
+  fitMinZoom(); map.on('resize',fitMinZoom);
+  map.on('click',e=>{ if(UI.card){UI.card=null;renderCard();renderList();} });
+  map.on('zoomend moveend',()=>declutter());
+  map.on('zoomend',()=>{ const big=map.getZoom()>=12; if(big!==initMap._big){initMap._big=big;renderMap();} });
+}
+/* the whole world is 256·2^z px tall, so the smallest zoom is the one where it just fills the map's height */
+function fitMinZoom(){ const h=map.getSize().y; if(h>0) map.setMinZoom(Math.max(0,Math.log2(h/256))); }
+function markHTML(it,color,big,alt,dim,focus){
+  const cls='mk'+(big?' big':'')+(alt?' alt':'')+(dim?' dim':'')+(focus?' focus':'');
+  return `<div class="${cls}" style="background:${color}">${icon(it.k,alt?th('altMark'):ON(),alt?'#fff':color)}</div>`;
+}
+function renderMap(){
+  if(!S||!map) return;
+  layer.clearLayers(); routeLayer.clearLayers(); labelTips=[];
+  const sel=UI.sel, tab=UI.tab, z=map.getZoom();
+  const dimAll=tab==='events';
+  S.days.forEach((d,di)=>{ const pts=d.items.filter(it=>hasPos(it)&&!it.alt);
+    for(let i=0;i<pts.length-1;i++){ const a=pts[i],b=pts[i+1]; if(a.lat===b.lat&&a.lon===b.lon) continue; const far=Math.hypot(a.lat-b.lat,a.lon-b.lon)>0.25;
+      const on=sel===null||sel===di; L.polyline([[a.lat,a.lon],[b.lat,b.lon]],{color:d.color,weight:on&&sel!==null?3.5:2.5,opacity:dimAll?.25:(on?.9:.15),dashArray:far?'7 7':null,interactive:false}).addTo(routeLayer); } });
+  /* lines are drawn only inside a day, so a day that ends far from where the next one starts (night train, day trip back)
+     gets a dotted link in the leaving day's color; nearby ends (back to the same hotel) stay unlinked */
+  for(let di=0;di<S.days.length-1;di++){ const a=[...S.days[di].items].reverse().find(it=>hasPos(it)&&!it.alt), b=S.days[di+1].items.find(it=>hasPos(it)&&!it.alt);
+    if(!a||!b||Math.hypot(a.lat-b.lat,a.lon-b.lon)<0.15) continue; const on=sel===null||sel===di||sel===di+1;
+    L.polyline([[a.lat,a.lon],[b.lat,b.lon]],{color:S.days[di].color,weight:2.5,opacity:dimAll?.25:(on?.8:.15),dashArray:'2 7',interactive:false}).addTo(routeLayer); }
+  const marks=[];
+  /* 「僅顯示行程」 keeps the scheduled places and their 備案; 「顯示所有地點」 adds the 候選 pool. A picked 候選 still shows */
+  S.days.forEach((d,di)=>d.items.forEach(it=>{ if(hasPos(it)) marks.push({it,di,color:itemColor(it,di),alt:!!it.alt,day:d}); }));
+  S.pool.forEach(it=>{ if(hasPos(it)&&(UI.showAll||UI.focus===it.id)) marks.push({it,di:-1,color:th('altMark'),alt:true,pool:true}); });
+  const isOn=m=>tab==='places'?true:(sel===null||m.di===sel);
+  marks.sort((a,b)=>(isOn(a)?1:0)-(isOn(b)?1:0)||(a.alt?0:1)-(b.alt?0:1));
+  marks.forEach(m=>{
+    const on=isOn(m), big=on&&sel!==null&&tab==='days'&&!m.alt, focus=UI.focus===m.it.id;
+    const sz=big?28:22;
+    const mk=L.marker([m.it.lat,m.it.lon],{icon:L.divIcon({className:'',html:markHTML(m.it,m.color,big,m.alt,dimAll||!on,focus),iconSize:[sz,sz],iconAnchor:[sz/2,sz/2]}),zIndexOffset:focus?2000:(on?1000:0)+(m.alt?0:100),riseOnHover:true});
+    const head=esc(m.it.n);
+    mk.on('click',e=>{ L.DomEvent.stop(e); if(m.di>=0&&UI.tab==='events') UI.tab='days'; openItem(m.it.id,false); });
+    mk.addTo(layer);
+    if(on&&!dimAll&&((sel!==null&&m.di===sel)||(tab==='places'&&z>=12)||(sel===null&&tab==='days'&&z>=13))){
+      mk.bindTooltip(esc((m.it.t&&!m.alt&&sel!==null?m.it.t+' ':'')+m.it.n),{permanent:true,direction:'right',offset:[sz/2,0],className:'lb'+(m.alt?' alt':'')}); labelTips.push(mk);
+    } else mk.bindTooltip(head,{direction:'top',offset:[0,-sz/2],className:'tipx'});
+  });
+  if(sel===null&&tab==='days'&&z<13){ const seen={}; S.days.forEach(d=>{ const s=d.items.find(x=>hasPos(x)&&!x.alt&&x.k!=='transit')||d.items.find(hasPos); if(!s) return;
+      if(seen[d.city]){seen[d.city].ds.push(d.date);return;} seen[d.city]={s,city:d.city,ds:[d.date],c:d.color}; });
+    Object.values(seen).forEach(v=>v.t=v.city+' '+dateRanges(v.ds));
+    Object.values(seen).forEach(v=>{ const mk=L.marker([v.s.lat,v.s.lon],{icon:L.divIcon({className:'',html:'',iconSize:[0,0]}),interactive:false}).addTo(layer);
+      mk.bindTooltip(esc(v.t),{permanent:true,direction:'right',offset:[10,0],className:'lb city'}); labelTips.push(mk);
+      setTimeout(()=>{const t=mk.getTooltip(); if(t&&t._container) t._container.style.color=v.c;},0); }); }
+  const evs=tab==='events'?S.events.filter(e=>typeof e.lat==='number'):[];
+  evs.forEach(e=>{ const html=`<div class="mk" style="background:${FIT[e.fit]||'#999'};border-radius:5px;transform:rotate(45deg)"><span style="transform:rotate(-45deg);display:flex">${eicon(e.k,ON(),FIT[e.fit]||'#999')}</span></div>`;
+    const mk=L.marker([e.lat,e.lon],{icon:L.divIcon({className:'',html,iconSize:[22,22],iconAnchor:[11,11]}),zIndexOffset:3000}).addTo(layer);
+    mk.on('click',ev=>{L.DomEvent.stop(ev); UI.card={type:'event',id:e.id}; renderAll();});
+    mk.bindTooltip(esc(e.n.split('（')[0]),{permanent:true,direction:'right',offset:[11,0],className:'lb'}); labelTips.push(mk); });
+  later(declutter);
+}
+function declutter(){
+  const boxes=[];
+  labelTips.forEach(mk=>{ const t=mk.getTooltip(); if(!t||!t._container) return; const c=t._container; c.style.visibility='visible';
+    const r=c.getBoundingClientRect(); if(!r.width) return; const hit=boxes.some(b=>!(r.right<b.left||b.right<r.left||r.bottom<b.top||b.bottom<r.top));
+    if(hit) c.style.visibility='hidden'; else boxes.push(r); });
+}
+function bounds(pts){ return L.latLngBounds(pts.map(p=>[p.lat,p.lon])); }
+function fitAll(){ const p=[]; S.days.forEach(d=>d.items.forEach(it=>{if(hasPos(it)&&!it.alt)p.push(it);})); if(p.length) map.flyToBounds(bounds(p),{padding:[40,40],duration:.7}); }
+function fitDay(di){ const d=S.days[di]; let core=d.items.filter(s=>hasPos(s)&&!s.alt&&s.k!=='transit'&&s.k!=='stay'); if(core.length<2) core=d.items.filter(s=>hasPos(s)&&!s.alt); if(!core.length) core=d.items.filter(hasPos); if(!core.length) return;
+  if(core.length===1) return flyTo(core[0]); map.flyToBounds(bounds(core),{padding:[70,70],maxZoom:16,duration:.7}); }
+function flyTo(o,minZ){ map.flyTo([o.lat,o.lon],Math.max(map.getZoom(),minZ||15),{duration:.6}); }
+
+/* ---------- exports ---------- */
+function loadScript(src,sri){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;if(sri){s.integrity=sri;s.crossOrigin='anonymous';}s.onload=res;s.onerror=()=>rej(new Error('load'));document.head.appendChild(s);});}
+function saveFile(filename,data){ const b=data instanceof Blob?data:new Blob([data]); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download=filename; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),5000); }
+const safeName=()=>(S.title||'trip').replace(/\//g,'-').replace(/[\\:*?"<>|]/g,'').trim().slice(0,60)||'trip';
+function allItems(){ const out=[]; S.days.forEach(d=>d.items.forEach(it=>out.push({d,it}))); S.pool.forEach(it=>out.push({d:null,it})); return out; }
+function exportCSV(){
+  const rows=[['名稱','日期','時間','城市','類別','狀態','說明','緯度','經度','Google 地圖']];
+  allItems().forEach(({d,it})=>{ if(!hasPos(it)) return; rows.push([it.n,d?dateLabel(d.date):'',it.t||'',d?d.city:(it.city||''),catName(it.k),!d?'候選地點':it.alt?'備案':'行程',[it.note,it.desc].filter(Boolean).join('。'),it.lat,it.lon,gmaps(it.q||it.n)]); });
+  saveFile(fileStem()+'_Google我的地圖.csv','﻿'+rows.map(r=>r.map(v=>{v=String(v??'');return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v;}).join(',')).join('\r\n'));
+  toast('已匯出。到 mymaps.google.com 建立地圖後按「匯入」');
+}
+function exportJSON(){ saveFile(fileStem()+'.json',JSON.stringify(S,null,1)); }
+/* 另存新檔: pick a new file; later saves go there. Cancelling keeps the old file */
+async function saveAs(){ const old=FH; FH=null; await saveToFile(true); if(!FH) FH=old; }
+async function exportXLSX(){
+  toast('準備 Excel 中…');
+  try{ if(!window.XLSX) await loadScript('https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js','sha384-OUW9euuUyxyHcAhTqbhI+Iyb8LMssXt/cpz0yXhs9UWG2/R/uaWdakx/4cfww7Vb'); }catch(e){ toast('Excel 套件載入失敗'); return; }
+  const X=window.XLSX, days=S.days, slots=[]; for(let m=360;m<1440;m+=30) slots.push(m);
+  const fmt=m=>`${String(Math.floor(m/60)%24).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
+  const aoa=[['城市','','',...days.map(d=>d.city)],[],['時間','','',...days.map(d=>{const x=new Date(d.date+'T12:00:00');return `${x.getMonth()+1}/${x.getDate()}`;})],['','','',...days.map(d=>WD[new Date(d.date+'T12:00:00').getDay()])]];
+  const grid=slots.map(()=>days.map(()=>[]));
+  days.forEach((d,di)=>{ let last=0; d.items.forEach(it=>{ if(it.alt) return; const m=tmin(it.t); let si=m===null?last:Math.max(0,Math.min(slots.length-1,Math.floor((m-360)/30))); last=si; grid[si][di].push(it.n+(it.note?'\n'+it.note:'')); }); });
+  slots.forEach((m,si)=>aoa.push([fmt(m),'-',fmt(m+30),...grid[si].map(a=>a.join('\n'))]));
+  const ws=X.utils.aoa_to_sheet(aoa); ws['!cols']=[{wch:7},{wch:2},{wch:7},...days.map(()=>({wch:22}))];
+  const rg=X.utils.decode_range(ws['!ref']);
+  for(let r=0;r<=rg.e.r;r++) for(let c=0;c<=rg.e.c;c++){ const ref=X.utils.encode_cell({r,c}); if(!ws[ref]) ws[ref]={t:'s',v:''};
+    ws[ref].s={alignment:{wrapText:true,vertical:'top',horizontal:c<3?'center':'left'},font:{name:'Arial',sz:10,bold:r<4}};
+    if(r===0&&c>=3&&ws[ref].v) ws[ref].s.font={bold:true,color:{rgb:days[c-3].color.replace('#','').toUpperCase()}}; }
+  const rows=[['日期','星期','城市','時間','項目','備註','類別','狀態','緯度','經度','Google 地圖']];
+  allItems().forEach(({d,it})=>rows.push([d?dateLabel(d.date).split('（')[0]:'',d?WD[new Date(d.date+'T12:00:00').getDay()]:'',d?d.city:(it.city||''),it.t||'',it.n,it.note||'',catName(it.k),!d?'候選地點':it.alt?'備案':'行程',hasPos(it)?it.lat:'',hasPos(it)?it.lon:'',hasPos(it)?gmaps(it.q||it.n):'']));
+  const ws2=X.utils.aoa_to_sheet(rows); ws2['!cols']=[{wch:7},{wch:4},{wch:10},{wch:6},{wch:30},{wch:36},{wch:7},{wch:6},{wch:9},{wch:9},{wch:40}];
+  const wb=X.utils.book_new(); X.utils.book_append_sheet(wb,ws,'日程'); X.utils.book_append_sheet(wb,ws2,'清單');
+  saveFile(fileStem()+'.xlsx',new Blob([X.write(wb,{bookType:'xlsx',type:'array'})])); toast('Excel 已匯出');
+}
+/* an imported trip is a new trip: it gets its own id so it never shares a browser copy with the file it was imported into */
+function loadTrip(j){ if(!j||!Array.isArray(j.days)) return false; const old=S.id;
+  /* an AI reply carries no category list: keep this trip's, so custom keys the prompt offered still match */
+  if((!Array.isArray(j.cats)||!j.cats.length)&&S&&Array.isArray(S.cats)&&S.cats.length){ j.cats=S.cats.map(c=>({...c})); j.catsV2=1; j.catsGone=[...(S.catsGone||[])]; }
+  S=normalize(j); if(!j.id||S.id===old) S.id=uid();
+  UI.sel=null; UI.card=null; UI.focus=null; UI.editItem=UI.editDay=UI.editEvent=null; UI.tab='days'; commit(); fitAll(); toast('已匯入','復原',undo); return true; }
+/* AI replies often wrap the JSON in a code block or a sentence, or leave a trailing comma: take the outermost braces and retry without trailing commas */
+function parseTrip(t){ t=String(t||''); const a=t.indexOf('{'), b=t.lastIndexOf('}'); if(a<0||b<a) return null; t=t.slice(a,b+1);
+  try{ return JSON.parse(t); }catch(e){} try{ return JSON.parse(t.replace(/,\s*([}\]])/g,'$1')); }catch(e){ return null; } }
+function importJSON(){ const f=el('input'); f.type='file'; f.accept='.json,application/json'; f.onchange=async()=>{ const file=f.files[0]; if(!file) return;
+  if(!loadTrip(parseTrip(await file.text()))) toast('這不是行程檔案'); }; f.click(); }
+/* clear one whole tab at once (重新開始 clears the title, every day, place and event; categories and colours stay); 地點 means everything the places tab lists */
+function clearAll(kind){
+  let n=0, msg='';
+  if(kind==='days'){
+    /* places go back to the candidates (one copy per place, none that are already there); everything without a map position is dropped */
+    const key=it=>it.lat.toFixed(4)+','+it.lon.toFixed(4)+'|'+it.n, have=new Set(S.pool.filter(hasPos).map(key)); let moved=0, gone=0;
+    S.days.forEach(d=>{ d.items.forEach(it=>{ n++; if(!hasPos(it)){ gone++; return; } const k=key(it); if(have.has(k)) return; have.add(k);
+      it.alt=false; it.t=''; it.city=it.city||d.city; S.pool.push(it); moved++; }); d.items=[]; });
+    msg=`已清空所有行程，${moved} 個地點移到候選`+(gone?`，刪除 ${gone} 項交通與生活行程`:''); }
+  else if(kind==='places'){ n=S.pool.length; S.pool=[]; S.days.forEach(d=>{ const keep=d.items.filter(x=>!hasPos(x)); n+=d.items.length-keep.length; d.items=keep; }); msg=`已刪除所有地點，共 ${n} 個`; }
+  else if(kind==='events'){ n=S.events.length; S.events=[]; S.eventsNote=''; msg=`已刪除所有活動，共 ${n} 個`; }
+  else { n=1; S.id=uid(); S.title=''; S.sub=''; S.days=[]; S.pool=[]; S.events=[]; S.eventsNote=''; UI.sel=null; UI.tab='days'; UI.editDay=null; UI.editHead=false; msg='已清空整份行程'; }
+  if(!n){ toast('沒有可以刪除的項目'); return; }
+  UI.card=null; UI.focus=null; UI.editItem=null; UI.editEvent=null; commit(); toast(msg,'復原',undo);
+}
+/* drop this page's browser copy and reload, so the page reads the trip saved in the HTML file again */
+function discardCache(){
+  if(!confirm('捨棄瀏覽器暫存，改讀這個檔案的行程？尚未儲存的修改會不見喔！')) return;
+  clearTimeout(saveTimer); clearTimeout(fileTimer); clearTimeout(savePhotosQuietly.t);
+  try{ localStorage.removeItem(PAGE_KEY); }catch(e){}
+  fileDirty=false; location.reload();
+}
+/* font size is how this browser reads the page, not part of the trip: kept in localStorage, never in the saved file */
+const FZ_KEY='trip-planner:fz', FZ_MIN=80, FZ_MAX=150, FZ_STEP=10;
+let FZ=(()=>{ const v=+lsGet(FZ_KEY); return v>=FZ_MIN&&v<=FZ_MAX?v:100; })();
+function applyFz(){ document.documentElement.style.setProperty('--fz',FZ/100); }
+applyFz();
+function fzRow(){ const r=el('div','fzrow'); r.appendChild(el('span','fzl','字體大小')); const v=el('span','fzv');
+  const dn=el('button','','−'); dn.setAttribute('aria-label','縮小字體');
+  const up=el('button','','+'); up.setAttribute('aria-label','放大字體');
+  const show=()=>{ v.textContent=FZ+'%'; dn.disabled=FZ<=FZ_MIN; up.disabled=FZ>=FZ_MAX; };
+  const step=d=>{ FZ=Math.min(FZ_MAX,Math.max(FZ_MIN,FZ+d*FZ_STEP)); lsSet(FZ_KEY,FZ); applyFz(); show(); };
+  dn.onclick=ev=>{ ev.stopPropagation(); step(-1); }; up.onclick=ev=>{ ev.stopPropagation(); step(1); };
+  r.append(dn,v,up); show(); return r; }
+function moreMenu(){ popMenu($('#moreBtn'),[
+  CAN_FS&&['另存新檔',saveAs],['下載備份 JSON',exportJSON],['匯入備份 JSON',importJSON],'hr',
+  ['匯出 Excel',exportXLSX],['匯出 Google 我的地圖 CSV',exportCSV],'hr',
+  ['補齊所有地點照片',fillAllPhotos],['色彩設定',openTheme],fzRow(),'hr',
+  ['捨棄暫存',discardCache,'danger'],
+  ['清空所有行程',()=>clearAll('days'),'danger'],['刪除所有地點',()=>clearAll('places'),'danger'],['刪除所有活動',()=>clearAll('events'),'danger'],['重新開始',()=>clearAll('all'),'danger']]); }
+
+/* ---------- help: the tutorial, the AI prompt and the downloads all live in this file, so a deployed copy teaches itself ---------- */
+const rawText=id=>{ const n=document.getElementById(id); return n?n.textContent.replace(/<\\\//g,'</').replace(/^\n/,''):''; };
+function openHelp(){ UI.card=null; renderCard(); closeTheme(); const h=$('#help'); h.style.display='block'; h.scrollTop=0;
+  const pre=$('#helpPrompt'); if(pre) pre.textContent=promptText(); }
+/* the category list in the prompt follows this trip's categories: built-ins keep the prompt's own wording while their name is unchanged, renamed and custom ones are listed by key and current name, deleted ones are left out */
+function promptText(){
+  const raw=rawText('ai-prompt'), head='類別 k 只能用這些\n', a=raw.indexOf(head), b=a<0?-1:raw.indexOf('\n\n',a);
+  if(a<0||b<0||!S||!Array.isArray(S.cats)) return raw;
+  const desc={}; raw.slice(a+head.length,b).split(/[、\n]/).forEach(x=>{ const m=x.trim().match(/^(\S+)\s+(.+)$/); if(m) desc[m[1]]=m[2]; });
+  const parts=S.cats.map(c=>c.key+' '+(BASE[c.key]&&c.name===BASE[c.key].name&&desc[c.key]?desc[c.key]:c.name));
+  const lines=[]; for(let i=0;i<parts.length;i+=4) lines.push(parts.slice(i,i+4).join('、'));
+  return raw.slice(0,a+head.length)+lines.join('、\n')+raw.slice(b);
+}
+function closeHelp(){ const h=$('#help'); if(h) h.style.display='none'; }
+async function copyText(t,msg){ try{ await navigator.clipboard.writeText(t); }catch(e){ const a=el('textarea'); a.value=t; document.body.appendChild(a); a.select(); try{document.execCommand('copy');}catch(x){} a.remove(); } toast(msg); }
+/* the Kyoto sample lives in its own block, so the downloads stay the same whatever trip this file now holds */
+const sampleText=()=>{ const n=$('#sample-trip')||$('#trip-data'); return n?n.textContent:''; };
+const sampleJSON=()=>{ try{ return JSON.stringify(JSON.parse(sampleText()),null,1); }catch(e){ return ''; } };
+const sampleHTML=()=>TEMPLATE.replace(/(<script id="trip-data" type="application\/json">)[\s\S]*?(<\/script>)/,(m,a,b)=>a+sampleText()+b);
+const LINKS={studio:'https://clinqclinq.studio/',github:''};
+document.querySelectorAll('#help [data-link]').forEach(n=>{ const u=LINKS[n.dataset.link], a=n.tagName==='A'?n:n.querySelector('a');
+  if(u) a.href=u; else if(n.tagName==='A') n.removeAttribute('data-link'), n.style.borderBottom='none'; else n.remove(); });
+const HELP_ACTS={
+  copyPrompt:()=>copyText(promptText(),'已複製提示詞，貼給 AI 後在最後寫上你的條件'),
+  paste:()=>{ const t=$('#helpPaste'); if(!t.value.trim()){ t.focus(); return; } if(loadTrip(parseTrip(t.value))){ t.value=''; closeHelp(); } else toast('讀不到行程 JSON，請確認貼上的是完整內容'); },
+  togglePrompt:()=>{ const b=$('#help [data-act="togglePrompt"]'), box=$('#promptBox'), open=box.hidden; box.hidden=!open; b.setAttribute('aria-expanded',open); },
+  dlHTML:()=>saveFile('trip-planner-kyoto.html',sampleHTML()),
+  dlJSON:()=>saveFile('sample-trip.json',sampleJSON()),
+  close:closeHelp};
+$('#help').addEventListener('click',ev=>{ const b=ev.target.closest('[data-act]'); if(b){ ev.preventDefault(); HELP_ACTS[b.dataset.act](); } });
+$('#help').addEventListener('keydown',ev=>ev.stopPropagation());
+/* the 說明 and 色彩設定 panels close when she clicks anywhere else; a field being edited is committed first. Menus, toasts and the 說明 button itself don't count */
+document.addEventListener('pointerdown',ev=>{ const t=ev.target; if(!(t instanceof Element)||t.closest('#help,#theme,#helpBtn,#pop,#toast')) return;
+  const h=$('#help'), th=$('#theme'), a=document.activeElement;
+  if(h.style.display==='block'){ if(a&&h.contains(a)) a.blur(); closeHelp(); }
+  if(UI.themeOpen){ if(a&&th.contains(a)) a.blur(); closeTheme(); } },true);
+$('#helpBtn').onclick=()=>{ $('#help').style.display==='block'?closeHelp():openHelp(); };
+
+/* ---------- toast ---------- */
+let toastTimer=null;
+function toast(msg,act,fn){ const t=$('#toast'); $('#toastmsg').textContent=msg; const b=$('#toastact');
+  if(act){b.textContent=act;b.style.display='inline';b.onclick=()=>{t.style.display='none';fn();};} else b.style.display='none';
+  t.style.display='flex'; clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.style.display='none',act?6000:3200); }
+
+/* ---------- global controls ---------- */
+document.querySelectorAll('#tabs [data-tab]').forEach(b=>{ b.onclick=()=>{ UI.tab=b.dataset.tab; UI.card=null; UI.focus=null; UI.editItem=null; if(UI.tab!=='days') UI.sel=null; renderAll(); $('#list').scrollTop=0;
+  if(UI.tab==='events'){ const p=S.events.filter(e=>typeof e.lat==='number'); if(p.length) map.flyToBounds(bounds(p),{padding:[40,40],duration:.7}); } else fitAll(); }; });
+$('#allbtn').onclick=ev=>{ ev.stopPropagation();UI.tab='days';UI.sel=null;UI.focus=null;UI.card=null;renderAll();fitAll();};
+{ const v=lsGet('trip-ui:showAll'); if(typeof v==='boolean') UI.showAll=v; }
+$('#mapToggle').onclick=ev=>{ ev.stopPropagation(); UI.showAll=!UI.showAll; lsSet('trip-ui:showAll',UI.showAll); renderHead(); renderMap(); };
+$('#optDetail').onchange=e=>{UI.showDetail=e.target.checked;renderList();};
+/* the "not found" search/paste row only lives until she clicks somewhere else; the render waits for pointerup so the click still lands */
+document.addEventListener('pointerdown',ev=>{ const ids=Object.keys(UI.unfound); if(!ids.length) return; let ch=false;
+  ids.forEach(id=>{ if(!ev.target.closest(`.it[data-id="${CSS.escape(id)}"]`)){ delete UI.unfound[id]; ch=true; } }); if(ch) requestRender('full'); },true);
+$('#undoBtn').onclick=undo; $('#redoBtn').onclick=redo; $('#moreBtn').onclick=moreMenu; $('#saveBtn').onclick=()=>saveToFile(true);
+document.addEventListener('keydown',e=>{
+  const inEdit=e.target.isContentEditable||/INPUT|SELECT|TEXTAREA/.test(e.target.tagName); const mod=e.metaKey||e.ctrlKey;
+  if(mod&&e.key.toLowerCase()==='s'){ e.preventDefault(); if(document.activeElement&&document.activeElement.blur) document.activeElement.blur(); later(()=>saveToFile(true)); return; }
+  if(inEdit) return;
+  if(mod&&e.key.toLowerCase()==='z'){e.preventDefault(); e.shiftKey?redo():undo(); return;}
+  if(mod&&e.key.toLowerCase()==='y'){e.preventDefault(); redo(); return;}
+  if(e.key==='Escape'){ if(UI.editItem||UI.editDay||UI.editEvent||UI.editHead){UI.editItem=UI.editDay=UI.editEvent=null;UI.editHead=false;renderAll();} else if(UI.themeOpen) closeTheme(); else if($('#help').style.display==='block') closeHelp(); else if(UI.card){UI.card=null;renderCard();} closePop(); }
+});
+
+/* ---------- mobile: drag the top of the list panel to trade space between list and map ---------- */
+const MOBILE=matchMedia('(max-width:760px)');
+function setSideH(pct){ pct=Math.max(18,Math.min(92,pct)); $('#app').style.setProperty('--sideh',pct.toFixed(1)+'%'); return pct; }
+(function initSheet(){
+  const side=$('#side'), app=$('#app'); let y0=null, h0=0, pct=null, raf=0, moved=false;
+  const saved=lsGet('trip-ui:sideh'); if(typeof saved==='number') setSideH(saved);
+  const start=ev=>{ if(!MOBILE.matches) return;
+    if(ev.currentTarget.id==='head'&&(UI.editHead||ev.target.closest('.pen'))) return;
+    y0=ev.clientY; h0=side.offsetHeight; moved=false; ev.currentTarget.setPointerCapture(ev.pointerId); };
+  const move=ev=>{ if(y0===null) return; const dy=ev.clientY-y0; if(!moved&&Math.abs(dy)<4) return;
+    if(!moved){ moved=true; side.classList.add('resizing'); }
+    pct=setSideH((h0-dy)/app.clientHeight*100);
+    if(!raf) raf=requestAnimationFrame(()=>{ raf=0; if(map) map.invalidateSize({pan:false}); }); };
+  const end=()=>{ if(y0===null) return; y0=null; side.classList.remove('resizing');
+    if(moved&&pct!==null){ lsSet('trip-ui:sideh',pct); if(map) map.invalidateSize({pan:false}); } };
+  [$('#grab'),$('#head')].forEach(n=>{ n.addEventListener('pointerdown',start); n.addEventListener('pointermove',move); n.addEventListener('pointerup',end); n.addEventListener('pointercancel',end); });
+  MOBILE.addEventListener('change',()=>later(()=>map&&map.invalidateSize()));
+})();
+/* ---------- boot ---------- */
+const MIG={sight:'culture',inst:'academic',food:'restaurant',move:'transit',note:'life'};
+function normalize(j){
+  j.v=2; j.id=j.id||uid(); j.title=typeof j.title==='string'?j.title:''; j.sub=j.sub||''; j.days=Array.isArray(j.days)?j.days:[]; j.pool=j.pool||[]; j.events=j.events||[]; j.theme=(j.theme&&typeof j.theme==='object')?j.theme:{}; j.updatedAt=j.updatedAt||0;
+  /* files without the full ordered list get the built-in categories around any custom ones */
+  let cats=Array.isArray(j.cats)?j.cats.filter(c=>c&&c.key&&c.name):[];
+  if(!j.catsV2){ const tail=['stay','transit'], b=k=>({key:k,name:BASE[k].name,icon:k}); cats=[...BUILTIN.filter(k=>!tail.includes(k)).map(b),...cats.filter(c=>!BASE[c.key]),...tail.map(b)]; j.catsV2=1; }
+  if(!cats.length) cats=[{key:'culture',name:BASE.culture.name,icon:'culture'}];
+  j.cats=cats; j.catsGone=Array.isArray(j.catsGone)?j.catsGone:[];
+  /* events get categories too: older files carry a free-text e.cat, or none; keys come from the name so two copies of a file agree */
+  if(!Array.isArray(j.evCats)||!j.evCats.length){ const names=[];
+    j.events.forEach(e=>{ const n=e.cat||evRule(e)||'其他'; e._c=n; if(!names.includes(n)) names.push(n); });
+    j.evCats=(names.length?names:EV_DEFAULT).map(n=>({key:'e_'+n,name:n,icon:EV_ICON[n]||'star'}));
+    j.events.forEach(e=>{ if(!e.k&&e._c) e.k='e_'+e._c; delete e._c; delete e.cat; }); }
+  syncCats(j);
+  const num=v=>typeof v==='string'&&v.trim()!==''&&isFinite(+v)?+v:v;
+  const fix=it=>{it.id=it.id||uid(); it.lat=num(it.lat); it.lon=num(it.lon); if(typeof it.t==='string'&&it.t){ const t=normT(it.t); if(t) it.t=t; }
+    if(!CATS[it.k]&&MIG[it.k]&&CATS[MIG[it.k]]) it.k=MIG[it.k]; if(it.k==null||(it.k&&!CATS[it.k])) it.k=guessKind(it.n||''); it.note=it.note||''; it.n=it.n||'（未命名）';};
+  j.days.forEach((d,i)=>{d.id=d.id||uid(); d.items=d.items||[]; d.color=d.color||PALETTE[i%PALETTE.length]; d.city=d.city||''; d.title=d.title||''; d.items.forEach(fix);});
+  j.pool.forEach(fix); j.events.forEach(e=>{e.id=e.id||uid(); e.lat=num(e.lat); e.lon=num(e.lon); if(e.k==null){ const S0=S; S=j; e.k=guessEv(e); S=S0; } else if(!ECATS[e.k]) e.k=''; });
+  return j;
+}
+async function boot(){
+  let embedded;
+  try{ embedded=normalize(JSON.parse($('#trip-data').textContent)); }catch(e){ $('#loading').textContent='行程資料讀取失敗'; return; }
+  S=embedded; let fromCache=false;
+  PAGE_KEY=LSK(embedded.id); const local=lsGet(PAGE_KEY); if(local&&local.days&&(local.updatedAt||0)>(embedded.updatedAt||0)){ S=normalize(local); fromCache=true; }
+  /* categories added to the file reach a newer browser copy too: new ones are copied once, with the places the file put in them */
+  if(fromCache){ const have=new Set(S.cats.map(c=>c.key)), gone=new Set(S.catsGone||[]), add=embedded.cats.filter(c=>!have.has(c.key)&&!gone.has(c.key));
+    if(add.length){ const ks=new Set(add.map(c=>c.key)), ek=new Map();
+      [...embedded.pool,...embedded.days.flatMap(d=>d.items)].forEach(o=>{ if(ks.has(o.k)) ek.set(o.id,o.k); });
+      const at=S.cats.findIndex(c=>c.key==='stay'); S.cats.splice(at<0?S.cats.length:at,0,...add); [...S.pool,...S.days.flatMap(d=>d.items)].forEach(o=>{ if(ek.has(o.id)) o.k=ek.get(o.id); });
+      lsSet(PAGE_KEY,S); } }
+  syncCats();
+  S.events.forEach(e=>{ if(e.k==null) e.k=guessEv(e); else if(!ECATS[e.k]) e.k=''; });
+  if(typeof L==='undefined'){ $('#loading').textContent='地圖元件載入失敗，請確認網路連線'; return; }
+  $('#loading').remove();
+  initMap(); snap=JSON.stringify({...S,updatedAt:0});
+  renderAll(); { const p0=S.days.flatMap(d=>d.items.filter(it=>hasPos(it)&&!it.alt)); if(p0.length) map.fitBounds(bounds(p0),{padding:[40,40]}); }
+  /* reuse a remembered file only if it is the file open now */
+  if(CAN_FS){ let h=await idbGet(fhKey()); if(!h&&CUR_FILE) h=await idbGet('fh:'+S.id); if(h&&h.queryPermission&&(!CUR_FILE||h.name===CUR_FILE)) FH=h; }
+  if(fromCache){ fileDirty=true; setStatus('dirty','已載入較新的暫存版本'); }
+  else setStatus('saved',FH?'自動存到 '+FH.name:'已暫存在瀏覽器');
+}
+window.addEventListener('beforeunload',e=>{ if(fileDirty&&!FH){ e.preventDefault(); e.returnValue=''; } });
+boot();
+</script></body></html>
