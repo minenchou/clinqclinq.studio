@@ -2,7 +2,7 @@
         --ink: #1f3a44; --body: #3b545e; --muted: #6a8088; --faint: #9aabb0; --line: #efe0e2;
         --accent: #22838a; --soft: #e2f3f1;
         --pink: #d9667f; --pink-soft: #fce5ea;
-        --lemon: #a8820c; --lemon-soft: #fbf0bf;
+        --lemon: #EEBA2B; --lemon-soft: #FFF3C9;
         color-scheme: light; }
 
 :root[data-palette="classic"] { --bg: #fbfaf8; --blush: #fbfaf8;
